@@ -1,0 +1,320 @@
+<nav class="pcoded-navbar">
+    <div class="pcoded-inner-navbar main-menu">
+
+        <?php if(in_array(100, session()->get('registroPermisos'))){?>
+            <div class="pcoded-navigatio-lavel">Administración</div>
+            <ul class="pcoded-item pcoded-left-item">
+                <li class="pcoded-hasmenu <?= (isset($menu_actual) && in_array($menu_actual, array('oficinas', 'tramites', 'perfiles', 'usuarios', 'estado_tramite', 'tipo_documento', 'tipo_documento_externo'))) ? 'pcoded-trigger' : '';?>">
+                    <a href="javascript:void(0)">
+                        <span class="pcoded-micon"><i class="feather icon-settings"></i></span>
+                        <span class="pcoded-mtext">Configuraciones</span>
+                    </a>
+                    <ul class="pcoded-submenu">
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'oficinas') ? 'active' : '';?>">
+                            <a href="<?= base_url('oficinas');?>">
+                                <span class="pcoded-mtext">Direcciones</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'perfiles') ? 'active' : '';?>">
+                            <a href="<?= base_url('perfiles');?>">
+                                <span class="pcoded-mtext">Cargos</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'tramites') ? 'active' : '';?>">
+                            <a href="<?= base_url('tramites');?>">
+                                <span class="pcoded-mtext">Tramites</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'estado_tramite') ? 'active' : '';?>">
+                            <a href="<?= base_url('estado_tramite');?>">
+                                <span class="pcoded-mtext">Estados Tramites</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'tipo_documento') ? 'active' : '';?>">
+                            <a href="<?= base_url('tipo_documento');?>">
+                                <span class="pcoded-mtext">Tipos Documentos</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'usuarios') ? 'active' : '';?>">
+                            <a href="<?= base_url('usuarios');?>">
+                                <span class="pcoded-mtext">Usuarios</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'tipo_documento_externo') ? 'active' : '';?>">
+                            <a href="<?= base_url('tipo_documento_externo');?>">
+                                <span class="pcoded-mtext">Tipos Doc. Externos</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        <?php }?>
+
+        <?php if(in_array(11, session()->get('registroPermisos'))){?>
+            <div class="pcoded-navigatio-lavel">Correspondencia Externa</div>
+            <ul class="pcoded-item pcoded-left-item">
+                <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/agregar') ? 'active' : '';?>">
+                    <a href="<?= base_url('correspondencia_externa/agregar');?>">
+                        <span class="pcoded-micon"><i class="fa fa-envelope-o"></i></span>
+                        <span class="pcoded-mtext">Nuevo Ingreso</span>
+                    </a>
+                </li>
+                <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/mis_ingresos') ? 'active' : '';?>">
+                    <a href="<?= base_url('correspondencia_externa/mis_ingresos');?>">
+                        <span class="pcoded-micon"><i class="feather icon-menu"></i></span>
+                        <span class="pcoded-mtext">Mis Ingresos</span>
+                    </a>
+                </li>
+                <li class="<?= (isset($menu_actual) && $menu_actual === 'cam/generar_codigo_seguimiento') ? 'active' : '';?>">
+                    <a href="<?= base_url('cam/generar_codigo_seguimiento');?>">
+                        <span class="pcoded-micon"><i class="feather icon-lock"></i></span>
+                        <span class="pcoded-mtext">Código de Seguimiento</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="pcoded-navigatio-lavel">Minería Ilegal</div>
+            <ul class="pcoded-item pcoded-left-item">
+                <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/agregar_ventanilla') ? 'active' : '';?>">
+                    <a href="<?= base_url('mineria_ilegal/agregar_ventanilla');?>">
+                        <span class="pcoded-micon"><i class="fa fa-envelope-o"></i></span>
+                        <span class="pcoded-mtext">Nuevo Ingreso</span>
+                    </a>
+                </li>
+                <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/mis_ingresos') ? 'active' : '';?>">
+                    <a href="<?= base_url('mineria_ilegal/mis_ingresos');?>">
+                        <span class="pcoded-micon"><i class="feather icon-menu"></i></span>
+                        <span class="pcoded-mtext">Mis Ingresos</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="pcoded-navigatio-lavel">Buscador de Trámites</div>
+            <ul class="pcoded-item pcoded-left-item">
+                <li class="<?= (isset($menu_actual) && $menu_actual === 'buscador_tramites_cam') ? 'active' : '';?>">
+                    <a href="<?= base_url('cam/buscador_ventanilla');?>">
+                        <span class="pcoded-micon"><i class="fa fa-search"></i></span>
+                        <span class="pcoded-mtext">CAMs</span>
+                    </a>
+                </li>
+            </ul>            
+        <?php }?>
+
+        <?php if(count($tramites_menu) > 0){?>
+            <div class="pcoded-navigatio-lavel">Trámites</div>
+            <?php foreach($tramites_menu as $row){ ?>
+                <ul class="pcoded-item pcoded-left-item">
+                    <?php if($row['controlador'] == 'cam/'){?>
+                        <li class="pcoded-hasmenu <?= (isset($menu_actual) && strpos($menu_actual, $row['controlador']) !== false ) ? 'pcoded-trigger' : '';?>">
+                            <a href="javascript:void(0)">
+                                <span class="pcoded-micon"><i class="feather icon-folder"></i></span>
+                                <span class="pcoded-mtext"><?= $row['menu'] ?></span>
+                            </a>
+                            <ul class="pcoded-submenu">
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documento/listado') ? 'active' : '';?>">
+                                    <a href="<?= base_url('documentos/listado/'.$row['id']);?>">
+                                        <span class="pcoded-mtext">Mis Documentos</span>
+                                    </a>
+                                </li>
+
+                                <?php if(in_array(2, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documento/listado_anulacion') ? 'active' : '';?>">
+                                        <a href="<?= base_url('documentos/listado_anulacion/'.$row['id']);?>">
+                                            <span class="pcoded-mtext">Anular Documentos</span>
+                                        </a>
+                                    </li>
+                                <?php }?>
+
+                                <?php if(in_array(1, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'agregar') ? 'active' : '';?>">
+                                        <a href="<?= base_url($row['controlador'].'agregar');?>">
+                                            <span class="pcoded-mtext">Migrar SOL-CAM</span>
+                                        </a>
+                                    </li>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'agregar_cmn_cmc') ? 'active' : '';?>">
+                                        <a href="<?= base_url($row['controlador'].'agregar_cmn_cmc');?>">
+                                            <span class="pcoded-mtext">Migrar CMN/CMC</span>
+                                        </a>
+                                    </li>
+                                <?php }?>
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_recepcion') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'listado_recepcion');?>">
+                                        <span class="pcoded-mtext">Recepción de Trámites</span>
+                                    </a>
+                                </li>
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'mis_tramites') ? 'active' : '';?>">
+                                <a href="<?= base_url($row['controlador'].'mis_tramites');?>">
+                                        <span class="pcoded-mtext">Mis Tramites</span>
+                                    </a>
+                                </li>
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador_mis_tramites') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'buscador_mis_tramites');?>">
+                                        <span class="pcoded-mtext">Buscador de Mis Tramites</span>
+                                    </a>
+                                </li>
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'buscador');?>">
+                                        <span class="pcoded-mtext">Buscador de Tramites</span>
+                                    </a>
+                                </li>
+
+                                <?php if(in_array(10, session()->get('registroPermisos'))){?>
+                                <!--
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documentacion_digital') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'documentacion_digital');?>">
+                                        <span class="pcoded-mtext">Documentación Digital</span>
+                                    </a>
+                                </li>
+                                -->
+                                <?php }?>
+
+                                <?php if(in_array(6, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'reporte_usuarios') ? 'active' : '';?>">
+                                        <a href="<?= base_url($row['controlador'].'reporte_usuarios');?>">
+                                            <span class="pcoded-mtext">Reporte por Responsable</span>
+                                        </a>
+                                    </li>
+                                <?php }?>
+
+                                <?php if(in_array(7, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documentos/reporte') ? 'active' : '';?>">
+                                        <a href="<?= base_url('documentos/reporte/'.$row['id']);?>">
+                                            <span class="pcoded-mtext">Reporte Documentos</span>
+                                        </a>
+                                    </li>
+                                <?php }?>
+
+                                <?php if(in_array(8, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'reporte') ? 'active' : '';?>">
+                                        <a href="<?= base_url($row['controlador'].'reporte');?>">
+                                            <span class="pcoded-mtext">Reporte General</span>
+                                        </a>
+                                    </li>
+                                <?php }?>
+
+                            </ul>
+                        </li>
+                    <?php }?>
+
+                    <?php if($row['controlador'] == 'mineria_ilegal/'){?>
+                        <li class="pcoded-hasmenu <?= (isset($menu_actual) && strpos($menu_actual, $row['controlador']) !== false ) ? 'pcoded-trigger' : '';?>">
+                            <a href="javascript:void(0)">
+                                <span class="pcoded-micon"><i class="feather icon-folder"></i></span>
+                                <span class="pcoded-mtext"><?= $row['menu'] ?></span>
+                            </a>
+                            <ul class="pcoded-submenu">
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'denuncias_web') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'denuncias_web');?>">
+                                        <span class="pcoded-mtext">Denuncias Página Web</span>
+                                    </a>
+                                </li>
+
+                                <!--
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'agregar_fiscalizacion') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'agregar_fiscalizacion');?>">
+                                        <span class="pcoded-mtext">Nueva Denuncia DFCCI</span>
+                                    </a>
+                                </li>
+                                -->
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'agregar_oficio') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'agregar_oficio');?>">
+                                        <span class="pcoded-mtext">Verificación de Oficio</span>
+                                    </a>
+                                </li>
+
+                                <!--
+                                
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_pendientes') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'listado_pendientes');?>">
+                                        <span class="pcoded-mtext">Denuncias Penientes</span>
+                                    </a>
+                                </li>
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_atendidos') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'listado_atendidos');?>">
+                                        <span class="pcoded-mtext">Denuncias Atendidos</span>
+                                    </a>
+                                </li>
+
+                                -->
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documento/listado') ? 'active' : '';?>">
+                                    <a href="<?= base_url('documentos/listado/'.$row['id']);?>">
+                                        <span class="pcoded-mtext">Mis Documentos</span>
+                                    </a>
+                                </li>
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_recepcion') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'listado_recepcion');?>">
+                                        <span class="pcoded-mtext">Recepción de H.R.</span>
+                                    </a>
+                                </li>
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'mis_tramites') ? 'active' : '';?>">
+                                <a href="<?= base_url($row['controlador'].'mis_tramites');?>">
+                                        <span class="pcoded-mtext">Mis Hojas de Ruta</span>
+                                    </a>
+                                </li>
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador_mis_tramites') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'buscador_mis_tramites');?>">
+                                        <span class="pcoded-mtext">Buscador de Mis Tramites</span>
+                                    </a>
+                                </li>
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'buscador');?>">
+                                        <span class="pcoded-mtext">Buscador de Tramites</span>
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+                    <?php }?>
+
+                </ul>
+            <?php }?>
+        <?php } ?>
+
+
+
+
+        <!--div class="pcoded-navigatio-lavel">Seguimiento CAM's</!--div>
+        <ul class="pcoded-item pcoded-left-item">
+            <li class="<?= (isset($menu_actual) && $menu_actual === 'crear_seguimiento_cam') ? 'active' : '';?>">
+                <a href="<?= base_url('acto_administrativo/agregar');?>">
+                    <span class="pcoded-micon"><i class="feather icon-edit"></i></span>
+                    <span class="pcoded-mtext">Crear Seguimiento</span>
+                </a>
+            </li>
+            <li class="<?= (isset($menu_actual) && $menu_actual === 'tramite_proceso_cam') ? 'active' : '';?>">
+                <a href="<?= base_url('acto_administrativo');?>">
+                    <span class="pcoded-micon"><i class="feather icon-layers"></i></span>
+                    <span class="pcoded-mtext">Tramites en Proceso</span>
+                </a>
+            </li>
+            <li class="<?= (isset($menu_actual) && $menu_actual === 'tramite_espera_cam') ? 'active' : '';?>">
+                <a href="<?= base_url('acto_administrativo/espera');?>">
+                    <span class="pcoded-micon"><i class="feather icon-clock"></i></span>
+                    <span class="pcoded-mtext">Tramites en Espera</span>
+                </a>
+            </li>
+            <li class="<?= (isset($menu_actual) && $menu_actual === 'tramite_concluido_cam') ? 'active' : '';?>">
+                <a href="<?= base_url('acto_administrativo/concluido');?>">
+                    <span class="pcoded-micon"><i class="feather icon-check-square"></i></span>
+                    <span class="pcoded-mtext">Tramites Concluidos</span>
+                </a>
+            </li>
+            <li class="">
+                <a href="<?= base_url('acto_administrativo/buscador');?>">
+                    <span class="pcoded-micon"><i class="feather icon-search"></i></span>
+                    <span class="pcoded-mtext">Buscador de Tramites</span>
+                </a>
+            </li>
+        </ul>
+    </div-->
+</nav>
