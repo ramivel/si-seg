@@ -38,7 +38,14 @@ $(document).ready(function () {
         },
         descripcion_oficio: {
             presence: true,
-        },        
+        },
+        hr_anexados: {
+            presence: function(){
+                if($('#origen_oficio').val() == 'HOJA DE RUTA EXTERNA/INTERNA' && $('#hr_anexados').val().length == 0)
+                    return true;                
+                return false;                
+            }
+        },
         departamento:{
             presence: {
                 message: "^Debe seleccionar una opción."
@@ -67,7 +74,7 @@ $(document).ready(function () {
             presence: {
                 message: "^Debe seleccionar una opción."
             },
-        },        
+        },
         fk_usuario_destinatario:{
             presence: {
                 message: "^Debe seleccionar el Destinatario."

@@ -19,6 +19,7 @@ use App\Models\DenunciantesMineriaIlegalModel;
 use App\Models\DenunciasAreasMinerasMineriaIlegalModel;
 use App\Models\DenunciasMineriaIlegalModel;
 use App\Models\DenunciasDenunciantesMineriaIlegalModel;
+use App\Models\DenunciasHrSincobolMineriaIlegalModel;
 use App\Models\DenunciasWebMineriaIlegalModel;
 use App\Models\DerivacionMineriaIlegalModel;
 use App\Models\DerivacionModel;
@@ -186,7 +187,7 @@ class MineriaIlegal extends BaseController
                     'rules' => 'required',
                 ],
             ]);
-            if(!$validation){                
+            if(!$validation){
                 $contenido['usu_destinatario'] = $this->obtenerUsuario($this->request->getPost('fk_usuario_destinatario'));
                 $contenido['validation'] = $this->validator;
             }else{
@@ -607,14 +608,33 @@ class MineriaIlegal extends BaseController
 
     public function formularioDenunciaPdf($id_denuncia){
         $denunciasMineriaIlegalModel = new DenunciasMineriaIlegalModel();
-        if($denuncia = $denunciasMineriaIlegalModel->select("*, to_char(created_at, 'DD/MM/YYYY HH24:MI') as fecha_denuncia")->find($id_denuncia)){
+        $campos = array('*', "to_char(created_at, 'DD/MM/YYYY HH24:MI') as fecha_denuncia",
+        "CONCAT(informe_tecnico_numero, ' DE ', TO_CHAR(informe_tecnico_fecha, 'DD/MM/YYYY')) AS informe_tecnico");
+        if($denuncia = $denunciasMineriaIlegalModel->select($campos)->find($id_denuncia)){
             $coordenadasMineriaIlegalModel = new CoordenadasMineriaIlegalModel();
+            $denunciasHrSincobolMineriaIlegalModel = new DenunciasHrSincobolMineriaIlegalModel();
+            $denunciasAreasMinerasMineriaIlegalModel = new DenunciasAreasMinerasMineriaIlegalModel();
             $adjuntosMineriaIlegalModel = new AdjuntosMineriaIlegalModel();
-            $coordenadas = $coordenadasMineriaIlegalModel->where(array('fk_denuncia'=>$denuncia['id']))->findAll();
-            $adjuntos = $adjuntosMineriaIlegalModel->where(array('fk_denuncia'=>$denuncia['id']))->findAll();
+
+            if($idHojasRutasSincobol = $denunciasHrSincobolMineriaIlegalModel->where(array('fk_denuncia'=>$denuncia['id']))->findAll()){
+                $hojas_ruta_sincobol = '';
+                foreach($idHojasRutasSincobol as $idHojaRutaSincobol){
+                    $tmp = $this->obtenerDatosHrInExSincobol($idHojaRutaSincobol['fk_hoja_ruta']);
+                    $hojas_ruta_sincobol .= $tmp['correlativo'].', ';
+                }
+                $contenido['hojas_ruta_sincobol'] = substr($hojas_ruta_sincobol, 0, -2);
+            }
+
+            if($idAreasMineras = $denunciasAreasMinerasMineriaIlegalModel->where(array('fk_denuncia'=>$denuncia['id']))->findAll()){
+                $areas_mineras = array();
+                foreach($idAreasMineras as $idAreaMinera)
+                    $areas_mineras[] = $this->obtenerDatosAreaMineraMineriaIlegal($idAreaMinera['fk_area_minera']);
+                $contenido['areas_mineras'] = $areas_mineras;
+            }
+
             $contenido['denuncia'] = $denuncia;
-            $contenido['coordenadas'] = $coordenadas;
-            $contenido['adjuntos'] = $adjuntos;
+            $contenido['coordenadas'] = $coordenadasMineriaIlegalModel->where(array('fk_denuncia'=>$denuncia['id']))->findAll();
+            $contenido['adjuntos'] = $adjuntosMineriaIlegalModel->where(array('fk_denuncia'=>$denuncia['id']))->findAll();
             $contenido['tipo_denuncias'] = $this->tipoDenuncias;
             $contenido['color'] = '#F7CECE';
             switch($denuncia['fk_tipo_denuncia']){
@@ -931,7 +951,7 @@ class MineriaIlegal extends BaseController
             $denunciasMineriaIlegalModel = new DenunciasMineriaIlegalModel();
             $adjuntosMineriaIlegalModel = new AdjuntosMineriaIlegalModel();
             $derivacionMineriaIlegalModel = new DerivacionMineriaIlegalModel();
-            $croquis = $adjuntosMineriaIlegalModel->where(array('fk_usuario_creador'=>session()->get('registroUser'),'fk_denuncia'=>$hoja_ruta['fk_denuncia'],'nombre'=>'CROQUIS DE LA DENUNCIA'))->first();            
+            $croquis = $adjuntosMineriaIlegalModel->where(array('fk_usuario_creador'=>session()->get('registroUser'),'fk_denuncia'=>$hoja_ruta['fk_denuncia'],'nombre'=>'CROQUIS DE LA DENUNCIA'))->first();
             $documento_externo = $adjuntosMineriaIlegalModel->where(array('fk_usuario_creador'=>session()->get('registroUser'),'fk_denuncia'=>$hoja_ruta['fk_denuncia'],'nombre'=>'DENUNCIA O DOCUMENTO EXTERNO'))->first();
             $denuncia = $denunciasMineriaIlegalModel->select("*, correlativo as correlativo_denuncia, to_char(created_at, 'DD/MM/YYYY HH24:MI') as fecha_denuncia")->find($hoja_ruta['fk_denuncia']);
             $derivacion = $derivacionMineriaIlegalModel->where(array('fk_usuario_creador'=>session()->get('registroUser'),'fk_hoja_ruta'=>$hoja_ruta['id']))->orderBy('id','DESC')->first();
@@ -1364,6 +1384,7 @@ class MineriaIlegal extends BaseController
         $municipios = array();
         if ($this->request->getPost()) {
             $id_areas_mineras = $this->request->getPost('id_areas_mineras');
+            $id_hojas_rutas = array(285469, 285467);//$this->request->getPost('id_hojas_rutas');
             $validation = $this->validate([
                 'origen_oficio' => [
                     'rules' => 'required',
@@ -1410,7 +1431,13 @@ class MineriaIlegal extends BaseController
                 ],
             ]);
             if(!$validation){
-                if(count($id_areas_mineras) > 0){
+                if(isset($id_hojas_rutas) && count($id_hojas_rutas) > 0){
+                    $hojas_rutas = array();
+                    foreach($id_hojas_rutas as $id_hoja_ruta)
+                        $hojas_rutas[] = $this->obtenerDatosHrInExSincobol($id_hoja_ruta);
+                    $contenido['hojas_rutas'] = $hojas_rutas;
+                }
+                if(isset($id_areas_mineras) && count($id_areas_mineras) > 0){
                     $areas_mineras = array();
                     foreach($id_areas_mineras as $id_area_minera)
                         $areas_mineras[] = $this->obtenerDatosAreaMineraMineriaIlegal($id_area_minera);
@@ -1424,6 +1451,7 @@ class MineriaIlegal extends BaseController
                 $oficinaModel = new OficinasModel();
                 $municipiosModel = new MunicipiosModel();
                 $denunciasMineriaIlegalModel = new DenunciasMineriaIlegalModel();
+                $denunciasHrSincobolMineriaIlegalModel = new DenunciasHrSincobolMineriaIlegalModel();
                 $denunciasAreasMinerasMineriaIlegalModel = new DenunciasAreasMinerasMineriaIlegalModel();
                 $coordenadasMineriaIlegalModel = new CoordenadasMineriaIlegalModel();
                 $adjuntosMineriaIlegalModel = new AdjuntosMineriaIlegalModel();
@@ -1436,12 +1464,21 @@ class MineriaIlegal extends BaseController
                 $oficina = $oficinaModel->find($this->request->getPost('fk_oficina'));
                 $correlativoHR = $this->obtenerCorrelativo($oficina['correlativo'].'MIN-ILEGAL/');
 
+                /* INFORME TECNICO*/
+                $informeTecnicoDigital = $this->request->getFile('informe_tecnico_digital');
+                $nombreInformeTecnicoDigital = $informeTecnicoDigital->getRandomName();
+                //$informeTecnicoDigital->move($this->rutaArchivos,$nombreInformeTecnicoDigital);
+                $nombreInformeTecnicoDigital = $this->rutaArchivos.$nombreInformeTecnicoDigital;
+
                 $data = array(
                     'fk_municipio' => $this->request->getPost('fk_municipio'),
                     'fk_tipo_denuncia' => 3,
                     'correlativo' => $correlativoDenuncia,
                     'origen_oficio' => $this->request->getPost('origen_oficio'),
                     'enlace' => $this->request->getPost('enlace'),
+                    'informe_tecnico_numero' => mb_strtoupper($this->request->getPost('informe_tecnico_numero')),
+                    'informe_tecnico_fecha' => $this->request->getPost('informe_tecnico_fecha'),
+                    'informe_tecnico_adjunto' => $nombreInformeTecnicoDigital,
                     'descripcion_oficio' => mb_strtoupper($this->request->getPost('descripcion_oficio')),
                     'comunidad_localidad' => mb_strtoupper($this->request->getPost('comunidad_localidad')),
                     'descripcion_lugar' => mb_strtoupper($this->request->getPost('descripcion_lugar')),
@@ -1453,12 +1490,23 @@ class MineriaIlegal extends BaseController
                     'provincia' => $ubicacion['provincia'],
                     'municipio' => $ubicacion['municipio'],
                     'tiene_area_minera' => ( isset($id_areas_mineras) && count($id_areas_mineras)>0) ? 'true' : 'false',
-
                 );
                 if($denunciasMineriaIlegalModel->insert($data) === false){
                     session()->setFlashdata('fail', $denunciasMineriaIlegalModel->errors());
                 }else{
                     $idDenuncia = $denunciasMineriaIlegalModel->getInsertID();
+
+                    if(isset($id_hojas_rutas) && count($id_hojas_rutas) > 0){
+                        foreach($id_hojas_rutas as $id_hoja_ruta){
+                            $dataHojaRutaSincobol = array(
+                                'fk_denuncia' => $idDenuncia,
+                                'fk_hoja_ruta' => $id_hoja_ruta,
+                            );
+                            if($denunciasHrSincobolMineriaIlegalModel->insert($dataHojaRutaSincobol) === false)
+                                session()->setFlashdata('fail', $denunciasHrSincobolMineriaIlegalModel->errors());
+                        }
+                    }
+
                     if(isset($id_areas_mineras) && count($id_areas_mineras) > 0){
                         foreach($id_areas_mineras as $id_area_minera){
                             $dataAreaMinera = array(
@@ -1483,28 +1531,12 @@ class MineriaIlegal extends BaseController
                         }
                     }
 
-                    /* INFORME TECNICO*/
-                    $informeTecnicoDigital = $this->request->getFile('informe_tecnico_digital');
-                    $tipoInformeTecnicoDigital = $this->obtenerTipoArchivo($informeTecnicoDigital->guessExtension());
-                    $nombreInformeTecnicoDigital = $informeTecnicoDigital->getRandomName();
-                    $informeTecnicoDigital->move($this->rutaArchivos,$nombreInformeTecnicoDigital);
-                    $nombreInformeTecnicoDigital = $this->rutaArchivos.$nombreInformeTecnicoDigital;
-
-                    $dataAdjunto = array(
-                        'fk_denuncia' => $idDenuncia,
-                        'nombre' => 'INFORME TÉCNICO',
-                        'tipo' => $tipoInformeTecnicoDigital,
-                        'adjunto' => $nombreInformeTecnicoDigital,
-                        'cite' => mb_strtoupper($this->request->getPost('informe_tecnico_numero')),
-                        'fecha_cite' => $this->request->getPost('informe_tecnico_fecha'),
-                    );
-                    if($adjuntosMineriaIlegalModel->insert($dataAdjunto) === false)
-                        session()->setFlashdata('fail', $adjuntosMineriaIlegalModel->errors());
-
                     if ($adjuntos = $this->request->getFiles()) {
                         foreach($adjuntos as $nombre => $adjunto){
-                            if($nombre == 'adjunto' && count($adjunto) > 0){
-                                $nombre = $this->request->getPost('nombre');
+                            if($nombre == 'adjuntos' && count($adjunto) > 0){
+                                $nombres = $this->request->getPost('nombres');
+                                $cites = $this->request->getPost('cites');
+                                $fecha_cites = $this->request->getPost('fecha_cites');
                                 foreach($adjunto as $i => $archivo){
                                     $tipoDocDigital = $this->obtenerTipoArchivo($archivo->guessExtension());
                                     $nombreDocDigital = $archivo->getRandomName();
@@ -1512,9 +1544,12 @@ class MineriaIlegal extends BaseController
                                     $nombreDocDigital = $this->rutaArchivos.$nombreDocDigital;
                                     $dataAdjunto = array(
                                         'fk_denuncia' => $idDenuncia,
-                                        'nombre' => mb_strtoupper($nombre[$i]),
+                                        'nombre' => mb_strtoupper($nombres[$i]),
+                                        'cite' => mb_strtoupper($cites[$i]),
+                                        'fecha_cite'=>((!empty($fecha_cites[$i])) ? $fecha_cites[$i] : NULL),
                                         'tipo' => $tipoDocDigital,
                                         'adjunto' => $nombreDocDigital,
+                                        'fk_usuario_creador' => session()->get('registroUser'),
                                     );
                                     if($adjuntosMineriaIlegalModel->insert($dataAdjunto) === false)
                                         session()->setFlashdata('fail', $adjuntosMineriaIlegalModel->errors());
@@ -1771,7 +1806,7 @@ class MineriaIlegal extends BaseController
         return $denunciasDenunciantesMineriaIleglaModel->where($where)->delete();
     }
     private function liberarAreasMineras($fk_denuncia){
-        $denunciasAreasMinerasMineriaIlegalModel = new DenunciasAreasMinerasMineriaIlegalModel();        
+        $denunciasAreasMinerasMineriaIlegalModel = new DenunciasAreasMinerasMineriaIlegalModel();
         $where = array(
             'fk_denuncia' => $fk_denuncia,
         );
@@ -1847,25 +1882,35 @@ class MineriaIlegal extends BaseController
 
     public function ajaxTrAdjunto(){
         $n = $this->request->getPost('n');
-        $opciones = '';
-        if($this->tiposAdjuntos){
-            foreach($this->tiposAdjuntos as $id=>$row)
-                $opciones .= "<option value='$id'>$row</option>";
+        $tipo = $this->request->getPost('tipo');
+        $tipo_input_cite = 'hidden';
+        $tipo_input_fecha_cite = 'hidden';
+        if($tipo == 'DOCUMENTO'){
+            $tipo_input_cite = 'text';
+            $tipo_input_fecha_cite = 'date';
         }
+
         $html = "<tr id='adj$n'>
             <td class='text-cente form-group'>
-                <input type='hidden' name='id_adjunto[]' value='SIN' />
-                <select name='tipo[]' class='form-control'>
-                    $opciones
-                </select>
+                <input type='hidden' name='id_adjuntos[]' value='SIN' />
+                <input type='hidden' name='tipos[]' value='$tipo' readonly />
+                <span class='messages'></span>
+                $tipo
+            </td>
+            <td class='text-center form-group'>
+                <input type='text' name='nombres[]' class='form-control form-control-uppercase'>
                 <span class='messages'></span>
             </td>
             <td class='text-center form-group'>
-                <input type='text' name='nombre[]' class='form-control form-control-uppercase'>
+                <input type='$tipo_input_cite' name='cites[]' class='form-control form-control-uppercase'>
                 <span class='messages'></span>
             </td>
             <td class='text-center form-group'>
-                <input type='file' name='adjunto[]' class='form-control'>
+                <input type='$tipo_input_fecha_cite' name='fecha_cites[]' class='form-control form-control-uppercase'>
+                <span class='messages'></span>
+            </td>
+            <td class='text-center form-group'>
+                <input type='file' name='adjuntos[]' class='form-control'>
                 <span class='messages'></span>
             </td>
             <td class='text-center'>
@@ -1916,7 +1961,7 @@ class MineriaIlegal extends BaseController
         );
         $builder = $db->table('mineria_ilegal.hoja_ruta AS hr')
         ->select($campos)
-        ->join('mineria_ilegal.denuncias AS dn', 'hr.fk_denuncia = dn.id', 'left')        
+        ->join('mineria_ilegal.denuncias AS dn', 'hr.fk_denuncia = dn.id', 'left')
         ->join('usuarios AS ur', 'hr.ultimo_fk_usuario_remitente = ur.id', 'left')
         ->join('perfiles AS pr', 'ur.fk_perfil = pr.id', 'left')
         ->join('usuarios as ua', 'hr.ultimo_fk_usuario_responsable = ua.id', 'left')
@@ -2128,7 +2173,7 @@ class MineriaIlegal extends BaseController
                     $contenido['areas_mineras'] = $areas_mineras;
                 }
                 $provincias = $this->obtenerProvincias($this->request->getPost('departamento'));
-                $municipios = $this->obtenerMunicipios($this->request->getPost('departamento'), $this->request->getPost('provincia'));                
+                $municipios = $this->obtenerMunicipios($this->request->getPost('departamento'), $this->request->getPost('provincia'));
 
                 $cabera['titulo'] = $this->titulo;
                 $cabera['navegador'] = true;
@@ -2157,7 +2202,7 @@ class MineriaIlegal extends BaseController
                 $data['tramites_menu'] = $this->tramitesMenu();
                 $data['mapas'] = true;
                 echo view('templates/template', $data);
-            }else{                
+            }else{
                 $municipiosModel = new MunicipiosModel();
                 $denunciasMineriaIlegalModel = new DenunciasMineriaIlegalModel();
                 $denunciasDenunciantesMineriaIleglaModel = new DenunciasDenunciantesMineriaIlegalModel();
@@ -2196,8 +2241,8 @@ class MineriaIlegal extends BaseController
                         if($denunciasDenunciantesMineriaIleglaModel->insert($dataDenunciaDenunciante) === false)
                             session()->setFlashdata('fail', $denunciasDenunciantesMineriaIleglaModel->errors());
                     }
-                }                
-                
+                }
+
                 if(isset($id_areas_mineras) && implode(',',$id_areas_mineras) != $this->request->getPost('id_areas_mineras_ant')){
                     $this->liberarAreasMineras($id_denuncia);
                     foreach($id_areas_mineras as $id_area_minera){
@@ -2304,7 +2349,7 @@ class MineriaIlegal extends BaseController
                         }
                     }
                     session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información.');
-                }                
+                }
                 return redirect()->to($this->controlador.'mis_tramites');
             }
         }
@@ -2383,21 +2428,21 @@ class MineriaIlegal extends BaseController
             'deleted_at' => NULL,
         );
         if($hoja_ruta = $hojaRutaMineriaIlegalModel->where($where)->first()){
-            
+
             $estado = 'DEVUELTO';
             $motivo_devolucion = mb_strtoupper($this->request->getPost('motivo_devolucion'));
-            
+
             $where = array(
                 'fk_hoja_ruta' => $hoja_ruta['id'],
             );
-            $derivaciones = $derivacionMineriaIlegalModel->where($where)->orderBy('id', 'DESC')->findAll(2);            
+            $derivaciones = $derivacionMineriaIlegalModel->where($where)->orderBy('id', 'DESC')->findAll(2);
             $derivacion_actual = $derivaciones[0];
             $derivacion_restaurar = $derivaciones[1];
             $where = array(
                 'fk_derivacion' => $derivacion_actual['id'],
                 'fk_hoja_ruta' => $hoja_ruta['id'],
             );
-            $documentos_anexados = $documentosModel->where($where)->findAll();            
+            $documentos_anexados = $documentosModel->where($where)->findAll();
             $dataHojaRuta = array(
                 'id' => $hoja_ruta['id'],
                 'ultimo_estado' => $estado,
@@ -2406,9 +2451,9 @@ class MineriaIlegal extends BaseController
                 'ultimo_fecha_derivacion' => date('Y-m-d H:i:s'),
                 'ultimo_instruccion' => $motivo_devolucion,
                 'ultimo_fk_usuario_remitente' => session()->get('registroUser'),
-                'ultimo_fk_usuario_destinatario' => $derivacion_restaurar['fk_usuario_destinatario'],                
+                'ultimo_fk_usuario_destinatario' => $derivacion_restaurar['fk_usuario_destinatario'],
                 'ultimo_fk_documentos' => '',
-            );            
+            );
             if($hojaRutaMineriaIlegalModel->save($dataHojaRuta) === false){
                 session()->setFlashdata('fail', $hojaRutaMineriaIlegalModel->errors());
             }else{
@@ -2422,8 +2467,8 @@ class MineriaIlegal extends BaseController
                     'estado' => $estado,
                     'fk_usuario_creador' => session()->get('registroUser'),
                     'fk_usuario_responsable' => $derivacion_actual['fk_usuario_responsable'],
-                );                
-                
+                );
+
                 if($derivacionMineriaIlegalModel->insert($dataDerivacion) === false){
                     session()->setFlashdata('fail', $derivacionMineriaIlegalModel->errors());
                 }else{
@@ -2452,7 +2497,7 @@ class MineriaIlegal extends BaseController
                         'idtra' => $hoja_ruta['id']
                     );
                 }
-            }            
+            }
         }
         echo json_encode($resultado);
     }
@@ -5185,6 +5230,32 @@ class MineriaIlegal extends BaseController
             }
             return $datos;
         }
+    }
+
+    public function obtenerDatosHrInExSincobol($id){
+        if($id){
+            $dbSincobol = \Config\Database::connect('sincobol');
+            $campos = array('hr.id','thr.nombre as tipo_hoja_ruta', 'hr.correlativo', "TO_CHAR(hr.fecha, 'DD/MM/YYYY') as fecha, hr.referencia",
+            "CONCAT(pd.nombres, p.nombres, ' ', pd.apellido_paterno, p.apellido_paterno, ' ', pd.apellido_materno, p.apellido_materno, '<br />', c.nombre , e.cargo, '<br />', a.nombre ,e.institucion) as remitente",
+            "CONCAT(d.correlativo, hr.cite_documento_externo, '<br />', TO_CHAR(d.fecha_creacion, 'DD/MM/YYYY'), TO_CHAR(hr.fecha_cite_externo, 'DD/MM/YYYY')) as cite");
+            $where = array(
+                'hr.id' => $id
+            );
+            $builder = $dbSincobol->table('sincobol.hoja_ruta as hr')
+            ->select($campos)
+            ->join('sincobol.tipo_hoja_ruta as thr', 'hr.fk_tipo_hoja_ruta=thr.id', 'left')
+            ->join('sincobol.externo as e', 'e.id=hr.fk_externo_remitente', 'left')
+            ->join('sincobol.documento as d', 'd.id=hr.fk_documento_original', 'left')
+            ->join('sincobol.persona as p', 'p.id=e.fk_persona', 'left')
+            ->join('sincobol.asignacion_cargo as ac', 'ac.id=d.fk_asignacion_cargo', 'left')
+            ->join('sincobol.cargo as c', 'c.id=ac.fk_cargo', 'left')
+            ->join('sincobol.area as a', 'a.id=c.fk_area', 'left')
+            ->join('sincobol.persona as pd', 'pd.id=ac.fk_persona', 'left')
+            ->where($where);
+            if($fila = $builder->get()->getRowArray())
+                return $fila;
+        }
+        return false;
     }
 
     public function ajaxHojaRutaMadre(){

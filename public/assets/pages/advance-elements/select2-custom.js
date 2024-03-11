@@ -380,7 +380,7 @@ $(document).ready(function () {
           id: fk_hoja_ruta,
         },
         dataType: "json",
-        success: function (result) {          
+        success: function (result) {
           if(result.estado == 'success'){
             var markup = "<tr id='hr"+result.id+"'>"+
               "<td class='text-center form-group'><input type='hidden' name='id_hojas_rutas[]' value='"+result.id+"' /><span class='messages'></span>"+result.tipo_hoja_ruta+"</td>"+
@@ -388,11 +388,12 @@ $(document).ready(function () {
               "<td class='text-center'>"+result.fecha+"</td>"+
               "<td class='text-center'>"+result.referencia+"</td>"+
               "<td class='text-center'>"+result.remitente+"</td>"+
-              "<td class='text-center'>"+result.cite+"</td>"+              
+              "<td class='text-center'>"+result.cite+"</td>"+
               "<td class='text-center'><button type='button' class='btn btn-sm btn-danger waves-effect waves-light' title='Desanexar Hoja Ruta' onclick='desanexar_hoja_ruta("+result.id+");'><span class='icofont icofont-ui-delete'></span></button></td>"+
             "</tr>";
             $("#tabla_hojas_rutas tbody").append(markup);
             $(".hr-in-ex-ajax").val('').trigger('change');
+            $("#hr_anexados").val('SI');
           }else{
             console.log(result);
           }
@@ -612,11 +613,13 @@ $(document).ready(function () {
   /* AGREGAR ADJUNTO */
   $(".agregar_adjunto").click(function () {
     var tmp_adjuntos = parseInt($("#tmp_adjuntos").val()) + 1;
+    var tipo = $(this).data('tipo');
     $.ajax({
       url: baseUrl + "mineria_ilegal/ajax_tr_adjunto",
       type: "POST",
       data: {
         n: tmp_adjuntos,
+        tipo: tipo,
       },
       success: function (result) {
         $("#tabla_adjuntos tbody").append(result);
@@ -684,6 +687,15 @@ $(document).ready(function () {
   });
   /* FIN MINERIA ILEGAL AREAS MINERAS */
 
+  /* ORIGEN CAMBIAR */
+
+  verificarOrigen();
+
+  $("#origen_oficio").on("change", function () {
+    verificarOrigen();
+  });
+  /* ORIGEN CAMBIAR */
+
 });
 function desanexar_documento(idDocumento) {
   var row = document.getElementById(idDocumento);
@@ -707,6 +719,22 @@ function desanexar_area_minera_mineria_ilegal(n) {
 function eliminar_adjunto(n) {
   var row = document.getElementById("adj" + n);
   row.parentNode.removeChild(row);
+}
+function verificarOrigen(){
+  switch($("#origen_oficio").val()) {
+    case 'HOJA DE RUTA EXTERNA/INTERNA':
+      $('#origen_enlace').hide();
+      $('#origen_hr').show();
+      break;
+    case 'NOTICIA':
+    case 'REDES SOCIALES':
+      $('#origen_enlace').show();
+      $('#origen_hr').hide();
+      break;
+    default:
+      $('#origen_enlace').hide();
+      $('#origen_hr').hide();
+  }
 }
 
 
