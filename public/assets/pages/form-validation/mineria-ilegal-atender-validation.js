@@ -51,7 +51,20 @@ $(document).ready(function () {
         },
         coordenadas: {
             presence: true,
-        },        
+        },
+        fk_estado_tramite: {
+            presence: {
+                message: "^Debe seleccionar el Estado del Tramite."
+            },
+        },
+        fk_estado_tramite_hijo:{
+            presence: function(){
+                if($('#fk_estado_tramite').children('option:selected').data('padre') == 't')
+                    return true;
+                else
+                    return false;
+            }
+        },
         fk_usuario_destinatario:{
             presence: {
                 message: "^Debe seleccionar el Destinatario."

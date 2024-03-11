@@ -28,7 +28,7 @@
                         </div>
                     </div>
                     <div class="card-block">
-                        <div class="dt-responsive table-responsive">
+                        <div class="dt-responsive table-responsive" style="min-height: 300px;">
                             <!--div class="bg-color-box color-warning waves-effect waves-light" style="background-color: #FEEDB9;color:black !important;">TRÁMITES A PUNTO DE VENCER SU PLAZO</!--div>
                             <div-- class="bg-color-box color-danger waves-effect waves-light" style="background-color: #F2C4C9; color:black !important;">TRÁMITES QUE VENCIERON SU PLAZO</div-->
                             <table id="tabla-listado" class="table table-striped table-bordered nowrap" style="font-size: small;">

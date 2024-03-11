@@ -65,7 +65,7 @@
                                     <a class="nav-link " data-toggle="tab" href="#datos_personales" role="tab"><strong>Datos del Denunciante(s)</strong></a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link " data-toggle="tab" href="#descripcion_explotacion" role="tab"><strong>Descripción de la Explotación Ilegal</strong></a>
+                                        <a class="nav-link " data-toggle="tab" href="#descripcion_explotacion" role="tab"><strong>Descripción de la Actividad Minera</strong></a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link " data-toggle="tab" href="#areas_mineras_identificadas" role="tab"><strong>Área(s) Minera(s) Identificada(s)</strong></a>
@@ -541,7 +541,10 @@
                                         <p>Extensiones permitidas de Imágen: jpg, gif, bmp, png; de Documento: txt, doc, docx, pdf; de Vídeo: avi, mp4, mpeg, mwv; de Audio: mp3, wav, wma con un tamaño máximo de 20 MB.</p>
                                         <div class="row">
                                             <div class="col-sm-12 text-center mb-3">
-                                                <button type="button" class="btn btn-inverse agregar_adjunto"><i class="fa fa-plus-square"></i> Agregar Nuevo Adjunto</button>
+                                                <button type="button" class="btn btn-inverse agregar_adjunto" data-tipo="IMAGEN"><i class="fa fa-plus-square"></i> Agregar Imagen</button>
+                                                <button type="button" class="btn btn-inverse agregar_adjunto" data-tipo="DOCUMENTO"><i class="fa fa-plus-square"></i> Agregar Documento</button>
+                                                <button type="button" class="btn btn-inverse agregar_adjunto" data-tipo="VIDEO"><i class="fa fa-plus-square"></i> Agregar Video</button>
+                                                <button type="button" class="btn btn-inverse agregar_adjunto" data-tipo="AUDIO"><i class="fa fa-plus-square"></i> Agregar Audio</button>
                                             </div>
                                             <div class="col-md-12 col-sm-12">
                                                 <table id="tabla_adjuntos" class="table table-bordered">
@@ -549,6 +552,8 @@
                                                         <tr>
                                                             <th class="text-center">Tipo</th>
                                                             <th class="text-center">Nombre</th>
+                                                            <th class="text-center">Cite</th>
+                                                            <th class="text-center">Fecha</th>
                                                             <th class="text-center">Adjunto</th>
                                                             <th class="text-center"> </th>
                                                         </tr>
@@ -558,9 +563,11 @@
                                                             <?php foreach($adjuntos as $i=>$row){?>
                                                                 <tr id="adj<?= ($i+1);?>">
                                                                     <td class="text-center form-group">
-                                                                        <input type="hidden" name="id_adjunto[]" value="<?= $row['id'];?>" /><?= mb_strtoupper($row['tipo']);?><span class='messages'></span>
+                                                                        <input type="hidden" name="id_adjuntos[]" value="<?= $row['id'];?>" /><?= mb_strtoupper($row['tipo']);?><span class='messages'></span>
                                                                     </td>
                                                                     <td class="text-center"><?= $row['nombre'];?></td>
+                                                                    <td class="text-center"><?= $row['cite'];?></td>
+                                                                    <td class="text-center"><?= $row['fecha_cite'];?></td>
                                                                     <td class="text-center"><a href="<?= base_url($row['adjunto']);?>" class="btn btn-inverse" target="_blank"><i class="icofont icofont-download-alt"></i>Descargar</a></td>
                                                                     <td class="text-center">
                                                                         <!--
@@ -574,11 +581,45 @@
                                                         <?php }?>
                                                     </tbody>
                                                 </table>
-
                                             </div>
                                         </div>
                                     </div>
                                     <div class="tab-pane " id="estado_mineria_ilegal" role="tabpanel">
+                                        <div class="form-group row">
+                                            <label class="col-sm-2 col-form-label">Estado de la Denuncia * :</label>
+                                            <div class="col-sm-10">
+                                                <?= form_input(array('type'=>'hidden','name'=>'anexar_documentos','id'=>'anexar_documentos','value'=>set_value('anexar_documentos', ( (isset($anexar_documentos) && $anexar_documentos=='t') ? 'SI' : 'NO'), false)));?>                                                
+                                                <select id="fk_estado_tramite" name="fk_estado_tramite" class="form-control">
+                                                    <?php foreach($estadosTramites as $row){ ?>
+                                                        <option value="<?= $row['id'];?>" data-padre="<?= $row['padre'];?>" data-anexar="<?= $row['anexar'];?>" <?= (isset($id_estado_padre) && $id_estado_padre == $row['id']) ? 'selected' : ''; ?> ><?= $row['texto'];?></option>
+                                                    <?php }?>
+                                                </select>
+                                                <span class="messages"></span>
+                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                <?php }?>
+                                            </div>
+                                        </div>                                        
+                                        <div id="estado_tramite_hijo" class="form-group row">
+                                            <label class="col-sm-2 col-form-label">Estado de la Denuncia Especifico * :</label>
+                                            <div class="col-sm-10">
+                                                <select id="fk_estado_tramite_hijo" name="fk_estado_tramite_hijo" class="form-control">
+                                                    <option value="">SELECCIONE UNA OPCIÓN</option>
+                                                    <?php if(isset($estadosTramitesHijo)){?>
+                                                        <?php foreach($estadosTramitesHijo as $row){?>
+                                                            <option value="<?= $row['id'];?>" data-anexar="<?= $row['anexar_documentos'] ?>" <?= (isset($id_estado_hijo) && $id_estado_hijo == $row['id']) ? 'selected' : ''; ?> ><?= $row['texto'];?></option>
+                                                        <?php }?>
+                                                    <?php }?>
+                                                </select>
+                                                <span class="messages"></span>
+                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                <?php }?>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-12"><span><strong>Nota. Si el estado del trámite no fue modificado, no es obligatorio el llenado de Documento(s) Anexado(s) y Observaciones en el formulario.</strong></span></div>
+                                        </div>
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Buscador de Documento <span class="mytooltip tooltip-effect-5">
                                                 <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
