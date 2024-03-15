@@ -70,11 +70,11 @@
                                                                 <td class="text-center"><?= $row['documento_identidad'].' '.$row['expedido'];?></td>
                                                                 <td class="text-center"><?= $row['telefonos'];?></td>
                                                                 <td class="text-center"><?= $row['email'];?></td>
-                                                                <td class="text-center"><?= $row['direccion'];?></td>                                                                
+                                                                <td class="text-center"><?= $row['direccion'];?></td>
                                                                 <td class='text-center'>
-                                                                    <a href="<?=base_url($row['documento_identidad_digital']);?>" class='btn btn-sm btn-inverse' target='_blank' title='Ver Documento de Identidad'><i class='fa fa-file-pdf-o'></i></a> &nbsp; 
+                                                                    <a href="<?=base_url($row['documento_identidad_digital']);?>" class='btn btn-sm btn-inverse' target='_blank' title='Ver Documento de Identidad'><i class='fa fa-file-pdf-o'></i></a> &nbsp;
                                                                     <button type="button" class="btn btn-sm btn-danger waves-effect waves-light" title="Desanexar Denunciante" onclick="desanexar_denunciante(<?= $row['id'];?>);"><span class="icofont icofont-ui-delete"></span></button>
-                                                                </td>                                                                    
+                                                                </td>
                                                             </tr>
                                                         <?php }?>
                                                     <?php }?>
@@ -219,18 +219,67 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-sm-12">
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4 col-sm-12">
                                                 <div class="form-group row">
-                                                    <label class="col-sm-3 col-form-label">Denuncia o Documento Externo (Max. 20MB) * :</label>
-                                                    <div class="col-sm-6">
+                                                    <label class="col-sm-4 col-form-label">Denuncia o Documento Externo <span class="mytooltip tooltip-effect-5">
+                                                        <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
+                                                        <span class="tooltip-content clearfix">
+                                                            <span class="tooltip-text">Debe escribir el correlativo si existe.</span>
+                                                        </span>
+                                                    </span> : </label>
+                                                    <div class="col-sm-8">
                                                         <?php
-                                                            $campo = 'documento_digital';
-                                                            echo form_upload(array(
+                                                            $campo = 'documento_numero';
+                                                            echo form_input(array(
                                                                 'name' => $campo,
                                                                 'id' => $campo,
-                                                                'class' => 'form-control',
-                                                                'accept' => '.pdf',
+                                                                'placeholder' => 'N° CITE',
+                                                                'class' => 'form-control form-control-uppercase',
+                                                                'value' => set_value($campo,'',false)
                                                             ));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Fecha :</label>
+                                                    <div class="col-sm-8">
+                                                        <?php
+                                                            $campo = 'documento_fecha';
+                                                            echo form_input(array(
+                                                                'name' => $campo,
+                                                                'id' => $campo,
+                                                                'type' => 'date',
+                                                                'class' => 'form-control',
+                                                                'value' => set_value($campo,(isset($denuncia[$campo]) ? $denuncia[$campo] : ''),false)
+                                                            ));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-6 col-form-label">Documento de Digital (Max. 20MB) * :</label>
+                                                    <div class="col-sm-6">
+                                                        <?php
+                                                        $campo = 'documento_digital';
+                                                        echo form_upload(array(
+                                                            'name' => $campo,
+                                                            'id' => $campo,
+                                                            'class' => 'form-control',
+                                                            'accept' => '.pdf',
+                                                        ));
                                                         ?>
                                                         <span class="messages"></span>
                                                         <?php if (isset($validation) && $validation->hasError($campo)) { ?>

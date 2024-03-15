@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\ActoAdministrativoModel;
+use App\Models\HojaRutaMineriaIlegalModel;
 use App\Models\TramitesModel;
 use App\Models\UsuariosModel;
 use CodeIgniter\Controller;
@@ -75,6 +76,7 @@ class BaseController extends Controller
         $tramitesModel = new TramitesModel();
         $usuariosModel = new UsuariosModel();
         $actoAdministrativoModel = new ActoAdministrativoModel();
+        $hojaRutaMineriaIlegalModel =  new HojaRutaMineriaIlegalModel();
         $usuarioInfo = $usuariosModel->find(session()->get('registroUser'));
         if($usuarioInfo['tramites']){
             //$tramites = $tramitesModel->whereIn('id',explode(",", $usuarioInfo['tramites']))->where('activo',true)->findAll();
@@ -101,7 +103,7 @@ class BaseController extends Controller
                             'ce.estado' => 'INGRESADO',
                             'ce.deleted_at' => NULL,
                             'ac.fk_usuario_actual' => session()->get('registroUser'),
-                            'ac.deleted_at' => NULL,                            
+                            'ac.deleted_at' => NULL,
                         );
                         $builder = $db->table('public.correspondencia_externa AS ce')->select('count(*) as n')
                         ->join('public.acto_administrativo AS ac', "ce.fk_acto_administrativo = ac.id", 'left')
@@ -113,6 +115,20 @@ class BaseController extends Controller
                                 'text' => '<a href="'.base_url($tramite['controlador'].'mis_tramites').'" class="btn btn-danger">Recibir Trámites</a>',
                             );
                         /* Fin Correspondencia Externa Pendiente */
+                        break;
+                    case 2:
+                        /* Trámites Pendientes */
+                        $where = array(
+                            'deleted_at' => NULL,
+                            'ultimo_fk_usuario_destinatario' => session()->get('registroUser'),
+                        );
+                        $total = $hojaRutaMineriaIlegalModel->select('COUNT(*) AS n')->where($where)->whereIn('ultimo_estado', array('MIGRADO', 'DERIVADO'))->first();
+                        if($total['n'] > 0)
+                            $resultado[] = array(
+                                'title' => '<strong>Tiene '.$total['n'].' Hoja(s) de Ruta de Minería Ilegal pendientes de recepción!</strong>',
+                                'text' => '<a href="'.base_url($tramite['controlador'].'listado_recepcion').'" class="btn btn-danger">Recibir Trámites</a>',
+                            );
+                        /* Fin Trámites Pendientes */
                         break;
                 }
             }

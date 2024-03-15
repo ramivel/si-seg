@@ -90,6 +90,40 @@
         </tr>
     <?php }?>
 </table>
+<?php if(isset($areas_mineras) && count($areas_mineras)>0){ ?>
+    <br /><br />
+    <table border="1" cellpadding="3" cellspacing="0">
+        <tr>
+            <td bgcolor="<?= $color;?>" colspan="10" align="center"><b>ÁREA(S) MINERA(S) IDENTIFICADA(S)</b></td>
+        </tr>
+        <tr>
+            <td bgcolor="<?= $color;?>" align="center"><b>Nº</b></td>
+            <td bgcolor="<?= $color;?>" align="center"><b>CÓDIGO ÚNICO</b></td>
+            <td bgcolor="<?= $color;?>" align="center"><b>ÁREA MINERA</b></td>
+            <td bgcolor="<?= $color;?>" align="center"><b>TIPO ÁREA</b></td>
+            <td bgcolor="<?= $color;?>" align="center"><b>EXTENSIÓN</b></td>
+            <td bgcolor="<?= $color;?>" align="center"><b>TITULAR</b></td>
+            <td bgcolor="<?= $color;?>" align="center"><b>CLASIFICACIÓN</b></td>
+            <td bgcolor="<?= $color;?>" align="center"><b>DEPARTAMENTO(S)</b></td>
+            <td bgcolor="<?= $color;?>" align="center"><b>PROVINCIA(S)</b></td>
+            <td bgcolor="<?= $color;?>" align="center"><b>MUNICIPIO(S)</b></td>
+        </tr>
+        <?php foreach($areas_mineras as $n=>$area_minera){?>
+            <tr>
+                <td align="center"><?= $n+1;?></td>
+                <td align="center"><?= $area_minera['codigo_unico'];?></td>
+                <td align="center"><?= $area_minera['area_minera'];?></td>
+                <td align="center"><?= $area_minera['tipo_area_minera'];?></td>
+                <td align="center"><?= $area_minera['extension'];?></td>
+                <td align="center"><?= $area_minera['titular'];?></td>
+                <td align="center"><?= $area_minera['clasificacion'];?></td>
+                <td align="center"><?= $area_minera['departamentos'];?></td>
+                <td align="center"><?= $area_minera['provincias'];?></td>
+                <td align="center"><?= $area_minera['municipios'];?></td>                
+            </tr>
+        <?php }?>
+    </table>
+<?php }?>
 <?php if(isset($coordenadas) && count($coordenadas)>0){ ?>
     <br /><br />
     <table border="1" cellpadding="3" cellspacing="0">

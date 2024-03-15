@@ -17,6 +17,12 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
+        id_hoja_ruta: {
+            presence: true,
+        },
+        id_denuncia: {
+            presence: true,
+        },
         origen_oficio: {
             presence: {
                 message: "^Debe seleccionar una opción."
@@ -32,10 +38,7 @@ $(document).ready(function () {
         },
         informe_tecnico_fecha: {
             presence: true,
-        },
-        informe_tecnico_digital: {
-            presence: true,
-        },
+        },        
         descripcion_oficio: {
             presence: true,
         },
@@ -48,17 +51,17 @@ $(document).ready(function () {
         },
         departamento:{
             presence: {
-                message: "^Debe seleccionar una opción."
+                message: "^Debe seleccionar un Departamento."
             },
         },
         provincia:{
             presence: {
-                message: "^Debe seleccionar una opción."
+                message: "^Debe seleccionar una Provincia."
             },
         },
         fk_municipio:{
             presence: {
-                message: "^Debe seleccionar una opción."
+                message: "^Debe seleccionar un Municipio."
             },
         },
         comunidad_localidad: {
@@ -68,12 +71,20 @@ $(document).ready(function () {
             presence: true,
         },
         coordenadas: {
-            presence: false,
+            presence: true,
         },
-        fk_oficina:{
+        fk_estado_tramite: {
             presence: {
-                message: "^Debe seleccionar una opción."
+                message: "^Debe seleccionar el Estado del Tramite."
             },
+        },
+        fk_estado_tramite_hijo:{
+            presence: function(){
+                if($('#fk_estado_tramite').children('option:selected').data('padre') == 't')
+                    return true;
+                else
+                    return false;
+            }
         },
         fk_usuario_destinatario:{
             presence: {
@@ -82,6 +93,17 @@ $(document).ready(function () {
         },
         instruccion: {
             presence: true,
+        },
+        anexar_hr:{
+            presence: false,
+        },
+        motivo_anexo: {
+            presence: function(){
+                if($('#anexar_hr').val().length > 0)
+                    return true;
+                else
+                    return false;
+            }
         },
     };
 

@@ -87,6 +87,7 @@
                     </a>
                 </li>
             </ul>
+            <!--
             <div class="pcoded-navigatio-lavel">Buscador de Trámites</div>
             <ul class="pcoded-item pcoded-left-item">
                 <li class="<?= (isset($menu_actual) && $menu_actual === 'buscador_tramites_cam') ? 'active' : '';?>">
@@ -95,7 +96,8 @@
                         <span class="pcoded-mtext">CAMs</span>
                     </a>
                 </li>
-            </ul>            
+            </ul>
+            -->
         <?php }?>
 
         <?php if(count($tramites_menu) > 0){?>
@@ -226,7 +228,7 @@
                                 </li>
 
                                 <!--
-                                
+
 
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_pendientes') ? 'active' : '';?>">
                                     <a href="<?= base_url($row['controlador'].'listado_pendientes');?>">
@@ -260,6 +262,7 @@
                                     </a>
                                 </li>
 
+                                <!--
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador_mis_tramites') ? 'active' : '';?>">
                                     <a href="<?= base_url($row['controlador'].'buscador_mis_tramites');?>">
                                         <span class="pcoded-mtext">Buscador de Mis Tramites</span>
@@ -271,7 +274,7 @@
                                         <span class="pcoded-mtext">Buscador de Tramites</span>
                                     </a>
                                 </li>
-
+                                -->
                             </ul>
                         </li>
                     <?php }?>

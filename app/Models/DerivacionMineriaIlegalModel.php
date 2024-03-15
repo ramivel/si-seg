@@ -15,7 +15,7 @@ class DerivacionMineriaIlegalModel extends Model{
         'fk_estado_tramite_padre',
         'fk_estado_tramite_hijo',
         'instruccion',
-        'estado character',
+        'estado',
         'fk_usuario_responsable',
         'fk_usuario_remitente',
         'fk_usuario_destinatario',

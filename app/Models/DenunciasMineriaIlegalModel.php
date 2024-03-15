@@ -31,7 +31,7 @@ class DenunciasMineriaIlegalModel extends Model{
         'enlace',
         'informe_tecnico_numero',
         'informe_tecnico_fecha',
-        'informe_tecnico_adjunto',
+        'informe_tecnico_digital',
         'descripcion_oficio',
     ];
 

@@ -21,7 +21,7 @@
         <td bgcolor="<?= $color;?>" align="rigth"><b>Informe Técnico:</b></td>
         <td><?= $denuncia['informe_tecnico'];?></td>
     </tr>    
-    <?php if($hojas_ruta_sincobol){?>
+    <?php if(isset($hojas_ruta_sincobol)){?>
     <tr>
         <td bgcolor="<?= $color;?>" align="rigth"><b>Hoja(s) de Ruta(s):</b></td>
         <td><?= $hojas_ruta_sincobol;?></td>

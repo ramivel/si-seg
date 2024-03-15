@@ -49,7 +49,7 @@
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/bower_components/pnotify/css/pnotify.mobile.css');?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/pages/pnotify/notify.css');?>">
     <!-- leaflet -->
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/pages/leaflet/leaflet.css');?>">    
+    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/pages/leaflet/leaflet.css');?>">
 
     <!-- Style.css -->
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/style.css');?>">
@@ -188,33 +188,31 @@
     <?php }?>
 
     <!-- Custom Graficas -->
-    <?php if(isset($graficar)){ ?>
+    <?php if(isset($graficas) && count($graficas) > 0){ ?>
         <script type="text/javascript">
             $(document).ready(function() {
                 google.charts.load("current", {packages:["corechart"]});
-                google.charts.setOnLoadCallback(drawChart);
-                function drawChart() {
-                    var data = google.visualization.arrayToDataTable([
-                        ['Estados', 'N Tramites'],
-                        <?php
-                        foreach($resumen as $row){
-                            echo "['".$row['estado_tramite']."', ".$row['n']."],";
-                        }
-                        ?>
-                    ]);
+                <?php foreach($graficas as $grafica){?>
+                    google.charts.setOnLoadCallback(function(){
+                        var data = google.visualization.arrayToDataTable([
+                            ['Estados', 'N Tramites'],
+                            <?php
+                            foreach($grafica['resumen'] as $row){
+                                echo "['".$row['estado_tramite']."', ".$row['n']."],";
+                            }
+                            ?>
+                        ]);
 
-                    var options = {
-                        pieHole: 0.4,
-                    };
+                        var options = {
+                            pieHole: 0.4,
+                        };
 
-                    var chart = new google.visualization.PieChart(document.getElementById('dashcam'));
-                    chart.draw(data, options);
-                }
-
+                        var chart = new google.visualization.PieChart(document.getElementById('<?= $grafica['id_mapa']?>'));
+                        chart.draw(data, options);
+                    });
+                <?php }?>                
             });
-        </script>
-
-    <!--script type="text/javascript" src="<?= base_url('assets/pages/widget/custom-widget1.js');?>"></!--script-->
+        </script>    
     <?php }?>
 
     <?php if(isset($charts_js)){ ?>
@@ -231,14 +229,14 @@
 
     <!-- leaflet -->
     <?php if(isset($mapas) && $mapas){ ?>
-    <script type="text/javascript" src="<?= base_url('assets/pages/leaflet/leaflet.js');?>"></script>    
+    <script type="text/javascript" src="<?= base_url('assets/pages/leaflet/leaflet.js');?>"></script>
     <script type="text/javascript" src="<?= base_url('assets/js/maps.js');?>"></script>
     <?php if(isset($puntos) && count($puntos)>0){?>
         <script type="text/javascript">
             <?php
             foreach($puntos as $punto)
                 echo "L.marker([".$punto['latitud'].", ".$punto['longitud']."]).addTo(myMap);";
-            ?>            
+            ?>
         </script>
     <?php }?>
     <?php }?>
