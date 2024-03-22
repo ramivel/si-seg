@@ -207,11 +207,13 @@
                             </a>
                             <ul class="pcoded-submenu">
 
-                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'denuncias_web') ? 'active' : '';?>">
-                                    <a href="<?= base_url($row['controlador'].'denuncias_web');?>">
-                                        <span class="pcoded-mtext">Denuncias Página Web</span>
-                                    </a>
-                                </li>
+                                <?php if(in_array(12, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'denuncias_web') ? 'active' : '';?>">
+                                        <a href="<?= base_url($row['controlador'].'denuncias_web');?>">
+                                            <span class="pcoded-mtext">Denuncias Página Web</span>
+                                        </a>
+                                    </li>
+                                <?php }?>
 
                                 <!--
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'agregar_fiscalizacion') ? 'active' : '';?>">

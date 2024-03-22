@@ -14,7 +14,7 @@ class Usuarios extends BaseController
     protected $carpeta = 'usuarios/';
     protected $menuActual = 'usuarios';
     protected $permisos = array(
-        100 => 'Administrador de Sistemas',        
+        100 => 'Administrador de Sistemas',
         1 => 'Migrar SINCOBOL',
         2 => 'Anular Documentos',
         //3 => 'Fecha Notificación',
@@ -26,6 +26,8 @@ class Usuarios extends BaseController
         9 => 'Área(s) Protegida(s) Adicional(es)',
         10 => 'Encargado de Cargar Documentación Digital',
         11 => 'Correspondencia Externa',
+        12 => 'Responsable Minería Ilegal DFCCI',
+        13 => 'Responsable Minería Ilegal Dirección Departamental o Regional',
     );
 
     public function index()
@@ -143,7 +145,7 @@ class Usuarios extends BaseController
             $contenido['title'] = view('templates/title',$cabera);
             $contenido['oficinas'] = $this->obtenerOficinas();
             $contenido['perfiles'] = $this->obtenerPerfiles();
-            $contenido['tramites'] = $this->obtenerTramites();            
+            $contenido['tramites'] = $this->obtenerTramites();
             $contenido['accion'] = $this->controlador.'guardar';
             $contenido['validation'] = $this->validator;
             $contenido['controlador'] = $this->controlador;
@@ -155,7 +157,7 @@ class Usuarios extends BaseController
         }else{
             $usuariosModel = new UsuariosModel();
             $data = array(
-                'nombre_completo' => mb_strtoupper($this->request->getPost('nombre_completo')),                
+                'nombre_completo' => mb_strtoupper($this->request->getPost('nombre_completo')),
                 'email' => $this->request->getPost('email'),
                 'atencion' => mb_strtoupper($this->request->getPost('atencion')),
                 'fk_oficina' => $this->request->getPost('fk_oficina'),
@@ -175,7 +177,7 @@ class Usuarios extends BaseController
     public function editar($id){
         $usuariosModel = new UsuariosModel();
         $fila = $usuariosModel->find($id);
-        if($fila){            
+        if($fila){
             $cabera['titulo'] = 'Administracion de Usuarios';
             $cabera['navegador'] = true;
             $cabera['subtitulo'] = 'Editar Usuario';
@@ -186,7 +188,7 @@ class Usuarios extends BaseController
             $contenido['permisos'] = $this->permisos;
             $contenido['tramites_elegidos'] = explode(',',$fila['tramites']);
             $contenido['permisos_elegidos'] = explode(',',$fila['permisos']);
-            $contenido['fila'] = $fila;            
+            $contenido['fila'] = $fila;
             $contenido['accion'] = $this->controlador.'guardar_editar';
             $data['content'] = view($this->carpeta.'editar', $contenido);
             $data['menu_actual'] = $this->menuActual;
@@ -231,7 +233,7 @@ class Usuarios extends BaseController
                 $contenido['oficinas'] = $this->obtenerOficinas();
                 $contenido['perfiles'] = $this->obtenerPerfiles();
                 $contenido['tramites'] = $this->obtenerTramites();
-                $contenido['fila'] = $fila;                
+                $contenido['fila'] = $fila;
                 $contenido['accion'] = $this->controlador.'guardar_editar';
                 $contenido['validation'] = $this->validator;
                 $data['content'] = view($this->carpeta.'editar', $contenido);
@@ -254,6 +256,67 @@ class Usuarios extends BaseController
                     session()->setFlashdata('fail', $usuariosModel->errors());
                 else
                     session()->setFlashdata('success', 'Se Actualizo Correctamente la Información.');
+                return redirect()->to('usuarios');
+            }
+        }
+    }
+    public function cambiarContraseña($id){
+        $usuariosModel = new UsuariosModel();
+        $fila = $usuariosModel->find($id);
+        if($fila){
+            $cabera['titulo'] = 'Administracion de Usuarios';
+            $cabera['navegador'] = true;
+            $cabera['subtitulo'] = 'Cambiar la Contraseña Usuario';
+            $contenido['title'] = view('templates/title',$cabera);
+            $contenido['oficinas'] = $this->obtenerOficinas();
+            $contenido['perfiles'] = $this->obtenerPerfiles();
+            $contenido['fila'] = $fila;
+            $contenido['accion'] = $this->controlador.'guardar_cambiar_contraseña';
+            $data['content'] = view($this->carpeta.'cambiar_contraseña', $contenido);
+            $data['menu_actual'] = $this->menuActual;
+            $data['tramites_menu'] = $this->tramitesMenu();
+            $data['validacion_js'] = 'usuario-contrasena-validation.js';
+            echo view('templates/template', $data);
+        }else{
+            session()->setFlashdata('fail', 'El usuario no existe.');
+            return redirect()->to('usuarios');
+        }
+    }
+    public function guardarCambiarContraseña(){
+        $id = $this->request->getPost('id');
+        if(isset($id) && $id>0){
+            $usuariosModel = new UsuariosModel();
+            $validation = $this->validate([
+                'id' => [
+                    'rules' => 'required',
+                ],
+                'nueva_contrasena' => [
+                    'rules' => 'required|min_length[5]|max_length[12]',
+                ],
+            ]);
+            if(!$validation){
+                $cabera['titulo'] = 'Administracion de Usuarios';
+                $cabera['navegador'] = true;
+                $cabera['subtitulo'] = 'Cambiar la Contraseña Usuario';
+                $contenido['title'] = view('templates/title',$cabera);
+                $contenido['oficinas'] = $this->obtenerOficinas();
+                $contenido['perfiles'] = $this->obtenerPerfiles();                                
+                $contenido['accion'] = $this->controlador.'guardar_cambiar_contraseña';
+                $contenido['validation'] = $this->validator;
+                $data['content'] = view($this->carpeta.'cambiar_contraseña', $contenido);
+                $data['menu_actual'] = $this->menuActual;
+                $data['tramites_menu'] = $this->tramitesMenu();
+                $data['validacion_js'] = 'usuario-contrasena-validation.js';
+                echo view('templates/template', $data);
+            }else{                
+                $data = array(
+                    'id' => $id,
+                    'pass' => Hash::make($this->request->getPost('nueva_contrasena')),                    
+                );
+                if($usuariosModel->save($data) === false)
+                    session()->setFlashdata('fail', $usuariosModel->errors());
+                else
+                    session()->setFlashdata('success', 'Se Actualizo la Contraseña Correctamente.');
                 return redirect()->to('usuarios');
             }
         }

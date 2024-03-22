@@ -85,6 +85,8 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('editar/(:num)', 'Usuarios::editar/$1');
         $routes->post('guardar_editar', 'Usuarios::guardar_editar');
         $routes->add('eliminar/(:num)', 'Usuarios::eliminar/$1');
+        $routes->add('cambiar_contraseña/(:num)', 'Usuarios::cambiarContraseña/$1');
+        $routes->post('guardar_cambiar_contraseña', 'Usuarios::guardarCambiarContraseña');        
     });
 
     $routes->group('estado_tramite', function($routes){

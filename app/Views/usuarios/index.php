@@ -70,7 +70,7 @@
                                                 <button class="btn btn-info dropdown-toggle waves-effect waves-light " type="button" id="dropdown-4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Acciones</button>
                                                 <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                     <a class="dropdown-item waves-light waves-effect" href="#">Desactivar Usuario</a>
-                                                    <a class="dropdown-item waves-light waves-effect" href="#">Cambiar Contraseña</a>
+                                                    <?php echo anchor('usuarios/cambiar_contraseña/'.$fila['id'], 'Cambiar Contraseña',array('class' =>'dropdown-item waves-light waves-effect'));?>                                                    
                                                     <?php echo anchor('usuarios/editar/'.$fila['id'], 'Editar',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                     <?php echo anchor('usuarios/eliminar/'.$fila['id'], 'Eliminar',array('class' =>'dropdown-item waves-light waves-effect eliminar'));?>                                                    
                                                 </div>
