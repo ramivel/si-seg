@@ -436,10 +436,9 @@ $(document).ready(function() {
     $(".archivado-denuncia").on('click', function() {
         $('#archivado-denuncia-modal').modal('toggle');
     });
-    /* FIN ARCHIVADO DENUNCIA MINERIA ILEGAL */    
+    /* FIN ARCHIVADO DENUNCIA MINERIA ILEGAL */
 
     /* MINERIA ILEGAL NUEVO DENUNCIANTE */
-
     $(".nuevo_denunciante").on('click', function() {
         $("#d_nombres").val('');
         $("#d_apellidos").val('');
@@ -542,9 +541,20 @@ $(document).ready(function() {
                         console.log(result.texto);
                     }
                 }
-            });            
+            });
         }
     });
+    /* FIN MINERIA ILEGAL NUEVO DENUNCIANTE */
+
+    /* SELECCIONAR TODOS */
+    $("#seleccionar-todo").click(function () {
+      if (this.checked) {
+        $(".seleccionado").prop("checked", true);
+      } else {
+        $(".seleccionado").prop("checked", false);
+      }
+    });
+    /* FIN SELECCIONAR TODOS */
 
 });
 

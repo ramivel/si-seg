@@ -16,19 +16,6 @@ $(document).ready(function () {
         function(){
             window.location.href = link;
         });
-        /*swal({
-                title: "Esta seguro de ELIMINAR?",
-                text: "Se eliminará la relación de la Base de Datos.",
-                type: "error",
-                showCancelButton: true,
-                confirmButtonColor: "#DD6B55",
-                confirmButtonText: "Si, Eliminar!",
-                cancelButtonText: "Cancelar",
-                confirmButtonClass: 'btn btn-success',
-            cancelButtonClass: 'btn btn-danger'
-        }).then(function (isConfirm) {
-            if (isConfirm.value) window.location.href = link;
-        });*/
     });
 
     $('.aprobar_anulacion').on('click',function(e){
@@ -101,8 +88,8 @@ $(document).ready(function () {
             cancelButtonText: "Cancelar",
             closeOnConfirm: false
         },
-        function(){            
-            window.location.href = link;            
+        function(){
+            window.location.href = link;
         });
     });
 
@@ -110,7 +97,7 @@ $(document).ready(function () {
         e.preventDefault();
         var link = $(this).attr('href');
         swal({
-            title: "Esta seguro de RECHAZAR EL FORMULARIO DE DENUNCIA DE MINERÍA ILEGAL?",            
+            title: "Esta seguro de RECHAZAR EL FORMULARIO DE DENUNCIA DE MINERÍA ILEGAL?",
             type: "warning",
             showCancelButton: true,
             confirmButtonClass: "btn-danger",
@@ -120,7 +107,24 @@ $(document).ready(function () {
         },
         function(){
             window.location.href = link;
-        });        
+        });
+    });
+
+    $('.recibir-form').on('click',function(e){
+        e.preventDefault();
+        var form = $(this).parents('form');
+        swal({
+            title: "Esta seguro de RECIBIR LOS TRÁMITES SELECCIONADOS?",
+            type: "info",
+            showCancelButton: true,
+            confirmButtonClass: "btn-primary",
+            confirmButtonText: "Si, RECIBIR!",
+            cancelButtonText: "Cancelar",
+            closeOnConfirm: false
+        },
+        function(){
+            form.submit();
+        });
     });
 
 });
