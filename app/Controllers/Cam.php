@@ -1138,10 +1138,58 @@ class Cam extends BaseController
             if($derivacionModel->save($dataDerivacion) === false){
                 session()->setFlashdata('fail', $derivacionModel->errors());
             }
-
         }
         return redirect()->to($this->controlador.'listado_recepcion');
+    }
+    public function recibirMultiple(){
+        if ($this->request->getPost()) {
+            if($ids_tramites = $this->request->getPost('recibir')){
+                foreach($ids_tramites as $id_tramite)
+                    $this->recibirTramite($id_tramite);
+                session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información.');
+                return redirect()->to($this->controlador.'listado_recepcion');
+            }
+        }
+        session()->setFlashdata('fail', 'No se pudo recepcionar los trámites.');
+        return redirect()->to($this->controlador.'mis_tramites');
 
+    }
+    public function recibirTramite($id_tramite){
+        $actoAdministrativoModel = new ActoAdministrativoModel();
+        $derivacionModel = new DerivacionModel();
+        $where = array(
+            'id' => $id_tramite,
+            'deleted_at' => NULL,
+            'ultimo_fk_usuario_destinatario' => session()->get('registroUser'),
+        );
+        if($fila = $actoAdministrativoModel->where($where)->whereIn('ultimo_estado', array('DERIVADO','MIGRADO'))->first()){
+            $estado = 'RECIBIDO';
+            $data = array(
+                'id' => $fila['id'],
+                'ultimo_estado' => $estado,
+                'fk_usuario_actual' => $fila['ultimo_fk_usuario_destinatario'],
+                'editar' => true,
+            );
+
+            if($actoAdministrativoModel->save($data) === false){
+                session()->setFlashdata('fail', $actoAdministrativoModel->errors());
+            }
+
+            $where = array(
+                'fk_acto_administrativo' => $fila['id'],
+            );
+            $derivacion = $derivacionModel->where($where)->orderBY('id', 'DESC')->first();
+            $dataDerivacion = array(
+                'id' => $derivacion['id'],
+                'estado' => $estado,
+                'fecha_recepcion' => date('Y-m-d H:i:s'),
+            );
+
+            if($derivacionModel->save($dataDerivacion) === false){
+                session()->setFlashdata('fail', $derivacionModel->errors());
+            }
+        }
+        return true;
     }
 
     public function ajaxGuardarDevolver(){

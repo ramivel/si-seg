@@ -116,6 +116,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('mis_tramites', 'Cam::misTramites');
         $routes->add('listado_recepcion', 'Cam::listadoRecepcion');
         $routes->add('recibir/(:num)', 'Cam::recibir/$1');
+        $routes->post('recibir_multiple', 'Cam::recibirMultiple');
         $routes->add('agregar', 'Cam::agregar');
         $routes->add('agregar_cmn_cmc', 'Cam::agregarCmnCmc');
         $routes->add('atender/(:num)', 'Cam::atender/$1');
