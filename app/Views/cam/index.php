@@ -67,7 +67,7 @@
                                                             echo anchor($controlador.'atender/'.$fila['id'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             echo anchor($controlador.'espera/'.$fila['id'], 'En Espera',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             //echo anchor($controlador.'devolver/'.$fila['id'], 'Devolver',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            if(in_array(5, session()->get('registroPermisos')))
+                                                            if(in_array(5, session()->get('registroPermisos')) && $fila['finalizar'] == 'SI')
                                                                 echo anchor($controlador.'finalizar/'.$fila['id'], 'Finalizar',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             break;
                                                         case 'DERIVADO':
@@ -76,6 +76,7 @@
                                                                 echo anchor($controlador.'editar/'.$fila['id'], 'Editar Derivación',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             break;
                                                         case 'EN ESPERA':
+                                                            echo anchor('documentos/agregar/'.$id_tramite.'/'.$fila['id'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             echo anchor($controlador.'atender/'.$fila['id'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             break;                                                        
                                                     }

@@ -53,40 +53,49 @@
         <?php if(in_array(11, session()->get('registroPermisos'))){?>
             <div class="pcoded-navigatio-lavel">Correspondencia Externa</div>
             <ul class="pcoded-item pcoded-left-item">
-                <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/agregar') ? 'active' : '';?>">
-                    <a href="<?= base_url('correspondencia_externa/agregar');?>">
-                        <span class="pcoded-micon"><i class="fa fa-envelope-o"></i></span>
-                        <span class="pcoded-mtext">Nuevo Ingreso</span>
+                <li class="pcoded-hasmenu <?= (isset($menu_actual) && strpos($menu_actual, 'correspondencia_externa/') !== false ) ? 'pcoded-trigger' : '';?>">
+                    <a href="javascript:void(0)">
+                        <span class="pcoded-micon"><i class="feather icon-layers"></i></span>
+                        <span class="pcoded-mtext">CAM</span>
                     </a>
+                    <ul class="pcoded-submenu">
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/agregar') ? 'active' : '';?>">
+                            <a href="<?= base_url('correspondencia_externa/agregar');?>">
+                                <span class="pcoded-mtext">Nuevo Ingreso</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/mis_ingresos') ? 'active' : '';?>">
+                            <a href="<?= base_url('correspondencia_externa/mis_ingresos');?>">
+                                <span class="pcoded-mtext">Mis Ingresos</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'cam/generar_codigo_seguimiento') ? 'active' : '';?>">
+                            <a href="<?= base_url('cam/generar_codigo_seguimiento');?>">
+                                <span class="pcoded-mtext">Código de Seguimiento</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
-                <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/mis_ingresos') ? 'active' : '';?>">
-                    <a href="<?= base_url('correspondencia_externa/mis_ingresos');?>">
-                        <span class="pcoded-micon"><i class="feather icon-menu"></i></span>
-                        <span class="pcoded-mtext">Mis Ingresos</span>
+                <li class="pcoded-hasmenu <?= (isset($menu_actual) && strpos($menu_actual, 'mineria_ilegal/') !== false ) ? 'pcoded-trigger' : '';?>">
+                    <a href="javascript:void(0)">
+                        <span class="pcoded-micon"><i class="feather icon-layers"></i></span>
+                        <span class="pcoded-mtext">Minería Ilegal</span>
                     </a>
-                </li>
-                <li class="<?= (isset($menu_actual) && $menu_actual === 'cam/generar_codigo_seguimiento') ? 'active' : '';?>">
-                    <a href="<?= base_url('cam/generar_codigo_seguimiento');?>">
-                        <span class="pcoded-micon"><i class="feather icon-lock"></i></span>
-                        <span class="pcoded-mtext">Código de Seguimiento</span>
-                    </a>
+                    <ul class="pcoded-submenu">
+                    <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/agregar_ventanilla') ? 'active' : '';?>">
+                            <a href="<?= base_url('mineria_ilegal/agregar_ventanilla');?>">
+                                <span class="pcoded-mtext">Nuevo Ingreso</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/mis_ingresos') ? 'active' : '';?>">
+                            <a href="<?= base_url('mineria_ilegal/mis_ingresos');?>">
+                                <span class="pcoded-mtext">Mis Ingresos</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
-            <div class="pcoded-navigatio-lavel">Minería Ilegal</div>
-            <ul class="pcoded-item pcoded-left-item">
-                <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/agregar_ventanilla') ? 'active' : '';?>">
-                    <a href="<?= base_url('mineria_ilegal/agregar_ventanilla');?>">
-                        <span class="pcoded-micon"><i class="fa fa-envelope-o"></i></span>
-                        <span class="pcoded-mtext">Nuevo Ingreso</span>
-                    </a>
-                </li>
-                <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/mis_ingresos') ? 'active' : '';?>">
-                    <a href="<?= base_url('mineria_ilegal/mis_ingresos');?>">
-                        <span class="pcoded-micon"><i class="feather icon-menu"></i></span>
-                        <span class="pcoded-mtext">Mis Ingresos</span>
-                    </a>
-                </li>
-            </ul>
+
             <!--
             <div class="pcoded-navigatio-lavel">Buscador de Trámites</div>
             <ul class="pcoded-item pcoded-left-item">
@@ -285,41 +294,15 @@
             <?php }?>
         <?php } ?>
 
-
-
-
-        <!--div class="pcoded-navigatio-lavel">Seguimiento CAM's</!--div>
+        <div class="pcoded-navigatio-lavel">Documentación Sistema</div>
         <ul class="pcoded-item pcoded-left-item">
-            <li class="<?= (isset($menu_actual) && $menu_actual === 'crear_seguimiento_cam') ? 'active' : '';?>">
-                <a href="<?= base_url('acto_administrativo/agregar');?>">
-                    <span class="pcoded-micon"><i class="feather icon-edit"></i></span>
-                    <span class="pcoded-mtext">Crear Seguimiento</span>
+            <li class="<?= (isset($menu_actual) && $menu_actual === 'video_tutorial') ? 'active' : '';?>">
+                <a href="<?= base_url('video_tutorial');?>">
+                    <span class="pcoded-micon"><i class="feather icon-monitor"></i></span>
+                    <span class="pcoded-mtext">Video Tutoriales</span>
                 </a>
             </li>
-            <li class="<?= (isset($menu_actual) && $menu_actual === 'tramite_proceso_cam') ? 'active' : '';?>">
-                <a href="<?= base_url('acto_administrativo');?>">
-                    <span class="pcoded-micon"><i class="feather icon-layers"></i></span>
-                    <span class="pcoded-mtext">Tramites en Proceso</span>
-                </a>
-            </li>
-            <li class="<?= (isset($menu_actual) && $menu_actual === 'tramite_espera_cam') ? 'active' : '';?>">
-                <a href="<?= base_url('acto_administrativo/espera');?>">
-                    <span class="pcoded-micon"><i class="feather icon-clock"></i></span>
-                    <span class="pcoded-mtext">Tramites en Espera</span>
-                </a>
-            </li>
-            <li class="<?= (isset($menu_actual) && $menu_actual === 'tramite_concluido_cam') ? 'active' : '';?>">
-                <a href="<?= base_url('acto_administrativo/concluido');?>">
-                    <span class="pcoded-micon"><i class="feather icon-check-square"></i></span>
-                    <span class="pcoded-mtext">Tramites Concluidos</span>
-                </a>
-            </li>
-            <li class="">
-                <a href="<?= base_url('acto_administrativo/buscador');?>">
-                    <span class="pcoded-micon"><i class="feather icon-search"></i></span>
-                    <span class="pcoded-mtext">Buscador de Tramites</span>
-                </a>
-            </li>
-        </ul>
-    </div-->
+        </ul>        
+
+    </div>
 </nav>

@@ -17,13 +17,13 @@ class Dashboard extends BaseController
         $usuarioInfo = $usuariosModel->find(session()->get('registroUser'));
         $resultados = array();
         $graficas = array();
-        if($usuarioInfo['tramites']){            
+        if($usuarioInfo['tramites']){
             $tramites = $tramitesModel->whereIn('id',explode(",", $usuarioInfo['tramites']))->findAll();
             foreach($tramites as $tramite){
                 $resultados[$tramite['id']]['titulo'] = $tramite['nombre'];
                 $resultados[$tramite['id']]['controlador'] = $tramite['controlador'];
                 switch($tramite['id']){
-                    case 1:                        
+                    case 1:
 
                         $db = \Config\Database::connect();
                         $campos = array("CONCAT(etp.orden,'. ',etp.nombre) as estado_tramite", "COUNT(ac.id) as n");
@@ -43,7 +43,7 @@ class Dashboard extends BaseController
                         $totalMisTramites = 0;
                         if(count($resumenEstadosTramite) > 0){
                             foreach($resumenEstadosTramite as $row)
-                                $totalMisTramites += $row['n'];                            
+                                $totalMisTramites += $row['n'];
                             $graficas[$tramite['id']]['resumen'] = $resumenEstadosTramite;
                             $graficas[$tramite['id']]['id_mapa'] = 'dashcam';
                             $resultados[$tramite['id']]['id_mapa'] = 'dashcam';
@@ -81,7 +81,7 @@ class Dashboard extends BaseController
                         ->where($where)
                         ->groupBY('estado_tramite')
                         ->orderBY('estado_tramite', 'ASC');
-                        $resumenEstadosTramite = $builder->get()->getResultArray();                        
+                        $resumenEstadosTramite = $builder->get()->getResultArray();
 
                         $totalMisTramites = 0;
                         if(count($resumenEstadosTramite) > 0){
@@ -112,7 +112,7 @@ class Dashboard extends BaseController
                         break;
                 }
             }
-        }        
+        }
 
         $cabera['titulo'] = 'Bienvenid@ al Sistema';
         $cabera['sub_titulo'] = 'Resumen de los Tramites';
@@ -125,4 +125,19 @@ class Dashboard extends BaseController
         $data['graficas'] = $graficas;
         echo view('templates/template', $data);
     }
+
+    public function VideoTutorial()
+    {
+        $cabera['titulo'] = 'Video Tutoriales';
+        $cabera['navegador'] = true;
+        $cabera['subtitulo'] = 'Video Tutoriales';
+        $contenido['title'] = view('templates/title',$cabera);
+        $contenido['subtitulo'] = 'Video Tutoriales';        
+        $data['content'] = view($this->carpeta.'video_tutorial', $contenido);
+        $data['menu_actual'] = 'video_tutorial';
+        $data['tramites_menu'] = $this->tramitesMenu();
+        $data['alertas'] = $this->alertasTramites();        
+        echo view('templates/template', $data);
+    }
+
 }

@@ -51,6 +51,7 @@ $routes->add('ajax_municipios', 'Publico::ajaxMunicipios');
 $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
     // Agregar todas las rutas que necesitan proteccion
     $routes->get('dashboard', 'Dashboard::index');
+    $routes->get('video_tutorial', 'Dashboard::VideoTutorial');
 
     $routes->group('oficinas', function($routes){
         $routes->add('/', 'Oficinas::index');
@@ -154,6 +155,9 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('correspondencia_externa/(:num)', 'Cam::correspondenciaExterna/$1');
         $routes->add('generar_codigo_seguimiento', 'Cam::generarCodigoSeguimiento');
         $routes->add('pdf_seguimiento/(:num)', 'Cam::pdfCodigoSeguimiento/$1');
+
+        $routes->add('migrar_sol_cam', 'Cam::migrarSolCam');
+        $routes->add('migrar_cmn_cmc', 'Cam::migrarCmcCmc');        
     });
 
     $routes->group('tipo_documento_externo', function($routes){

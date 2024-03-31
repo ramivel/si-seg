@@ -41,6 +41,9 @@ class ActoAdministrativoModel extends Model{
         'ultimo_recurso_revocatoria',
         'ultimo_oposicion',
         'codigo_seguimiento',
+        'caja_documental',
+        'fojas',
+        'gestion_archivo',
     ];
 
     protected $useTimestamps = true;

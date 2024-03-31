@@ -4,7 +4,7 @@
         <div class="row">            
             <?php if(isset($resultados) && count($resultados)>0){?>                
                 <?php foreach($resultados as $resultado){?>
-                    <div class="col-sm-12 col-md-6">
+                    <div class="col-sm-12 col-md-12">
                         <div class="card">
                             <div class="card-header text-center">
                                 <h3><?= $resultado['titulo'];?></h3>

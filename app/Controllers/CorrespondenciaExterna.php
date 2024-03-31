@@ -77,9 +77,6 @@ class CorrespondenciaExterna extends BaseController
             $actoAdministrativoModel = new ActoAdministrativoModel();
             $correspondenciaExternaModel = new CorrespondenciaExternaModel();
             $validation = $this->validate([
-                'fk_tramite' => [
-                    'rules' => 'required',
-                ],
                 'fk_acto_administrativo' => [
                     'rules' => 'required',
                 ],
@@ -109,7 +106,6 @@ class CorrespondenciaExterna extends BaseController
             ]);
             if(!$validation){
                 $personaExternaModel = new PersonaExternaModel();
-                $contenido['fk_tramite'] = $this->request->getPost('fk_tramite');
                 $campos = array('id', "CONCAT(correlativo,' (',codigo_unico,' - ',denominacion,')') as hr");
                 $contenido['hr_madre'] = $actoAdministrativoModel->select($campos)->find($this->request->getPost('fk_acto_administrativo'));
                 $campos = array('id', "CONCAT(documento_identidad, ' - ', nombre_completo, ' (', institucion, ' - ',cargo,')') as nombre");
@@ -127,7 +123,7 @@ class CorrespondenciaExterna extends BaseController
                 $nombreAdjunto = $docDigital->getRandomName();
                 $docDigital->move($path,$nombreAdjunto);
                 $data = array(
-                    'fk_tramite' => $this->request->getPost('fk_tramite'),
+                    'fk_tramite' => 1,
                     'fk_acto_administrativo' => $this->request->getPost('fk_acto_administrativo'),
                     'fk_persona_externa' => $this->request->getPost('fk_persona_externa'),
                     'cite' => mb_strtoupper($this->request->getPost('cite')),
@@ -154,7 +150,6 @@ class CorrespondenciaExterna extends BaseController
         $contenido['accion'] = $this->controlador.'agregar';
         $contenido['validation'] = $this->validator;
         $contenido['controlador'] = $this->controlador;
-        $contenido['tramites'] = $this->obtenerTramites();
         $contenido['modal_remitente'] = view($this->carpeta.'nuevo_remitente', array('expedidos'=>$this->expedidos));
         $data['content'] = view($this->carpeta.'agregar', $contenido);
         $data['menu_actual'] = $this->menuActual.'agregar';
@@ -174,10 +169,10 @@ class CorrespondenciaExterna extends BaseController
             $db = \Config\Database::connect();
             $personaExternaModel = new PersonaExternaModel();
             $tramitesModel = new TramitesModel();
+
             $cabera['titulo'] = $this->titulo;
             $cabera['navegador'] = true;
             $cabera['subtitulo'] = 'Editar Registro';
-            $contenido['tramite'] = $tramitesModel->find($fila['fk_tramite']);
 
             $campos = array('id', "CONCAT(correlativo,' (',codigo_unico,' - ',denominacion,')') as hr");
             $where = array(
@@ -200,10 +195,10 @@ class CorrespondenciaExterna extends BaseController
             $contenido['persona_externa'] = $personaExternaModel->select($campos)->find($fila['fk_persona_externa']);
             $contenido['title'] = view('templates/title',$cabera);
             $contenido['fila'] = $fila;
+            $contenido['tramite'] = $tramitesModel->find($fila['fk_tramite']);
             $contenido['accion'] = $this->controlador.'guardar_editar';
             $contenido['validation'] = $this->validator;
             $contenido['controlador'] = $this->controlador;
-            $contenido['tramites'] = $this->obtenerTramites();
             $contenido['modal_remitente'] = view($this->carpeta.'nuevo_remitente', array('expedidos'=>$this->expedidos));
             $contenido['ruta_archivos'] = $this->rutaArchivos;
             $data['content'] = view($this->carpeta.'editar', $contenido);
@@ -259,16 +254,15 @@ class CorrespondenciaExterna extends BaseController
                 $cabera['titulo'] = $this->titulo;
                 $cabera['navegador'] = true;
                 $cabera['subtitulo'] = 'Editar Registro';
-                $contenido['tramite'] = $tramite;
                 $campos = array('id', "CONCAT(documento_identidad, ' - ', nombre_completo, ' (', institucion, ' - ',cargo,')') as nombre");
                 $contenido['persona_externa'] = $personaExternaModel->select($campos)->find($fila['fk_persona_externa']);
                 $contenido['acto_administrativo'] = $acto_administrativo;
                 $contenido['fila'] = $fila;
+                $contenido['tramite'] = $tramite;
                 $contenido['title'] = view('templates/title',$cabera);
                 $contenido['accion'] = $this->controlador.'guardar_editar';
                 $contenido['validation'] = $this->validator;
                 $contenido['controlador'] = $this->controlador;
-                $contenido['tramites'] = $this->obtenerTramites();
                 $contenido['ruta_archivos'] = $this->rutaArchivos;
                 $data['content'] = view($this->carpeta.'editar', $contenido);
                 $data['menu_actual'] = $this->menuActual.'mis_ingresos';

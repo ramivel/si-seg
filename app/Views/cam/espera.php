@@ -44,7 +44,7 @@
                                         'id' => $campo,
                                         'class' => 'form-control',
                                         'readonly' => true,
-                                        'value' => set_value($campo, (isset($fila[$campo]) ? $fila[$campo] : ''),false)
+                                        'value' => set_value($campo, (isset($hr_remitente[$campo]) ? $hr_remitente[$campo] : ''),false)
                                     ));
                                 ?>
                             </div>
@@ -59,7 +59,7 @@
                                         'id' => $campo,
                                         'class' => 'form-control',
                                         'readonly' => true,
-                                        'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
+                                        'value' => set_value($campo, (isset($hr_remitente[$campo]) ? $hr_remitente[$campo] : ''), false)
                                     ));
                                 ?>
                             </div>
@@ -72,7 +72,7 @@
                                         'id' => $campo,
                                         'class' => 'form-control',
                                         'readonly' => true,
-                                        'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''),false)
+                                        'value' => set_value($campo, (isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                     ));
                                 ?>
                             </div>
@@ -88,7 +88,7 @@
                                         'id' => $campo,
                                         'class' => 'form-control form-control-uppercase',
                                         'readonly' => true,
-                                        'value' => set_value($campo,(isset($datos[$campo]) ? $datos[$campo] : ''),false)
+                                        'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                     ));
                                 ?>
                             </div>
@@ -101,7 +101,7 @@
                                         'id' => $campo,
                                         'class' => 'form-control form-control-uppercase',
                                         'readonly' => true,
-                                        'value' => set_value($campo,(isset($datos[$campo]) ? $datos[$campo] : ''),false)
+                                        'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                     ));
                                 ?>
                             </div>
@@ -116,7 +116,7 @@
                                         'id' => $campo,
                                         'class' => 'form-control form-control-uppercase',
                                         'readonly' => true,
-                                        'value' => set_value($campo,(isset($datos[$campo]) ? $datos[$campo] : ''),false)
+                                        'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                     ));
                                 ?>
                             </div>
@@ -129,7 +129,7 @@
                                         'id' => $campo,
                                         'class' => 'form-control form-control-uppercase',
                                         'readonly' => true,
-                                        'value' => set_value($campo,(isset($datos[$campo]) ? $datos[$campo] : ''),false)
+                                        'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                     ));
                                 ?>
                             </div>
@@ -144,7 +144,7 @@
                                         'id' => $campo,
                                         'class' => 'form-control form-control-uppercase',
                                         'readonly' => true,
-                                        'value' => set_value($campo,(isset($datos[$campo]) ? $datos[$campo] : ''),false)
+                                        'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                     ));
                                 ?>
                             </div>
@@ -157,7 +157,7 @@
                                         'id' => $campo,
                                         'class' => 'form-control form-control-uppercase',
                                         'readonly' => true,
-                                        'value' => set_value($campo,(isset($datos[$campo]) ? $datos[$campo] : ''),false)
+                                        'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                     ));
                                 ?>
                             </div>
@@ -170,13 +170,13 @@
                                         'id' => $campo,
                                         'class' => 'form-control form-control-uppercase',
                                         'readonly' => true,
-                                        'value' => set_value($campo,(isset($datos[$campo]) ? $datos[$campo] : ''),false)
+                                        'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                     ));
                                 ?>
                             </div>
                         </div>
                         <?php $campo = 'area_protegida';?>
-                        <?php if(isset($datos[$campo]) && !empty($datos[$campo])){?>
+                        <?php if(isset($fila[$campo]) && !empty($fila[$campo])){?>
                             <div class="form-group row">
                                 <label class="col-sm-2 col-form-label">Área Protegida:</label>
                                 <div class="col-sm-10">
@@ -186,7 +186,7 @@
                                             'id' => $campo,
                                             'class' => 'form-control form-control-uppercase',
                                             'readonly' => true,
-                                            'value' => set_value($campo,(isset($datos[$campo]) ? $datos[$campo] : ''),false)
+                                            'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                         ));
                                     ?>
                                 </div>
@@ -253,20 +253,20 @@
                                         'id' => $campo,
                                         'class' => 'form-control form-control-uppercase',
                                         'readonly' => true,
-                                        'value' => set_value($campo,(isset($datos[$campo]) ? $datos[$campo] : ''),false)
+                                        'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                     ));
                                 ?>
                             </div>
                             <label class="col-sm-2 col-form-label">Clasificación del APM:</label>
                             <div class="col-sm-2">
                                 <?php
-                                    $campo = 'clasificacion';
+                                    $campo = 'clasificacion_titular';
                                     echo form_input(array(
                                         'name' => $campo,
                                         'id' => $campo,
                                         'class' => 'form-control form-control-uppercase',
                                         'readonly' => true,
-                                        'value' => set_value($campo,(isset($datos[$campo]) ? $datos[$campo] : ''),false)
+                                        'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                     ));
                                 ?>
                             </div>
@@ -440,6 +440,7 @@
                                 <?php }?>
                             </div>
                         </div>
+                        <!--
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">Respaldo Digital * : </label>
                             <div class="col-sm-10">
@@ -458,6 +459,7 @@
                                 <?php }?>
                             </div>
                         </div>
+                        -->
                         <div class="form-group row">
                             <label class="col-sm-8"></label>
                             <div class="col-sm-4 text-right">

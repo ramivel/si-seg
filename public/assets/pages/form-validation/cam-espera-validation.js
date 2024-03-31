@@ -23,9 +23,9 @@ $(document).ready(function () {
         motivo_espera: {
             presence: true,
         },
-        adjunto: {
+        /*adjunto: {
             presence: true,
-        },
+        },*/
     };
 
     // Hook up the form so we can prevent it from being posted

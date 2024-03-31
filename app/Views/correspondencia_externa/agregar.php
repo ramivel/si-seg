@@ -15,23 +15,7 @@
                                 <?= form_hidden('id'); ?>
                                 <span class="messages"></span>
                             </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">Tipo de Tramite*:</label>
-                            <div class="col-sm-10">
-                                <?php $campo = 'fk_tramite'; ?>
-                                <select id="<?= $campo; ?>" name="<?= $campo; ?>" class="form-control">
-                                    <option value="">SELECCIONE UNA OPCIÓN</option>
-                                    <?php foreach ($tramites as $row) { ?>
-                                        <option value="<?= $row['id']; ?>" data-controlador="<?= $row['controlador']; ?>" <?= (isset($fk_tramite) && $fk_tramite == $row['id']) ? 'selected':'';?> ><?= $row['nombre']; ?></option>
-                                    <?php } ?>
-                                </select>
-                                <span class="messages"></span>
-                                <?php if (isset($validation) && $validation->hasError($campo)) { ?>
-                                    <span class="form-bar text-danger"><?= $validation->getError($campo); ?></span>
-                                <?php } ?>
-                            </div>
-                        </div>
+                        </div>                        
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">Correlativo H.R. Madre*:</label>
                             <div class="col-sm-10">
@@ -288,7 +272,7 @@
                             <label class="col-sm-2"></label>
                             <div class="col-sm-10">
                                 <?php echo form_submit('enviar', 'GUARDAR', 'class="btn btn-primary m-b-0"'); ?>
-                                <a href="<?= base_url($controlador); ?>" class="btn btn-success m-b-0">CANCELAR</a>
+                                <a href="<?= base_url($controlador.'mis_ingresos'); ?>" class="btn btn-success m-b-0">CANCELAR</a>
                             </div>
                         </div>
                         <?= form_close(); ?>

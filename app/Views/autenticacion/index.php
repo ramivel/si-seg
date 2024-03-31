@@ -105,7 +105,7 @@
                             <button type="submit" class="btn btn-login btn-block btn-lg">INGRESAR AL SISTEMA</button>
                         </div>
                         <hr />
-                        <p class="text-center">Copyright &copy; 2023 | AJAM<br>Reservados todos los derechos.</p>
+                        <p class="text-center">Copyright &copy; 2024 | AJAM<br>Reservados todos los derechos.</p>
                         <!--img src="<?= base_url("assets/login/img/logo_pie.png"); ?>" data-id="login-cover-image" alt="" width="100%" /-->
                     <?= form_close();?>
                     <div class="row">

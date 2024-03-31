@@ -20,12 +20,18 @@ $(document).ready(function () {
         id:{
             presence: true,
         },
+        caja_documental:{
+            presence: true,
+        },
+        gestion_archivo:{
+            presence: true,
+        },
+        fojas:{
+            presence: true,
+        },
         motivo_finalizar: {
             presence: true,
-        },
-        adjunto: {
-            presence: true,
-        },
+        },        
     };
 
     // Hook up the form so we can prevent it from being posted

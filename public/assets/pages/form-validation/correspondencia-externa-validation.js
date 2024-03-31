@@ -16,12 +16,7 @@ $(document).ready(function () {
     });
 
     // These are the constraints used to validate the form
-    var constraints = {
-        fk_tramite: {
-            presence: {
-                message: "^Debe seleccionar el Tipo de Trámite."
-            },
-        },
+    var constraints = {        
         fk_acto_administrativo: {
             presence: {
                 message: "^Debe seleccionar el Correlativo de H.R. Madre"

@@ -15,6 +15,7 @@ use App\Models\DerivacionModel;
 use App\Models\DerivacionSincobolModel;
 use App\Models\DocumentosModel;
 use App\Models\HrAnexadasModel;
+use App\Models\MigrarCAMModel;
 use App\Models\OficinasModel;
 use App\Models\SolicitudLicenciaContratoModel;
 use App\Models\TipoDocumentoExternoModel;
@@ -49,8 +50,10 @@ class Cam extends BaseController
         $campos = array('ac.id', 'ac.fk_area_minera', 'ac.correlativo', "to_char(ac.fecha_mecanizada, 'DD/MM/YYYY') as fecha_mecanizada", 'ac.ultimo_instruccion', 'ac.ultimo_estado',
         'dam.codigo_unico', 'dam.denominacion', 'dam.titular', 'dam.departamentos', "CONCAT(ur.nombre_completo,'<br><b>',pr.nombre,'<b>') as remitente", "CONCAT(ud.nombre_completo,'<br><b>',pd.nombre,'<b>') as destinatario",
         "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
+        "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 AND eth.finalizar THEN 'SI' WHEN etp.finalizar THEN 'SI'  ELSE 'NO' END as finalizar",
         "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion", "(CURRENT_DATE - ac.ultimo_fecha_derivacion::date) as dias", 'etp.dias_intermedio', 'etp.dias_limite', 'etp.notificar',
-        'ac.ultimo_fk_documentos', "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as responsable", 'dam.representante_legal', 'ac.ultimo_recurso_jerarquico', 'ac.ultimo_recurso_revocatoria', 'ac.ultimo_oposicion', 'ac.editar');
+        'ac.ultimo_fk_documentos', "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as responsable", 'dam.representante_legal', 'ac.ultimo_recurso_jerarquico', 'ac.ultimo_recurso_revocatoria', 'ac.ultimo_oposicion', 'ac.editar'
+        );
         $where = array(
             'ac.deleted_at' => NULL,
             'ac.fk_usuario_actual' => session()->get('registroUser'),
@@ -735,8 +738,8 @@ class Cam extends BaseController
                         'regional' => $this->request->getPost('regional'),
                         'area_protegida' => $this->request->getPost('area_protegida'),
                         'area_protegida_adicional' => mb_strtoupper($this->request->getPost('area_protegida_adicional')),
-                        'representante_legal' => $this->request->getPost('representante_legal'),
-                        'nacionalidad' => $this->request->getPost('nacionalidad'),
+                        'representante_legal' => mb_strtoupper($this->request->getPost('representante_legal')),
+                        'nacionalidad' => mb_strtoupper($this->request->getPost('nacionalidad')),
                         'titular' => $this->request->getPost('titular'),
                         'clasificacion_titular' => $this->request->getPost('clasificacion'),
                     );
@@ -1344,8 +1347,11 @@ class Cam extends BaseController
 
     public function finalizar($id){
         $db = \Config\Database::connect();
-        $campos = array('ac.id', 'ac.fk_solicitud_licencia_contrato', 'ac.fk_hoja_ruta', 'ac.fk_area_minera', 'ac.ultimo_fk_usuario_remitente', 'ac.correlativo',
-        'ac.ultimo_fk_estado_tramite_padre', 'ac.ultimo_fk_estado_tramite_hijo', 'ac.ultimo_fk_usuario_responsable', 'ac.area_protegida_adicional', 'dam.area_protegida_adicional', 'dam.representante_legal', 'dam.nacionalidad');
+        $campos = array('ac.id', 'ac.fecha_mecanizada', 'ac.fk_solicitud_licencia_contrato', 'ac.fk_hoja_ruta', 'ac.fk_area_minera', 'ac.ultimo_fk_usuario_remitente', 'ac.correlativo',
+        'ac.ultimo_fk_estado_tramite_padre', 'ac.ultimo_fk_estado_tramite_hijo', 'ac.ultimo_fk_usuario_responsable',
+        'dam.codigo_unico', 'dam.denominacion', 'dam.extension', 'dam.departamentos', 'dam.provincias', 'dam.municipios', 'dam.regional',
+        'dam.area_protegida', 'dam.area_protegida_adicional', 'dam.representante_legal', 'dam.nacionalidad', 'dam.titular', 'dam.clasificacion_titular'
+        );
         $where = array(
             'ac.deleted_at' => NULL,
             'ac.fk_usuario_actual' => session()->get('registroUser'),
@@ -1353,6 +1359,7 @@ class Cam extends BaseController
         );
         $builder = $db->table('public.acto_administrativo as ac')
         ->select($campos)
+        ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
         ->join('usuarios as ur', 'ac.ultimo_fk_usuario_remitente = ur.id', 'left')
         ->join('perfiles as per', 'ur.fk_perfil = per.id', 'left')
         ->join('estado_tramite as etp', 'ac.ultimo_fk_estado_tramite_padre = etp.id', 'left')
@@ -1361,6 +1368,19 @@ class Cam extends BaseController
         ->orderBY('ac.id', 'DESC');
 
         if($fila = $builder->get()->getRowArray()){
+
+            $dbSincobol = \Config\Database::connect('sincobol');
+            $campos = array('hr.correlativo','hr.cantidad_fojas','hr.referencia',"CONCAT(p.nombres,' ',p.apellido_paterno,' ',p.apellido_materno) as nombre_completo",'e.cargo','e.institucion');
+            $where = array(
+                'hr.id' => $fila['fk_hoja_ruta'],
+            );
+            $builder = $dbSincobol->table('sincobol.hoja_ruta as hr')
+            ->select($campos)
+            ->join('sincobol.externo as e', 'hr.fk_externo_remitente = e.id', 'left')
+            ->join('sincobol.persona as p', 'e.fk_persona = p.id', 'left')
+            ->where($where);
+            $hr_remitente = $builder->get()->getFirstRow('array');
+            $contenido['hr_remitente'] = $hr_remitente;
 
             $campos = array(
                 'der.id', 'der.domicilio_legal', 'der.domicilio_procesal', 'der.telefono_solicitante', 'der.observaciones as ultima_observacion',
@@ -1399,7 +1419,6 @@ class Cam extends BaseController
             $cabera['navegador'] = true;
             $cabera['subtitulo'] = 'Finalizar Tramite';
             $contenido['title'] = view('templates/title',$cabera);
-            $contenido['datos'] = $this->informacionAreaMinera($fila['fk_solicitud_licencia_contrato']);
             $contenido['fila'] = $fila;
             $contenido['subtitulo'] = 'Finalizar Tramite';
             $contenido['accion'] = $this->controlador.'guardar_finalizar';
@@ -1420,6 +1439,15 @@ class Cam extends BaseController
         if ($this->request->getPost()) {
             $validation = $this->validate([
                 'id' => [
+                    'rules' => 'required',
+                ],
+                'caja_documental' => [
+                    'rules' => 'required',
+                ],
+                'gestion_archivo' => [
+                    'rules' => 'required',
+                ],
+                'fojas' => [
                     'rules' => 'required',
                 ],
                 'motivo_finalizar' => [
@@ -1459,11 +1487,18 @@ class Cam extends BaseController
                     'ultimo_instruccion' => $motivo_finalizar,
                     'ultimo_fk_usuario_remitente' => session()->get('registroUser'),
                     'ultimo_fk_usuario_responsable'=>($this->request->getPost('responsable') ? $this->request->getPost('fk_usuario_destinatario') : $this->request->getPost('ultimo_fk_usuario_responsable')),
+                    'caja_documental' => mb_strtoupper($this->request->getPost('caja_documental')),
+                    'gestion_archivo' => $this->request->getPost('gestion_archivo'),
+                    'fojas' => $this->request->getPost('fojas'),
+                    'estado_tramite_apm' => $this->obtenerEstadoTramiteAPM($derivacion_actual['fk_estado_tramite_padre'], $derivacion_actual['fk_estado_tramite_hijo']),
+                    'documentos_apm' => $this->obtenerDocumentosAPM($this->request->getPost('id')),
                 );
+
                 if($actoAdministrativoModel->save($data) === false){
                     session()->setFlashdata('fail', $actoAdministrativoModel->errors());
                 }else{
 
+                    /*
                     $dataDatosAreaMinera = array(
                         'fk_acto_administrativo' => $this->request->getPost('id'),
                         'extension' => $this->request->getPost('extension'),
@@ -1478,6 +1513,7 @@ class Cam extends BaseController
 
                     if($datosAreaMineraModel->save($dataDatosAreaMinera) === false)
                         session()->setFlashdata('fail', $datosAreaMineraModel->errors());
+                    */
 
                     $dataDerivacion = array(
                         'fk_acto_administrativo' => $this->request->getPost('id'),
@@ -1517,8 +1553,11 @@ class Cam extends BaseController
 
     public function espera($id){
         $db = \Config\Database::connect();
-        $campos = array('ac.id', 'ac.fk_solicitud_licencia_contrato', 'ac.fk_hoja_ruta', 'ac.fk_area_minera', 'ac.ultimo_fk_usuario_remitente', 'ac.correlativo',
-        'ac.ultimo_fk_estado_tramite_padre', 'ac.ultimo_fk_estado_tramite_hijo', 'ac.ultimo_fk_usuario_responsable', 'dam.area_protegida_adicional', 'dam.representante_legal', 'dam.nacionalidad');
+        $campos = array('ac.id', 'ac.fecha_mecanizada', 'ac.fk_solicitud_licencia_contrato', 'ac.fk_hoja_ruta', 'ac.fk_area_minera', 'ac.ultimo_fk_usuario_remitente', 'ac.correlativo',
+        'ac.ultimo_fk_estado_tramite_padre', 'ac.ultimo_fk_estado_tramite_hijo', 'ac.ultimo_fk_usuario_responsable',
+        'dam.codigo_unico', 'dam.denominacion', 'dam.extension', 'dam.departamentos', 'dam.provincias', 'dam.municipios', 'dam.regional',
+        'dam.area_protegida', 'dam.area_protegida_adicional', 'dam.representante_legal', 'dam.nacionalidad', 'dam.titular', 'dam.clasificacion_titular'
+        );
         $where = array(
             'ac.deleted_at' => NULL,
             'ac.fk_usuario_actual' => session()->get('registroUser'),
@@ -1535,6 +1574,18 @@ class Cam extends BaseController
         ->orderBY('ac.id', 'DESC');
 
         if($fila = $builder->get()->getRowArray()){
+            $dbSincobol = \Config\Database::connect('sincobol');
+            $campos = array('hr.correlativo','hr.cantidad_fojas','hr.referencia',"CONCAT(p.nombres,' ',p.apellido_paterno,' ',p.apellido_materno) as nombre_completo",'e.cargo','e.institucion');
+            $where = array(
+                'hr.id' => $fila['fk_hoja_ruta'],
+            );
+            $builder = $dbSincobol->table('sincobol.hoja_ruta as hr')
+            ->select($campos)
+            ->join('sincobol.externo as e', 'hr.fk_externo_remitente = e.id', 'left')
+            ->join('sincobol.persona as p', 'e.fk_persona = p.id', 'left')
+            ->where($where);
+            $hr_remitente = $builder->get()->getFirstRow('array');
+            $contenido['hr_remitente'] = $hr_remitente;
 
             $campos = array(
                 'der.id', 'der.domicilio_legal', 'der.domicilio_procesal', 'der.telefono_solicitante', 'der.observaciones as ultima_observacion',
@@ -1573,7 +1624,6 @@ class Cam extends BaseController
             $cabera['navegador'] = true;
             $cabera['subtitulo'] = 'En Espera del Trámite';
             $contenido['title'] = view('templates/title',$cabera);
-            $contenido['datos'] = $this->informacionAreaMinera($fila['fk_solicitud_licencia_contrato']);
             $contenido['fila'] = $fila;
             $contenido['subtitulo'] = 'En Espera del Trámite';
             $contenido['accion'] = $this->controlador.'guardar_espera';
@@ -1638,6 +1688,7 @@ class Cam extends BaseController
                     session()->setFlashdata('fail', $actoAdministrativoModel->errors());
                 }else{
 
+                    /*
                     $dataDatosAreaMinera = array(
                         'fk_acto_administrativo' => $this->request->getPost('id'),
                         'extension' => $this->request->getPost('extension'),
@@ -1652,6 +1703,7 @@ class Cam extends BaseController
 
                     if($datosAreaMineraModel->save($dataDatosAreaMinera) === false)
                         session()->setFlashdata('fail', $datosAreaMineraModel->errors());
+                    */
 
                     $dataDerivacion = array(
                         'fk_acto_administrativo' => $this->request->getPost('id'),
@@ -2213,7 +2265,6 @@ class Cam extends BaseController
         ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
         ->where($where);
         if($fila = $builder->get()->getRowArray()){
-            $db = \Config\Database::connect();
             $dbSincobol = \Config\Database::connect('sincobol');
             $campos = array('hr.correlativo','hr.cantidad_fojas','hr.referencia',"CONCAT(p.nombres,' ',p.apellido_paterno,' ',p.apellido_materno) as nombre_completo",'e.cargo','e.institucion');
             $where = array(
@@ -3806,7 +3857,7 @@ class Cam extends BaseController
         if(isset($id_hr) && $id_hr > 0){
             $dbSincobol = \Config\Database::connect('sincobol');
             $campos = array('hr.fecha_creacion as fecha_mecanizada', 'hr.referencia', 'hr.cite_documento_externo as cite_documento', 'e.institucion as procedencia',
-            "CONCAT(p.nombres,' ',p.apellido_paterno,' ',p.apellido_materno) AS remitente", 'e.cargo');
+            "CONCAT(p.nombres,' ',p.apellido_paterno,' ',p.apellido_materno) AS remitente", 'e.cargo', 'hr.correlativo');
             $where = array(
                 'hr.id' => $id_hr
             );
@@ -4026,6 +4077,287 @@ class Cam extends BaseController
             $pdf->Output($file_name);
             exit();
         }
+    }
+
+    public function migrarSolCam(){
+        $migrarModel = new MigrarCAMModel();
+        $actoAdministrativoModel = new ActoAdministrativoModel();
+        $datosAreaMineraModel = new DatosAreaMineraModel();
+        $derivacionModel = new DerivacionModel();
+        $derivacionSincobolModel = new DerivacionSincobolModel();
+        $solicitudLicenciaContratoModel = new SolicitudLicenciaContratoModel();
+        $where = array(
+            'tipo' => 'SOL-CAM',
+            'migrado' => false,
+            'fk_oficina' => 2,
+        );
+        if($datos = $migrarModel->where($where)->findAll(200)){            
+            foreach($datos as $n => $row){
+                $hoja_ruta = $this->obtenerDatosMigracion($row['fk_hoja_ruta_sincobol']);
+                $errorActoAdministrativo = 'NO';
+                $errorDatosAreaMinera = 'NO';
+                $errorDerivacion = 'NO';
+                $errorDerivacionSincobol = 'NO';
+                $errorSolicitudLicencia = 'NO';
+                $errorMigracion = 'NO';
+                $estado = 'MIGRADO';
+                $fk_estado_tramite_padre = $this->obtenerIdEstadoPadre($row['codigo_estado']);
+                $fk_estado_tramite_hijo = '';
+                if($row['codigo_subestado']>0)
+                    $fk_estado_tramite_hijo = $this->obtenerIdEstadoHijo($fk_estado_tramite_padre, $row['codigo_subestado']);
+                $data = array(
+                    'fk_solicitud_licencia_contrato' => $hoja_ruta['fk_solicitud_licencia_contrato'],
+                    'fk_area_minera' => $hoja_ruta['fk_area_minera'],
+                    'fk_hoja_ruta' => $hoja_ruta['fk_hoja_ruta'],
+                    'fk_oficina' => $row['fk_oficina'],
+                    'correlativo' => $hoja_ruta['correlativo'],
+                    'fecha_mecanizada' => $hoja_ruta['fecha_mecanizada'],
+                    'fk_usuario_actual' => $row['fk_usuario_remitente'],
+                    'ultimo_fk_usuario_responsable' => $row['fk_usuario_destinatario'],
+                    'ultimo_estado' => $estado,
+                    'ultimo_fk_estado_tramite_padre' => $fk_estado_tramite_padre,
+                    'ultimo_fk_estado_tramite_hijo' => (!empty($fk_estado_tramite_hijo) ? $fk_estado_tramite_hijo : NULL),
+                    'ultimo_fecha_derivacion' => date('Y-m-d H:i:s'),
+                    'fk_usuario_creador' => $row['fk_usuario_remitente'],
+                    'ultimo_instruccion' => 'PARA SU ATENCIÓN',
+                    'ultimo_fk_usuario_remitente' => $row['fk_usuario_remitente'],
+                    'ultimo_fk_usuario_destinatario' => $row['fk_usuario_destinatario'],
+                    'fk_tipo_hoja_ruta' => 1,
+                    'estado_tramite_apm' => $this->obtenerEstadoTramiteAPM($fk_estado_tramite_padre, $fk_estado_tramite_hijo),
+                );
+                if($actoAdministrativoModel->insert($data) === false){
+                    $errorActoAdministrativo = 'SI';
+                }else{
+                    $idActoAdministrativo = $actoAdministrativoModel->getInsertID();
+                    $dataDatosAreaMinera = array(
+                        'fk_acto_administrativo' => $idActoAdministrativo,
+                        'codigo_unico' => $hoja_ruta['codigo_unico'],
+                        'denominacion' => $hoja_ruta['denominacion'],
+                        'extension' => $hoja_ruta['extension'],
+                        'departamentos' => $hoja_ruta['departamentos'],
+                        'provincias' => $hoja_ruta['provincias'],
+                        'municipios' => $hoja_ruta['municipios'],
+                        'regional' => $hoja_ruta['regional'],
+                        'area_protegida' => $hoja_ruta['area_protegida'],
+                        'representante_legal' => $hoja_ruta['representante_legal'],
+                        'nacionalidad' => $hoja_ruta['nacionalidad'],
+                        'titular' => $hoja_ruta['titular'],
+                        'clasificacion_titular' => $hoja_ruta['clasificacion_titular'],
+                    );
+                    if($datosAreaMineraModel->insert($dataDatosAreaMinera) === false){
+                        $errorDatosAreaMinera = 'SI';
+                    }else{
+                        $dataDerivacion = array(
+                            'fk_acto_administrativo' => $idActoAdministrativo,
+                            'domicilio_legal' => $hoja_ruta['domicilio_legal'],
+                            'domicilio_procesal' => $hoja_ruta['domicilio_procesal'],
+                            'telefono_solicitante' => $hoja_ruta['telefono_solicitante'],
+                            'fk_estado_tramite_padre' => $fk_estado_tramite_padre,
+                            'fk_estado_tramite_hijo' => (!empty($fk_estado_tramite_hijo) ? $fk_estado_tramite_hijo : NULL),
+                            'fk_usuario_remitente' => $row['fk_usuario_remitente'],
+                            'fk_usuario_destinatario' => $row['fk_usuario_destinatario'],
+                            'fk_usuario_responsable' => $row['fk_usuario_destinatario'],
+                            'instruccion' => 'PARA SU ATENCIÓN',
+                            'estado' => $estado,
+                            'fk_usuario_creador' => $row['fk_usuario_remitente'],
+                        );
+                        if($derivacionModel->insert($dataDerivacion) === false){
+                            $errorDerivacion = 'SI';
+                        }else{
+                            $campos = array('id', 'fk_hoja_ruta');
+                            $where = array(                                
+                                'fk_hoja_ruta' => $hoja_ruta['fk_hoja_ruta'],
+                            );
+                            $ultima_derivacion = $derivacionSincobolModel->select($campos)->where($where)->orderBY('id', 'DESC')->first();
+                            $dataDerivacionSincobol = array(
+                                'id' => $ultima_derivacion['id'],
+                                'estado' => 'CONCLUIDO',
+                                'fecha_conclusion' => date('Y-m-d h:i:s'),
+                                'motivo_conclusion' => 'MIGRADO AL SISTEMA DE CONTROL Y SEGUIMIENTO DE TRAMITES',
+                            );
+                            if($derivacionSincobolModel->save($dataDerivacionSincobol) === false){
+                                $errorDerivacionSincobol = 'SI';
+                            }else{
+                                $dataSolicitudLicencia = array(
+                                    'id' => $hoja_ruta['fk_solicitud_licencia_contrato'],
+                                    'fk_acto_administrativo' => $idActoAdministrativo,
+                                );
+                                if($solicitudLicenciaContratoModel->save($dataSolicitudLicencia) === false){
+                                    $errorSolicitudLicencia = 'SI';
+                                }else{
+                                    $dataMigracion = array(
+                                        'id' => $row['id'],
+                                        'migrado' => 'true',
+                                    );
+                                    if($migrarModel->save($dataMigracion) === false)
+                                        $errorMigracion = 'SI';
+                                }
+                            }
+                        }
+                    }
+                }
+                echo ($n+1).'. La H.R. '.$hoja_ruta['correlativo'].' tuvo errores en A:'.$errorActoAdministrativo.' B:'.$errorDatosAreaMinera.' C:'.$errorDerivacion.' D:'.$errorDerivacionSincobol.' E:'.$errorSolicitudLicencia.' F:'.$errorMigracion.'<br>';
+            }
+        }
+    }
+    public function migrarCmcCmc(){
+        $migrarModel = new MigrarCAMModel();
+        $actoAdministrativoModel = new ActoAdministrativoModel();
+        $datosAreaMineraModel = new DatosAreaMineraModel();
+        $derivacionModel = new DerivacionModel();
+        $derivacionSincobolModel = new DerivacionSincobolModel();
+        $where = array(
+            'tipo' => 'CMN-CMC',
+            'migrado' => false,
+            'fk_oficina' => 2,
+        );
+        if($datos = $migrarModel->where($where)->findAll(200)){
+            foreach($datos as $n => $row){
+                $hoja_ruta = $this->informacionHRCmnCmc($row['fk_hoja_ruta_sincobol']);
+                $area_minera = $this->informacionAreaMineraCmnCmc($row['fk_area_minera']);
+                $errorActoAdministrativo = 'NO';
+                $errorDatosAreaMinera = 'NO';
+                $errorDerivacion = 'NO';
+                $errorDerivacionSincobol = 'NO';
+                $errorMigracion = 'NO';
+                $estado = 'MIGRADO';
+                $fk_tipo_hoja_ruta = 0;
+                if(strpos($hoja_ruta['correlativo'],'CMN'))
+                    $fk_tipo_hoja_ruta = 2;
+                elseif(strpos($hoja_ruta['correlativo'],'CMC'))
+                    $fk_tipo_hoja_ruta = 3;
+                $fk_estado_tramite_padre = $this->obtenerIdEstadoPadre($row['codigo_estado']);
+                $fk_estado_tramite_hijo = '';
+                if($row['codigo_subestado']>0)
+                    $fk_estado_tramite_hijo = $this->obtenerIdEstadoHijo($fk_estado_tramite_padre, $row['codigo_subestado']);
+                $data = array(
+                    'fk_area_minera' => $row['fk_area_minera'],
+                    'fk_hoja_ruta' => $row['fk_hoja_ruta_sincobol'],
+                    'fk_oficina' => $row['fk_oficina'],
+                    'correlativo' => $hoja_ruta['correlativo'],
+                    'fecha_mecanizada' => $hoja_ruta['fecha_mecanizada'],
+                    'fk_usuario_actual' => $row['fk_usuario_remitente'],
+                    'ultimo_fk_usuario_responsable' => $row['fk_usuario_destinatario'],
+                    'ultimo_estado' => $estado,
+                    'ultimo_fk_estado_tramite_padre' => $fk_estado_tramite_padre,
+                    'ultimo_fk_estado_tramite_hijo' => (!empty($fk_estado_tramite_hijo) ? $fk_estado_tramite_hijo : NULL),
+                    'ultimo_fecha_derivacion' => date('Y-m-d H:i:s'),
+                    'fk_usuario_creador' => $row['fk_usuario_remitente'],
+                    'ultimo_instruccion' => 'PARA SU ATENCIÓN',
+                    'ultimo_fk_usuario_remitente' => $row['fk_usuario_remitente'],
+                    'ultimo_fk_usuario_destinatario' => $row['fk_usuario_destinatario'],
+                    'fk_tipo_hoja_ruta' => $fk_tipo_hoja_ruta,
+                    'estado_tramite_apm' => $this->obtenerEstadoTramiteAPM($fk_estado_tramite_padre, $fk_estado_tramite_hijo),
+                );
+                if($actoAdministrativoModel->insert($data) === false){
+                    $errorActoAdministrativo = 'SI';
+                }else{
+                    $idActoAdministrativo = $actoAdministrativoModel->getInsertID();
+                    $dataDatosAreaMinera = array(
+                        'fk_acto_administrativo' => $idActoAdministrativo,
+                        'codigo_unico' => $area_minera['codigo_unico'],
+                        'denominacion' => $area_minera['denominacion'],
+                        'extension' => $area_minera['extension'],
+                        'departamentos' => $area_minera['departamentos'],
+                        'provincias' => $area_minera['provincias'],
+                        'municipios' => $area_minera['municipios'],
+                        'regional' => $area_minera['regional'],
+                        'area_protegida' => $area_minera['area_protegida'],
+                        'representante_legal' => $area_minera['representante_legal'],
+                        'nacionalidad' => $area_minera['nacionalidad'],
+                        'titular' => $area_minera['titular'],
+                        'clasificacion_titular' => $area_minera['clasificacion'],
+                    );
+                    if($datosAreaMineraModel->insert($dataDatosAreaMinera) === false){
+                        $errorDatosAreaMinera = 'SI';
+                    }else{
+                        $dataDerivacion = array(
+                            'fk_acto_administrativo' => $idActoAdministrativo,
+                            'domicilio_legal' => $area_minera['domicilio_legal'],
+                            'domicilio_procesal' => $area_minera['domicilio_procesal'],
+                            'telefono_solicitante' => $area_minera['telefono_solicitante'],
+                            'fk_estado_tramite_padre' => $fk_estado_tramite_padre,
+                            'fk_estado_tramite_hijo' => (!empty($fk_estado_tramite_hijo) ? $fk_estado_tramite_hijo : NULL),
+                            'fk_usuario_remitente' => $row['fk_usuario_remitente'],
+                            'fk_usuario_destinatario' => $row['fk_usuario_destinatario'],
+                            'fk_usuario_responsable' => $row['fk_usuario_destinatario'],
+                            'instruccion' => 'PARA SU ATENCIÓN',
+                            'estado' => $estado,
+                            'fk_usuario_creador' => $row['fk_usuario_remitente'],
+                        );
+                        if($derivacionModel->insert($dataDerivacion) === false){
+                            $errorDerivacion = 'SI';
+                        }else{
+                            $campos = array('id', 'fk_hoja_ruta');
+                            $where = array(                                
+                                'fk_hoja_ruta' => $row['fk_hoja_ruta_sincobol'],
+                            );
+                            $ultima_derivacion = $derivacionSincobolModel->select($campos)->where($where)->orderBY('id', 'DESC')->first();
+                            $dataDerivacionSincobol = array(
+                                'id' => $ultima_derivacion['id'],
+                                'estado' => 'CONCLUIDO',
+                                'fecha_conclusion' => date('Y-m-d h:i:s'),
+                                'motivo_conclusion' => 'MIGRADO AL SISTEMA DE CONTROL Y SEGUIMIENTO DE TRAMITES',
+                            );
+                            if($derivacionSincobolModel->save($dataDerivacionSincobol) === false){
+                                $errorDerivacionSincobol = 'SI';
+                            }else{
+                                $dataMigracion = array(
+                                    'id' => $row['id'],
+                                    'migrado' => 'true',
+                                );
+                                if($migrarModel->save($dataMigracion) === false)
+                                    $errorMigracion = 'SI';
+                            }
+                        }
+                    }
+                }
+                echo ($n+1).'. La H.R. '.$hoja_ruta['correlativo'].' A.M. '.$area_minera['codigo_unico'].' tuvo errores en A:'.$errorActoAdministrativo.' B:'.$errorDatosAreaMinera.' C:'.$errorDerivacion.' D:'.$errorDerivacionSincobol.' E:'.$errorMigracion.'<br>';
+            }
+        }
+    }
+    private function obtenerDatosMigracion($id_hoja_ruta){
+        $dbSincobol = \Config\Database::connect('sincobol');
+        $campos = array(
+        'slc.id as fk_solicitud_licencia_contrato', 'am.id as fk_area_minera', 'hr.id as fk_hoja_ruta', 'hr.correlativo',
+        "to_char(slc.fecha_ingreso, 'YYYY-MM-DD HH24:MI') as fecha_mecanizada",
+        'am.nombre as denominacion', 'am.codigo_unico', "CONCAT(ROUND(am.extension), ' ', CASE WHEN am.unidad = 'CUADRICULA' THEN 'CUADRICULA(S)' ELSE am.unidad END) AS extension",
+        'am.departamentos', 'am.provincias', 'am.municipios', 'am.descripcion_area_protegida as area_protegida', 'am.regional', 'acm.nombre as titular', 'tam.nombre as clasificacion_titular',
+        'dcam.domicilio_legal', 'dcam.domicilio_procesal', 'dcam.telefonos as telefono_solicitante', "CONCAT(p.nombres, ' ',p.apellido_paterno, ' ',p.apellido_materno) as representante_legal", 'acm.nacionalidad'
+        );
+        $builder = $dbSincobol->table('sincobol.hoja_ruta as hr')
+        ->select($campos)
+        ->join('contratos_licencias.solicitud_licencia_contrato as slc', 'hr.fk_solicitud_licencia_contrato = slc.id', 'left')
+        ->join('contratos_licencias.area_minera as am', ' slc.fk_area_minera = am.id', 'left')
+        ->join('contratos_licencias.actor_minero as acm', 'am.fk_actor_minero_poseedor = acm.id', 'left')
+        ->join('contratos_licencias.tipo_actor_minero as tam', 'acm.fk_tipo_actor_minero = tam.id', 'left')
+        ->join('sincobol.datos_contacto_actor_minero as dcam', 'acm.id = dcam.fk_actor_minero', 'left')
+        ->join('contratos_licencias.persona_actor_minero as pacm', 'acm.id = pacm.fk_actor_minero', 'left')
+        ->join('sincobol.persona as p', 'pacm.fk_persona = p.id', 'left')
+        ->where(array('hr.id' => $id_hoja_ruta));
+        return $builder->get()->getRowArray();
+    }
+    private function obtenerIdEstadoPadre($orden){
+        $estadoTramiteModel = new EstadoTramiteModel();
+        $where = array(
+            'deleted_at' => NULL,
+            'fk_estado_padre' => NULL,
+            'fk_tramite' => $this->idTramite,
+            'orden' => $orden,
+        );
+        $estado = $estadoTramiteModel->where($where)->first();
+        return $estado['id'];
+    }
+    private function obtenerIdEstadoHijo($fk_estado_tramite_padre, $orden){
+        $estadoTramiteModel = new EstadoTramiteModel();
+        $where = array(
+            'deleted_at' => NULL,
+            'fk_estado_padre' => $fk_estado_tramite_padre,
+            'fk_tramite' => $this->idTramite,
+            'orden' => $orden,
+        );
+        $estado = $estadoTramiteModel->where($where)->first();
+        return $estado['id'];
     }
 
 }
