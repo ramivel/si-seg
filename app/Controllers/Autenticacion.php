@@ -29,7 +29,7 @@ class Autenticacion extends BaseController
                 ]*/
             ],
             'pass' => [
-                'rules' => 'required|min_length[5]|max_length[12]',
+                'rules' => 'required|min_length[5]',
                 /*'errors' => [
                     'required' => 'Debe introducir la Contraseña',
                     'min_length' => 'La contraseña debe tener al menos 5 caracteres',
