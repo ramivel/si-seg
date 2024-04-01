@@ -57,9 +57,8 @@ $(document).ready(function () {
             presence: true,
             // And must be at least 5 characters long
             length: {
-                minimum: 5,
-                maximum: 12,
-                message: "^La contraseña debe tener al menos 5 y maximo 12 caracteres."
+                minimum: 5,                
+                message: "^La contraseña debe tener al menos 5 caracteres."
             }
         },
         "tramites[]": {

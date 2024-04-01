@@ -129,7 +129,7 @@ class Usuarios extends BaseController
                 ]
             ],
             'pass' => [
-                'rules' => 'required|min_length[5]|max_length[12]',
+                'rules' => 'required|min_length[5]',
             ],
             /*'tramites' => [
                 'rules' => 'required',
@@ -291,7 +291,7 @@ class Usuarios extends BaseController
                     'rules' => 'required',
                 ],
                 'nueva_contrasena' => [
-                    'rules' => 'required|min_length[5]|max_length[12]',
+                    'rules' => 'required|min_length[5]',
                 ],
             ]);
             if(!$validation){
