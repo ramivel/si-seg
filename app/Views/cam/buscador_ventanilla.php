@@ -60,8 +60,7 @@
                                         <tr>
                                             <?php for($i=0;$i<count($campos_listar);$i++){?>
                                             <th class="text-center"><?php echo $campos_listar[$i];?></th>
-                                            <?php }?>
-                                            <th class="nosort"></th>
+                                            <?php }?>                                            
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -75,19 +74,19 @@
                                                     $style = '';
                                                     switch($fila[$campos_reales[$i]]){
                                                         case 'MIGRADO':
-                                                            $style = 'btn btn-sm btn-inverse btn-round';
+                                                            $style = 'btn btn-sm btn-danger btn-round';
                                                             break;
                                                         case 'ATENDIDO':
                                                             $style = 'btn btn-sm btn-success btn-round';
                                                             break;
-                                                        case 'DERIVADO':
+                                                        case 'RECIBIDO':
                                                             $style = 'btn btn-sm btn-primary btn-round';
                                                             break;
                                                         case 'DEVUELTO':
                                                             $style = 'btn btn-sm btn-warning btn-round';
                                                             break;
-                                                        case 'FINALIZADO':
-                                                            $style = 'btn btn-sm btn-danger btn-round';
+                                                        case 'DERIVADO':
+                                                            $style = 'btn btn-sm btn-inverse btn-round';
                                                             break;
                                                         case 'EN ESPERA':
                                                             $style = 'btn btn-sm btn-info btn-round';
@@ -99,10 +98,7 @@
                                                 }
                                             ?>
                                             </td>
-                                            <?php }?>
-                                            <td class="text-center">
-                                            <?php echo anchor($controlador.'ver/5/'.$fila['id'], '<i class="fa fa-eye"></i> Ver',array('class' =>'btn btn-sm btn-info'));?>
-                                            </td>
+                                            <?php }?>                                            
                                         </tr>
                                         <?php }?>
                                     <?php }?>

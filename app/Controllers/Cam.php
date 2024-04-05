@@ -2078,10 +2078,10 @@ class Cam extends BaseController
             'denominacion' => 'Denominación',
         );
         $campos_listar=array(
-            ' ','Fecha Derivación/Devolución','H.R. Madre','Código Único','Denominación','Responsable Trámite','Remitente','Destinatario','Instrucción','Estado Trámite',
+            ' ','Fecha Derivación/Devolución','H.R. Madre', 'Remitente','Destinatario','Responsable Trámite','Estado Trámite','Código Único','Denominación',
         );
         $campos_reales=array(
-            'ultimo_estado','ultimo_fecha_derivacion','correlativo','codigo_unico','denominacion','responsable','remitente','destinatario','ultimo_instruccion','estado_tramite',
+            'ultimo_estado','ultimo_fecha_derivacion','correlativo','remitente','destinatario','responsable','estado_tramite','codigo_unico','denominacion',
         );
         $cabera['titulo'] = $this->titulo;
         $cabera['navegador'] = true;
@@ -2094,7 +2094,7 @@ class Cam extends BaseController
         $contenido['accion'] = $this->controlador.'buscador_ventanilla';
         $contenido['controlador'] = $this->controlador;
         $data['content'] = view($this->carpeta.'buscador_ventanilla', $contenido);
-        $data['menu_actual'] = 'buscador_tramites_cam';
+        $data['menu_actual'] = 'correspondencia_externa/buscador_tramites_cam';
         $data['tramites_menu'] = $this->tramitesMenu();
         $data['alertas'] = $this->alertasTramites();
         echo view('templates/template', $data);

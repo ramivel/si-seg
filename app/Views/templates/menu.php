@@ -59,6 +59,11 @@
                         <span class="pcoded-mtext">CAM</span>
                     </a>
                     <ul class="pcoded-submenu">
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/buscador_tramites_cam') ? 'active' : '';?>">
+                            <a href="<?= base_url('cam/buscador_ventanilla');?>">
+                                <span class="pcoded-mtext">Buscador</span>
+                            </a>
+                        </li>
                         <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/agregar') ? 'active' : '';?>">
                             <a href="<?= base_url('correspondencia_externa/agregar');?>">
                                 <span class="pcoded-mtext">Nuevo Ingreso</span>

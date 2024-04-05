@@ -38,6 +38,7 @@ class CorrespondenciaExterna extends BaseController
         "CONCAT('CITE: ',ce.cite,'<br>Fecha: ',to_char(ce.fecha_cite, 'DD/MM/YYYY'),'<br>Remitente: ',CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')'),'<br>Referencia: ',ce.referencia) as documento_externo",
         'ce.editar', "to_char(ce.created_at, 'DD/MM/YYYY HH24:MI') as fecha_ingreso",
         "to_char(ce.fecha_recepcion, 'DD/MM/YYYY HH24:MI') as fecha_recepcion", "CONCAT(ur.nombre_completo,'<br><b>',pr.nombre,'<b>') as recepcion",
+        "CONCAT(ud.nombre_completo,'<br><b>',pd.nombre,'<b>') as usuario_actual",
         );
         $where = array(
             'ce.deleted_at' => NULL,
@@ -49,12 +50,14 @@ class CorrespondenciaExterna extends BaseController
         ->join('public.persona_externa AS pe', 'ce.fk_persona_externa = pe.id', 'left')
         ->join('public.usuarios AS ur', 'ce.fk_usuario_recepcion = ur.id', 'left')
         ->join('public.perfiles AS pr', 'ur.fk_perfil = pr.id', 'left')
+        ->join('usuarios as ud', 'ac.ultimo_fk_usuario_destinatario = ud.id', 'left')
+        ->join('perfiles as pd', 'ud.fk_perfil = pd.id', 'left')        
         ->select($campos)
         ->where($where)
         ->orderBy('ce.id', 'DESC');
         $datos = $builder->get()->getResultArray();
-        $campos_listar=array('Estado','Fecha Ingreso', 'Fecha Recepción', 'Recepcionado Por','Tipo Trámite','Correlativo', 'Documento Externo', 'Doc. Digital', );
-        $campos_reales=array('estado','fecha_ingreso','fecha_recepcion','recepcion','tipo_tramite','correlativo', 'documento_externo', 'doc_digital', );
+        $campos_listar=array('Estado','Fecha Ingreso', 'Fecha Recepción', 'Recepcionado Por','Correlativo', 'Usuario Actual','Documento Externo', 'Doc. Digital', );
+        $campos_reales=array('estado','fecha_ingreso','fecha_recepcion','recepcion','correlativo','usuario_actual','documento_externo', 'doc_digital', );
         $cabera['titulo'] = $this->titulo;
         $cabera['navegador'] = true;
         $cabera['subtitulo'] = 'Mis Ingresos';
@@ -101,7 +104,7 @@ class CorrespondenciaExterna extends BaseController
                 'doc_digital' => [
                     'uploaded[doc_digital]',
                     'mime_in[doc_digital,application/pdf]',
-                    'max_size[doc_digital,20480]',
+                    //'max_size[doc_digital,20480]',
                 ],
             ]);
             if(!$validation){

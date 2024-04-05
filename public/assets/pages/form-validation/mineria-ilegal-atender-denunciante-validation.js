@@ -50,7 +50,7 @@ $(document).ready(function () {
             presence: true,
         },
         coordenadas: {
-            presence: true,
+            presence: false,
         },
         fk_estado_tramite: {
             presence: {

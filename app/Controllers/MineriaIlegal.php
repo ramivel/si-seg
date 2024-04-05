@@ -57,13 +57,18 @@ class MineriaIlegal extends BaseController
         3 => 'VERIFICACIÓN DE OFICIO',
     );
     protected $fontPDF = 'helvetica';
-    protected $acciones = array(
+    protected $acciones = array(        
         'Para su conocimiento y consideración',
         'Verificar Requisitos',
         'Requerir Informe Técnico',
         'Preparar informe',
         'Proceder conforme a reglamento',
-        'Archivar'
+        'Archivar',
+        '',
+        '',
+        '',
+        '',
+        '',        
     );
     protected $expedidos = array(
         '' => 'SELECCIONE UNA OPCIÓN',
@@ -554,9 +559,7 @@ class MineriaIlegal extends BaseController
 
             $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
             $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
-            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
-            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
-            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
+            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);            
 
             $pdf->AddPage('P','Letter');
 
@@ -564,8 +567,6 @@ class MineriaIlegal extends BaseController
             $pdf->MultiCell(55, 8, 'HOJA DE RUTA:', 1, 'R', true, 0, '', '', true, 0, false, false, 5, 'M', true);
             $pdf->MultiCell(141, 8, '', 1, 'L', false, 1, '', '', true, 0, false, false, 5, 'T', true);
 
-            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
-            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
             $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
             $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
             $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
@@ -582,7 +583,7 @@ class MineriaIlegal extends BaseController
     }
 
     private function crearDerivacion(&$pdf, $tipo_letra, $acciones) {
-        $pdf->ln(2);
+        $pdf->ln(1);
         // FILA 1
         $pdf->SetFont($tipo_letra, 'B', 7);
         $pdf->MultiCell(55, 0, 'ACCIÓN', 1, 'C', true, 0);
@@ -2234,9 +2235,9 @@ class MineriaIlegal extends BaseController
                 'descripcion_lugar' => [
                     'rules' => 'required',
                 ],
-                'coordenadas' => [
+                /*'coordenadas' => [
                     'rules' => 'required',
-                ],
+                ],*/
                 'fk_estado_tramite' => [
                     'rules' => 'required',
                     'errors' => [
@@ -2709,7 +2710,7 @@ class MineriaIlegal extends BaseController
             $coordenadas = $coordenadasMineriaIlegalModel->where(array('fk_denuncia' => $hoja_ruta['fk_denuncia']))->findAll();
 
             $hojas_rutas = array();
-            if($denunciaHojaRutaSincobol = $denunciasHrSincobolMineriaIlegalModel->where(array('fk_denuncia' => $hoja_ruta['fk_denuncia']))->findAll()){                
+            if($denunciaHojaRutaSincobol = $denunciasHrSincobolMineriaIlegalModel->where(array('fk_denuncia' => $hoja_ruta['fk_denuncia']))->findAll()){
                 foreach($denunciaHojaRutaSincobol as $row)
                     $hojas_rutas[] = $this->obtenerDatosHrInExSincobol($row['fk_hoja_ruta']);
             }
