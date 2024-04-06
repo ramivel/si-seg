@@ -1,5 +1,23 @@
 'use strict';
 $(document).ready(function () {
+
+    $('.cambiar_estado').on('click',function(e){
+        e.preventDefault();
+        var link = $(this).attr('href');
+        swal({
+            title: "Esta seguro de CAMBIAR EL ESTADO?",            
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonClass: "btn-danger",
+            confirmButtonText: "Si, Cambiar!",
+            cancelButtonText: "Cancelar",
+            closeOnConfirm: false
+        },
+        function(){
+            window.location.href = link;
+        });
+    });
+
     $('.eliminar').on('click',function(e){
         e.preventDefault();
         var link = $(this).attr('href');

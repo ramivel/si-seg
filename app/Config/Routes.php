@@ -85,9 +85,13 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->post('guardar', 'Usuarios::guardar');
         $routes->add('editar/(:num)', 'Usuarios::editar/$1');
         $routes->post('guardar_editar', 'Usuarios::guardar_editar');
+        $routes->add('activar/(:num)', 'Usuarios::activar/$1');
+        $routes->add('desactivar/(:num)', 'Usuarios::desactivar/$1');
         $routes->add('eliminar/(:num)', 'Usuarios::eliminar/$1');
+        $routes->add('cambiar_contraseña_usuario', 'Usuarios::cambiarContraseñaUsuario');
+        $routes->post('guardar_cambiar_contraseña_usuario', 'Usuarios::guardarCambiarContraseñaUsuario');
         $routes->add('cambiar_contraseña/(:num)', 'Usuarios::cambiarContraseña/$1');
-        $routes->post('guardar_cambiar_contraseña', 'Usuarios::guardarCambiarContraseña');        
+        $routes->post('guardar_cambiar_contraseña', 'Usuarios::guardarCambiarContraseña');
     });
 
     $routes->group('estado_tramite', function($routes){
@@ -157,7 +161,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('pdf_seguimiento/(:num)', 'Cam::pdfCodigoSeguimiento/$1');
 
         $routes->add('migrar_sol_cam', 'Cam::migrarSolCam');
-        $routes->add('migrar_cmn_cmc', 'Cam::migrarCmcCmc');        
+        $routes->add('migrar_cmn_cmc', 'Cam::migrarCmcCmc');
     });
 
     $routes->group('tipo_documento_externo', function($routes){
@@ -195,7 +199,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_datos_area_minera_mineria_ilegal', 'MineriaIlegal::ajaxDatosAreaMineraMineriaIlegal');
         $routes->add('ajax_analista_destinario', 'MineriaIlegal::ajaxAnalistaDestinatario');
         $routes->add('ajax_guardar_devolver', 'MineriaIlegal::ajaxGuardarDevolver');
-        
+
         $routes->add('ver/(:num)/(:num)', 'MineriaIlegal::ver/$1/$2');
 
         $routes->add('mis_ingresos', 'MineriaIlegal::misIngresos');
@@ -216,7 +220,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_provincias', 'MineriaIlegal::ajaxProvincias');
         $routes->add('ajax_municipios', 'MineriaIlegal::ajaxMunicipios');
 
-        
+
 
 
     });

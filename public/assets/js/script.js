@@ -558,6 +558,32 @@ $(document).ready(function() {
 
 });
 
+/* VER/OCULTAR CONTRASEÑA */
+$(document).ready(function() {
+    $(".contrasena_ver").show();
+    $(".contrasena_ocultar").hide();
+    $('.contrasena_ver').click(function(){
+        var contrasena_actual = $("#contrasena_actual");
+        var nueva_contrasena = $("#nueva_contrasena");
+        var confirmar_nueva_contrasena = $("#confirmar_nueva_contrasena");
+        contrasena_actual.attr('type') === 'password' ? contrasena_actual.attr('type','text') : contrasena_actual.attr('type','password');
+        nueva_contrasena.attr('type') === 'password' ? nueva_contrasena.attr('type','text') : nueva_contrasena.attr('type','password');
+        confirmar_nueva_contrasena.attr('type') === 'password' ? confirmar_nueva_contrasena.attr('type','text') : confirmar_nueva_contrasena.attr('type','password');
+        $(".contrasena_ver").hide();
+        $(".contrasena_ocultar").show();
+    });
+    $('.contrasena_ocultar').click(function(){
+        var contrasena_actual = $("#contrasena_actual");
+        var nueva_contrasena = $("#nueva_contrasena");
+        var confirmar_nueva_contrasena = $("#confirmar_nueva_contrasena");
+        contrasena_actual.attr('type') === 'password' ? contrasena_actual.attr('type','text') : contrasena_actual.attr('type','password');
+        nueva_contrasena.attr('type') === 'password' ? nueva_contrasena.attr('type','text') : nueva_contrasena.attr('type','password');
+        confirmar_nueva_contrasena.attr('type') === 'password' ? confirmar_nueva_contrasena.attr('type','text') : confirmar_nueva_contrasena.attr('type','password');
+        $(".contrasena_ver").show();
+        $(".contrasena_ocultar").hide();
+    });
+});
+
 // toggle full screen
 function toggleFullScreen() {
     var a = $(window).height() - 10;

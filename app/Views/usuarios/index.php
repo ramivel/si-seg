@@ -20,25 +20,25 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-header">                        
+                    <div class="card-header">
                         <div class="col-sm text-left">
                                 <a href="<?= base_url('usuarios/agregar');?>" class="btn btn-success"><i class="feather icon-plus-circle"></i> Nuevo Usuario</a>
-                            </div> 
+                            </div>
                         <div class="card-header-right">
                             <ul class="list-unstyled card-option">
                                 <li><i class="feather icon-maximize full-card"></i></li>
                             </ul>
                         </div>
                     </div>
-                    <div class="card-block">                        
+                    <div class="card-block">
                         <div class="dt-responsive table-responsive">
                             <table id="tabla-listado" class="table table-striped table-bordered nowrap">
                                 <thead>
                                     <tr>
                                         <?php for($i=0;$i<count($campos_listar);$i++){?>
                                         <th class="text-center"><?php echo $campos_listar[$i];?></th>
-                                        <?php }?>                    
-                                        <th class="nosort"></th>                                
+                                        <?php }?>
+                                        <th class="nosort"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -52,7 +52,7 @@
                                                 if($fila[$campos_reales[$i]]=='t')
                                                     echo '<span class="text-success"><i class="ti-check"></i> Activo</span>';
                                                 else
-                                                    echo '<span class="text-danger"><i class="ti-close"></i> Inactivo</span>';                                                    
+                                                    echo '<span class="text-danger"><i class="ti-close"></i> Inactivo</span>';
                                             }elseif($campos_reales[$i]=='tramites'){
                                                 if($fila['tramites']){
                                                     $tmp = explode(',', $fila['tramites']);
@@ -61,7 +61,7 @@
                                                 }
                                             }else{
                                                 echo $fila[$campos_reales[$i]];
-                                            }                        
+                                            }
                                         ?>
                                         </td>
                                         <?php }?>
@@ -69,13 +69,18 @@
                                             <div class="dropdown-info dropdown open">
                                                 <button class="btn btn-info dropdown-toggle waves-effect waves-light " type="button" id="dropdown-4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Acciones</button>
                                                 <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                    <a class="dropdown-item waves-light waves-effect" href="#">Desactivar Usuario</a>
-                                                    <?php echo anchor('usuarios/cambiar_contraseña/'.$fila['id'], 'Cambiar Contraseña',array('class' =>'dropdown-item waves-light waves-effect'));?>                                                    
                                                     <?php echo anchor('usuarios/editar/'.$fila['id'], 'Editar',array('class' =>'dropdown-item waves-light waves-effect'));?>
-                                                    <?php echo anchor('usuarios/eliminar/'.$fila['id'], 'Eliminar',array('class' =>'dropdown-item waves-light waves-effect eliminar'));?>                                                    
+                                                    <?php echo anchor('usuarios/cambiar_contraseña/'.$fila['id'], 'Cambiar Contraseña',array('class' =>'dropdown-item waves-light waves-effect'));?>
+                                                    <?php
+                                                    if($fila['activo']=='t')
+                                                        echo anchor('usuarios/desactivar/'.$fila['id'], 'Desactivar Usuario',array('class' =>'dropdown-item waves-light waves-effect cambiar_estado'));
+                                                    else
+                                                        echo anchor('usuarios/activar/'.$fila['id'], 'Activar Usuario',array('class' =>'dropdown-item waves-light waves-effect cambiar_estado'));
+                                                    ?>
+                                                    <?php echo anchor('usuarios/eliminar/'.$fila['id'], 'Eliminar',array('class' =>'dropdown-item waves-light waves-effect eliminar'));?>
                                                 </div>
-                                            </div>                                            
-                                        </td>                  
+                                            </div>
+                                        </td>
                                     </tr>
                                     <?php }?>
                                 <?php }?>
@@ -84,8 +89,8 @@
                                     <tr>
                                         <?php for($i=0;$i<count($campos_listar);$i++){?>
                                         <th><?php echo $campos_listar[$i];?></th>
-                                        <?php }?>                    
-                                        <th></th>                                
+                                        <?php }?>
+                                        <th></th>
                                     </tr>
                                 </tfoot>
                             </table>

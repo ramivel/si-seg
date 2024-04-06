@@ -13,6 +13,7 @@ namespace CodeIgniter\Validation;
 
 use Config\Database;
 use InvalidArgumentException;
+use App\Libraries\Hash;
 
 /**
  * Validation Rules.
@@ -405,4 +406,16 @@ class Rules
             ->limit(1);
         return $row->get()->getRow() === null;
     }
+
+    public function verificar_contrasena($str = null): bool
+    {
+        $db = Database::connect();
+        $row = $db->table('public.usuarios')
+            ->select('pass')
+            ->where(array('id' => session()->get('registroUser')))
+            ->limit(1);
+        $usuarioInfo = $row->get()->getRowArray();        
+        return Hash::check($str, $usuarioInfo['pass']);
+    }
+
 }

@@ -300,7 +300,7 @@ class Usuarios extends BaseController
                 $cabera['subtitulo'] = 'Cambiar la Contraseña Usuario';
                 $contenido['title'] = view('templates/title',$cabera);
                 $contenido['oficinas'] = $this->obtenerOficinas();
-                $contenido['perfiles'] = $this->obtenerPerfiles();                                
+                $contenido['perfiles'] = $this->obtenerPerfiles();
                 $contenido['accion'] = $this->controlador.'guardar_cambiar_contraseña';
                 $contenido['validation'] = $this->validator;
                 $data['content'] = view($this->carpeta.'cambiar_contraseña', $contenido);
@@ -308,10 +308,10 @@ class Usuarios extends BaseController
                 $data['tramites_menu'] = $this->tramitesMenu();
                 $data['validacion_js'] = 'usuario-contrasena-validation.js';
                 echo view('templates/template', $data);
-            }else{                
+            }else{
                 $data = array(
                     'id' => $id,
-                    'pass' => Hash::make($this->request->getPost('nueva_contrasena')),                    
+                    'pass' => Hash::make($this->request->getPost('nueva_contrasena')),
                 );
                 if($usuariosModel->save($data) === false)
                     session()->setFlashdata('fail', $usuariosModel->errors());
@@ -320,6 +320,108 @@ class Usuarios extends BaseController
                 return redirect()->to('usuarios');
             }
         }
+    }
+    public function cambiarContraseñaUsuario(){
+        $usuariosModel = new UsuariosModel();
+        $fila = $usuariosModel->find(session()->get('registroUser'));
+        if($fila){
+            $cabera['titulo'] = 'Cambiar Contraseña';
+            $cabera['navegador'] = true;
+            $cabera['subtitulo'] = 'Cambiar Contraseña';
+            $contenido['title'] = view('templates/title',$cabera);
+            $contenido['oficinas'] = $this->obtenerOficinas();
+            $contenido['perfiles'] = $this->obtenerPerfiles();
+            $contenido['fila'] = $fila;
+            $contenido['accion'] = $this->controlador.'guardar_cambiar_contraseña_usuario';
+            $data['content'] = view($this->carpeta.'cambiar_contraseña_usuario', $contenido);
+            $data['menu_actual'] = '';
+            $data['tramites_menu'] = $this->tramitesMenu();
+            $data['alertas'] = $this->alertasTramites();
+            $data['validacion_js'] = 'cambiar-contrasena-usuario-validation.js';
+            echo view('templates/template', $data);
+        }else{
+            session()->setFlashdata('fail', 'El usuario no existe.');
+            return redirect()->to('dashboard');
+        }
+    }
+    public function guardarCambiarContraseñaUsuario(){
+        if ($this->request->getPost()) {
+            $validation = $this->validate([
+                'contrasena_actual' => [
+                    'rules' => 'required|verificar_contrasena',
+                    'errors' => [
+                        'verificar_contrasena' => 'La contraseña actual es incorrecta.'
+                    ]
+                ],
+                'nueva_contrasena' => [
+                    'rules' => 'required|min_length[5]',
+                ],
+                'confirmar_nueva_contrasena' => [
+                    'rules' => 'required|min_length[5]',
+                ],
+            ]);
+            if(!$validation){
+                $cabera['titulo'] = 'Cambiar Contraseña';
+                $cabera['navegador'] = true;
+                $cabera['subtitulo'] = 'Cambiar Contraseña';
+                $contenido['title'] = view('templates/title',$cabera);
+                $contenido['oficinas'] = $this->obtenerOficinas();
+                $contenido['perfiles'] = $this->obtenerPerfiles();
+                $contenido['accion'] = $this->controlador.'guardar_cambiar_contraseña_usuario';
+                $contenido['validation'] = $this->validator;
+                $data['content'] = view($this->carpeta.'cambiar_contraseña_usuario', $contenido);
+                $data['menu_actual'] = '';
+                $data['tramites_menu'] = $this->tramitesMenu();
+                $data['alertas'] = $this->alertasTramites();
+                $data['validacion_js'] = 'cambiar-contrasena-usuario-validation.js';
+                echo view('templates/template', $data);
+            }else{
+                $usuariosModel = new UsuariosModel();
+                $data = array(
+                    'id' => session()->get('registroUser'),
+                    'pass' => Hash::make($this->request->getPost('nueva_contrasena')),
+                );
+                if($usuariosModel->save($data) === false)
+                    session()->setFlashdata('fail', $usuariosModel->errors());
+                else
+                    session()->setFlashdata('success', 'Se actualizo la contraseña correctamente.');
+                return redirect()->to('dashboard');
+            }
+        }
+    }
+    public function activar($id){
+        $usuariosModel = new UsuariosModel();
+        $fila = $usuariosModel->find($id);
+        if($fila){
+            $data = array(
+                'id' => $fila['id'],
+                'activo' => 'true',
+            );
+            if($usuariosModel->save($data) === false)
+                session()->setFlashdata('fail', $usuariosModel->errors());
+            else
+                session()->setFlashdata('success', 'Se actualizo correctamente la información.');
+        }else{
+            session()->setFlashdata('fail', 'El usuario no existe.');
+        }
+        return redirect()->to('usuarios');
+    }
+    public function desactivar($id){
+        $usuariosModel = new UsuariosModel();
+        $fila = $usuariosModel->find($id);
+        if($fila){
+            $data = array(
+                'id' => $fila['id'],
+                'activo' => 'false',
+            );
+            if($usuariosModel->save($data) === false)
+                session()->setFlashdata('fail', $usuariosModel->errors());
+            else
+                session()->setFlashdata('success', 'Se actualizo correctamente la información.');
+        }else{
+            session()->setFlashdata('fail', 'El usuario no existe.');
+        }
+        return redirect()->to('usuarios');
     }
     public function eliminar($id){
         $usuariosModel = new UsuariosModel();

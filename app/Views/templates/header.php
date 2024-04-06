@@ -12,28 +12,22 @@
             </a>
         </div>
         <div class="navbar-container container-fluid">
-            <ul class="nav-left">                
-                <li>                    
+            <ul class="nav-left">
+                <li>
                     <h3 class="titulo-sistema"><?=TITLE_PAGE;?></h3>
                 </li>
             </ul>
-            <ul class="nav-right">                                
+            <ul class="nav-right">
                 <li class="user-profile header-notification">
                     <div class="dropdown-primary dropdown">
                         <div class="dropdown-toggle" data-toggle="dropdown">
-                            <img src="<?=base_url('assets/images/usuario.jpg');?>" class="img-radius" alt="User-Profile-Image">                            
+                            <img src="<?=base_url('assets/images/usuario.jpg');?>" class="img-radius" alt="User-Profile-Image">
                             <span><?=session()->get('registroUserName');?></span>
                             <i class="feather icon-chevron-down"></i>
                         </div>
                         <ul class="show-notification profile-notification dropdown-menu" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                            <li>
-                                <a href="#">
-                                    <i class="feather icon-lock"></i> Cambiar Contraseña
-                                </a>
-                            </li>
-                            <li>
-                                <?php echo anchor('autenticacion/logout', '<i class="feather icon-log-out"></i> Salir del Sistema'); ?>
-                            </li>                            
+                            <li><?php echo anchor('usuarios/cambiar_contraseña_usuario', '<i class="feather icon-lock"></i> Cambiar Contraseña'); ?></li>
+                            <li><?php echo anchor('autenticacion/logout', '<i class="feather icon-log-out"></i> Salir del Sistema'); ?></li>
                         </ul>
                     </div>
                 </li>
