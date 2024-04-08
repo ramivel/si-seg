@@ -101,17 +101,6 @@
                 </li>
             </ul>
 
-            <!--
-            <div class="pcoded-navigatio-lavel">Buscador de Trámites</div>
-            <ul class="pcoded-item pcoded-left-item">
-                <li class="<?= (isset($menu_actual) && $menu_actual === 'buscador_tramites_cam') ? 'active' : '';?>">
-                    <a href="<?= base_url('cam/buscador_ventanilla');?>">
-                        <span class="pcoded-micon"><i class="fa fa-search"></i></span>
-                        <span class="pcoded-mtext">CAMs</span>
-                    </a>
-                </li>
-            </ul>
-            -->
         <?php }?>
 
         <?php if(count($tramites_menu) > 0){?>
@@ -220,6 +209,12 @@
                                 <span class="pcoded-mtext"><?= $row['menu'] ?></span>
                             </a>
                             <ul class="pcoded-submenu">
+                                
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'denuncia_manual') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'denuncia_manual');?>">
+                                        <span class="pcoded-mtext">Denuncia Manual</span>
+                                    </a>
+                                </li>                                
 
                                 <?php if(in_array(12, session()->get('registroPermisos'))){?>
                                     <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'denuncias_web') ? 'active' : '';?>">
@@ -242,23 +237,6 @@
                                         <span class="pcoded-mtext">Verificación de Oficio</span>
                                     </a>
                                 </li>
-
-                                <!--
-
-
-                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_pendientes') ? 'active' : '';?>">
-                                    <a href="<?= base_url($row['controlador'].'listado_pendientes');?>">
-                                        <span class="pcoded-mtext">Denuncias Penientes</span>
-                                    </a>
-                                </li>
-
-                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_atendidos') ? 'active' : '';?>">
-                                    <a href="<?= base_url($row['controlador'].'listado_atendidos');?>">
-                                        <span class="pcoded-mtext">Denuncias Atendidos</span>
-                                    </a>
-                                </li>
-
-                                -->
 
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documento/listado') ? 'active' : '';?>">
                                     <a href="<?= base_url('documentos/listado/'.$row['id']);?>">
@@ -307,7 +285,7 @@
                     <span class="pcoded-mtext">Video Tutoriales</span>
                 </a>
             </li>
-        </ul>        
+        </ul>
 
     </div>
 </nav>

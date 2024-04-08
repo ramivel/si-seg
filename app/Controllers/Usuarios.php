@@ -26,8 +26,9 @@ class Usuarios extends BaseController
         9 => 'Área(s) Protegida(s) Adicional(es)',
         10 => 'Encargado de Cargar Documentación Digital',
         11 => 'Correspondencia Externa',
-        12 => 'Responsable Minería Ilegal DFCCI',
-        13 => 'Responsable Minería Ilegal Dirección Departamental o Regional',
+        12 => 'Responsable Atender Denuncias Página Web',
+        13 => 'Responsable Minería Ilegal DFCCI',
+        14 => 'Responsable Minería Ilegal Dirección Departamental o Regional',
     );
 
     public function index()

@@ -220,7 +220,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_provincias', 'MineriaIlegal::ajaxProvincias');
         $routes->add('ajax_municipios', 'MineriaIlegal::ajaxMunicipios');
 
-
+        $routes->add('denuncia_manual', 'MineriaIlegal::denunciaManual');
 
 
     });

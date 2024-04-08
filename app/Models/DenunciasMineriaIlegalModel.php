@@ -33,6 +33,7 @@ class DenunciasMineriaIlegalModel extends Model{
         'informe_tecnico_fecha',
         'informe_tecnico_digital',
         'descripcion_oficio',
+        'manual',
     ];
 
     protected $useTimestamps = true;

@@ -10,8 +10,6 @@ var markers = L.layerGroup().addTo(myMap);
 
 myMap.doubleClickZoom.disable();
 myMap.on('dblclick', e => {
-  var inputCoordenadas = document.getElementById("coordenadas").value;  
-
   var latLng = myMap.mouseEventToLatLng(e.originalEvent);
   var lat = latLng.lat;
   var lng = latLng.lng;
@@ -19,10 +17,39 @@ myMap.on('dblclick', e => {
   marker = L.marker([lat, lng]);
   markers.addLayer(marker);
   myMap.addLayer(markers);
-  
-  inputCoordenadas = inputCoordenadas + "("+lat+"|"+lng+")";
-  document.getElementById("coordenadas").value = inputCoordenadas;  
+  actualizarInputCoordenadas(lat, lng);
 });
+
+function agregarPunto(){
+  var latitude = document.getElementById("latitude").value;
+  var longitude = document.getElementById("longitude").value;
+
+  if(validateLatitude(latitude) && validateLongitude(longitude)){
+    var latlng = L.latLng(latitude, longitude);
+    L.marker(latlng).addTo(myMap);
+    myMap.setView(latlng, 15);
+    actualizarInputCoordenadas(latitude, longitude);
+    document.getElementById("latitude").value = "";
+    document.getElementById("longitude").value = "";
+  }else{
+    alert('La Latitud y Longitud no son correctos.');
+  }
+}
+function validateLatitude(lat) {
+  var regexLat = new RegExp('^(\\+|-)?(?:90(?:(?:\\.0{1,6})?)|(?:[0-9]|[1-8][0-9])(?:(?:\\.[0-9]{1,6})?))$');
+  return regexLat.test(lat);
+}
+
+function validateLongitude(lon) {
+  var regexLong = new RegExp('^(\\+|-)?(?:180(?:(?:\\.0{1,6})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\\.[0-9]{1,6})?))$');
+  return regexLong.test(lon);
+}
+
+function actualizarInputCoordenadas(lat, lon){
+  var inputCoordenadas = document.getElementById("coordenadas").value;
+  inputCoordenadas = inputCoordenadas + "("+lat+"|"+lon+")";
+  document.getElementById("coordenadas").value = inputCoordenadas;
+}
 
 function limpiarCoordenadas(){
     markers.clearLayers();
