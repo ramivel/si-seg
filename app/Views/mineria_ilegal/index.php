@@ -60,9 +60,10 @@
                                                 <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                     <?php echo anchor($controlador.'ver/2/'.$fila['id_hoja_ruta'], 'Ver',array('class' =>'dropdown-item waves-light waves-effect'));?>                                                    
                                                     <?php echo anchor($controlador.'hoja_ruta_pdf/'.$fila['id_hoja_ruta'], 'Imprimir H.R.',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
-                                                    <?php echo anchor($controlador.'formulario_denuncia_pdf/'.$fila['id_hoja_ruta'], 'Imprimir Formulario Denuncia',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
+                                                    <?php echo anchor($controlador.'formulario_denuncia_pdf/'.$fila['id_denuncia'], 'Imprimir Formulario Denuncia',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
                                                     <?php
                                                     switch($fila['ultimo_estado']){
+                                                        case 'REGULARIZACIÓN':
                                                         case 'RECIBIDO':
                                                         case 'DEVUELTO':
                                                             echo anchor('documentos/agregar/'.$id_tramite.'/'.$fila['id_hoja_ruta'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
@@ -90,7 +91,7 @@
                                                 if($campos_reales[$i]=='ultimo_estado'){
                                                     $style = '';
                                                     switch($fila[$campos_reales[$i]]){
-                                                        case 'MIGRADO':
+                                                        case 'REGULARIZACIÓN':
                                                             $style = 'btn btn-sm btn-danger btn-round';
                                                             break;
                                                         case 'ATENDIDO':

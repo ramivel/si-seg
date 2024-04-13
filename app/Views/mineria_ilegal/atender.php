@@ -727,6 +727,62 @@
                                         </div>
                                     </div>
                                     <div class="tab-pane " id="coordenadas_geograficas" role="tabpanel">
+                                        <p>Nota. Haga <strong>DOBLE CLICK</strong> en el mapa para poner uno o mas puntos.</p>
+                                        <div class="row">
+                                            <div class="col-md-4 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Latitud <span class="mytooltip tooltip-effect-5">
+                                                        <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
+                                                        <span class="tooltip-content clearfix">
+                                                            <span class="tooltip-text">Debe ingresar el dato en Grados Decimales (GD) Ejemplo: -16.517438</span>
+                                                        </span>
+                                                    </span> : </label>
+                                                    <div class="col-sm-8">
+                                                        <?php
+                                                            $campo = 'latitude';
+                                                            echo form_input(array(
+                                                                'name' => $campo,
+                                                                'id' => $campo,
+                                                                'class' => 'form-control',
+                                                                'value' => set_value($campo, '')
+                                                            ));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Longitud <span class="mytooltip tooltip-effect-5">
+                                                        <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
+                                                        <span class="tooltip-content clearfix">
+                                                            <span class="tooltip-text">Debe ingresar el dato en Grados Decimales (GD) Ejemplo: -68.118976</span>
+                                                        </span>
+                                                    </span> : </label>
+                                                    <div class="col-sm-8">
+                                                        <?php
+                                                            $campo = 'longitude';
+                                                            echo form_input(array(
+                                                                'name' => $campo,
+                                                                'id' => $campo,
+                                                                'class' => 'form-control',
+                                                                'value' => set_value($campo, '')
+                                                            ));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-12 col-md-2">
+                                                <button type="button" class="btn btn-inverse" onclick="agregarPunto();"><i class="fa fa-map-marker"></i> Agregar Punto</button>
+                                            </div>
+                                        </div>
                                         <div class="row">
                                             <div class="col-md-12 col-sm-12">
                                                 <div id="mi-map" class="set-map"></div>

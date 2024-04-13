@@ -57,23 +57,24 @@ class Documentos extends BaseController
             $db = \Config\Database::connect();
             switch($tramite['controlador']){
                 case 'cam/':
-                    $campos = array('doc.id', 'doc.correlativo', "to_char(doc.fecha, 'DD/MM/YYYY') as fecha", 'doc.referencia', 'dam.codigo_unico', 'adm.correlativo as hoja_ruta', 'doc.estado');
+                    $campos = array('doc.id', 'adm.fk_area_minera', 'doc.correlativo', "to_char(doc.fecha, 'DD/MM/YYYY') as fecha", 'doc.referencia', 'dam.codigo_unico', 'adm.correlativo as hoja_ruta', 'doc.estado', 'td.nombre as tipo_documento', 'doc.doc_digital');
                     $where = array(
                         'doc.fk_tramite' => $idTramite,
                         'doc.fk_usuario_creador' => session()->get('registroUser'),
                     );
-                    $builder = $db->table('documentos as doc')
+                    $builder = $db->table('public.documentos as doc')
                     ->select($campos)
-                    ->join('acto_administrativo as adm', 'doc.fk_acto_administrativo = adm.id', 'left')
+                    ->join('public.tipo_documento as td', 'doc.fk_tipo_documento = td.id', 'left')
+                    ->join('public.acto_administrativo as adm', 'doc.fk_acto_administrativo = adm.id', 'left')
                     ->join('public.datos_area_minera as dam', 'adm.id = dam.fk_acto_administrativo', 'left')
                     ->where($where)
                     ->orderBY('doc.id', 'DESC');
                     $datos = $builder->get()->getResult('array');
                     $campos_listar=array(
-                        'Fecha','Correlativo','Referencia','Código Único','H.R. Madre','Estado'
+                        'Estado','Fecha','Correlativo', 'Tipo Documento', 'Referencia','Código Único','H.R. Madre', 'Documento Digital'
                     );
                     $campos_reales=array(
-                        'fecha','correlativo','referencia','codigo_unico','hoja_ruta','estado'
+                        'estado','fecha','correlativo', 'tipo_documento', 'referencia','codigo_unico','hoja_ruta', 'doc_digital'
                     );
                     break;
                 case 'mineria_ilegal/':
@@ -84,7 +85,7 @@ class Documentos extends BaseController
                         'doc.fk_tramite' => $idTramite,
                         'doc.fk_usuario_creador' => session()->get('registroUser'),
                     );
-        
+
                     $builder = $db->table('documentos AS doc')
                     ->select($campos)
                     ->join('mineria_ilegal.hoja_ruta AS hr', 'doc.fk_hoja_ruta = hr.id', 'left')
@@ -102,7 +103,7 @@ class Documentos extends BaseController
                     );
                     break;
             }
-            
+
             $this->menuActual = $tramite['controlador'].'documento/listado';
             $cabera['titulo'] = $this->titulo;
             $cabera['navegador'] = true;
@@ -114,6 +115,7 @@ class Documentos extends BaseController
             $contenido['subtitulo'] = 'Mis Documentos Generados';
             $contenido['controlador'] = $this->controlador;
             $contenido['id_tramite'] = $idTramite;
+            $contenido['ruta_archivos'] = 'archivos/'.$tramite['controlador'];            
             $data['content'] = view($this->carpeta.'index', $contenido);
             $data['menu_actual'] = $this->menuActual;
             $data['tramites_menu'] = $this->tramitesMenu();
@@ -656,7 +658,7 @@ class Documentos extends BaseController
             'u.nombre_completo as usuario', 'p.nombre as cargo', 'doc.fk_tramite', 'doc.fk_acto_administrativo', 'doc.fk_hoja_ruta'
         );
         $where = array(
-            'doc.fk_usuario_creador' => session()->get('registroUser'),
+            //'doc.fk_usuario_creador' => session()->get('registroUser'),
             'doc.id' => $id,
         );
         $builder = $db->table('public.documentos as doc')
@@ -679,8 +681,8 @@ class Documentos extends BaseController
                     $builder = $db->table('public.acto_administrativo as cam')
                     ->select($campos)
                     ->join('public.datos_area_minera as dam', 'cam.id = dam.fk_acto_administrativo', 'left')
-                    ->where($where);                    
-                    if($fila = $builder->get()->getRowArray()){                        
+                    ->where($where);
+                    if($fila = $builder->get()->getRowArray()){
                         $file_name = str_replace('/','-',$documento['doc_correlativo']).'.docx';
                         $template = base_url('archivos/tipo_documento/'.$documento['plantilla']);
                         $plantillaWord = new TemplateProcessor($template);
@@ -715,7 +717,7 @@ class Documentos extends BaseController
                         readfile($temp_file);
                         @unlink($temp_file);
                         exit;
-                    }                    
+                    }
                     break;
                 case 'mineria_ilegal/':
                     $where = array(
@@ -742,13 +744,13 @@ class Documentos extends BaseController
                         exit;
                     }
                     break;
-            }            
-        }        
+            }
+        }
     }
 
     private function generarQRCam($documento, $fila){
         $data = $fila['hr_madre'].'|'.$documento['tipo_documento'].'|CITE:'.$documento['doc_correlativo'].'|FECHA:'.$documento['doc_fecha'].'|CODIGO UNICO:'.$fila['codigo_unico'].
-        '|DENOMINACION:'.$fila['denominacion'].'|APM:'.$fila['titular'].'|USUARIO:'.$documento['usuario'].' - '.$documento['cargo'];        
+        '|DENOMINACION:'.$fila['denominacion'].'|APM:'.$fila['titular'].'|USUARIO:'.$documento['usuario'].' - '.$documento['cargo'];
         $result = Builder::create()
         ->writer(new PngWriter())
         ->writerOptions([])
@@ -889,7 +891,7 @@ class Documentos extends BaseController
         }
         echo json_encode($data);
     }
-    
+
 
     private function tipoDocumentoReporte($idTramite){
         $tiposDocumentosModel = new TipoDocumentoModel();

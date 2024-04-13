@@ -17,6 +17,7 @@ class DenunciantesMineriaIlegalModel extends Model{
         'expedido',
         'telefonos',
         'direccion',
+        'domicilio_procesal',
         'email',
         'documento_identidad_digital',
         'fk_usuario_creador',

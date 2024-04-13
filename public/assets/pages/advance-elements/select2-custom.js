@@ -696,6 +696,13 @@ $(document).ready(function () {
   });
   /* ORIGEN CAMBIAR */
 
+  /* TIPO MINERIA ILEGAL MANUAL*/
+  verificarTipoMineriaManual();
+  $("#fk_tipo_denuncia").on("change", function () {
+    verificarTipoMineriaManual();
+  });
+  /* FIN TIPO MINERIA ILEGAL MANUAL*/
+
 });
 function desanexar_documento(idDocumento) {
   var row = document.getElementById(idDocumento);
@@ -734,6 +741,17 @@ function verificarOrigen(){
     default:
       $('#origen_enlace').hide();
       $('#origen_hr').hide();
+      break;
+  }
+}
+function verificarTipoMineriaManual(){  
+  switch($("#fk_tipo_denuncia").val()) {
+    case '3':
+      $('#verificacion-oficio-manual').show();
+      break;
+    default:
+      $('#verificacion-oficio-manual').hide();
+      break;
   }
 }
 

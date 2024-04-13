@@ -294,7 +294,7 @@
                                                     <?php
                                                     $style = '';
                                                     switch($derivacion[$campos_derivacion[$i]]){
-                                                        case 'MIGRADO':
+                                                        case 'REGULARIZACIÓN':
                                                             $style = 'btn btn-sm btn-danger btn-round';
                                                             break;
                                                         case 'ATENDIDO':

@@ -17,22 +17,57 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
-        correlativo_hr: {
+        fk_oficina:{
+            presence: {
+                message: "^Debe seleccionar una opción."
+            },
+        },
+        n_correlativo_hoja_ruta: {
             presence: true,
         },
-        fecha_hr: {
+        fecha_hoja_ruta: {
             presence: true,
         },
-        correlativo_denuncia: {
+        fk_usuario_destino: {
+            presence: true,
+        },
+        n_correlativo_denuncia: {
             presence: true,
         },
         fecha_denuncia: {
             presence: true,
         },
-        denunciantes_anexados: {
+        fk_tipo_denuncia: {
+            presence: true,
+        },
+        origen_oficio: {
+            presence: function(){
+                if($("#fk_tipo_denuncia").val() == '3')
+                    return true;
+                else
+                    return false;
+            }
+        },
+        descripcion_oficio: {
+            presence: function(){
+                if($("#fk_tipo_denuncia").val() == '3')
+                    return true;
+                else
+                    return false;
+            }
+        },
+        hr_anexados: {
             presence: {
-                message: "^Debe anexar a un denunciante al menos."
+                message: "^Debe anexar al menos una Hoja de Ruta."
             },
+        },
+        denunciantes_anexados: {
+            presence: function(){
+                if($("#fk_tipo_denuncia").val() == '3')
+                    return false;
+                else
+                    return true;
+            }
         },
         departamento:{
             presence: {
@@ -67,19 +102,6 @@ $(document).ready(function () {
                 else
                     return false;
             }
-        },
-        fk_oficina:{
-            presence: {
-                message: "^Debe seleccionar una opción."
-            },
-        },
-        fk_usuario_destinatario:{
-            presence: {
-                message: "^Debe seleccionar el Destinatario."
-            },
-        },
-        instruccion: {
-            presence: true,
         },
     };
 

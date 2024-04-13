@@ -28,7 +28,7 @@
                         </div>
                     </div>
                     <div class="card-block">
-                        <div class="dt-responsive table-responsive">
+                        <div class="dt-responsive table-responsive" style="min-height: 300px;">
                             <!--div class="bg-color-box color-warning waves-effect waves-light" style="background-color: #FEEDB9;color:black !important;">TRÁMITES A PUNTO DE VENCER SU PLAZO</!--div>
                             <div-- class="bg-color-box color-danger waves-effect waves-light" style="background-color: #F2C4C9; color:black !important;">TRÁMITES QUE VENCIERON SU PLAZO</div-->
                             <table id="tabla-listado" class="table table-striped table-bordered nowrap" style="font-size: small;">
@@ -55,33 +55,36 @@
                                         ?>
                                     <tr class="<?=$style?>">
                                         <td class="text-center">
-                                            <?php if($fila['estado'] == 'PRESENTADO'){?>
-                                                <div class="dropdown-info dropdown open">
-                                                    <button class="btn btn-sm btn-info dropdown-toggle waves-effect waves-light " type="button" id="dropdown-4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Acciones</button>
-                                                    <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                        <?php echo anchor('pdf_formulario_denuncia/'.$fila['id'], 'Imprimir Formulario',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
-                                                        <?php echo anchor($controlador.'atender_denuncia_web/'.$fila['id'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));?>
-                                                    </div>
-                                                </div>
-                                            <?php }?>
+                                            <?= anchor($controlador.'revisar_denuncia_manual/'.$fila['id_hoja_ruta'], '<i class="fa fa-check-square-o"></i> REVISAR',array('class' =>'btn btn-sm btn-primary'));?><br>                                            
                                         </td>
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>
                                         <td class="text-center" >
                                             <?php
-                                                if($campos_reales[$i]=='estado'){
+                                                if($campos_reales[$i]=='estado_manual'){
                                                     $style = '';
                                                     switch($fila[$campos_reales[$i]]){
-                                                        case 'PRESENTADO':
+                                                        case 'INGRESADO':
                                                             $style = 'btn btn-sm btn-danger btn-round';
                                                             break;
-                                                        case 'ARCHIVADO':
+                                                        case 'ATENDIDO':
+                                                            $style = 'btn btn-sm btn-success btn-round';
+                                                            break;
+                                                        case 'RECIBIDO':
+                                                            $style = 'btn btn-sm btn-primary btn-round';
+                                                            break;
+                                                        case 'DEVUELTO':
                                                             $style = 'btn btn-sm btn-warning btn-round';
                                                             break;
-                                                        case 'PROCESADO':
-                                                            $style = 'btn btn-sm btn-success btn-round';
+                                                        case 'DERIVADO':
+                                                            $style = 'btn btn-sm btn-inverse btn-round';
+                                                            break;
+                                                        case 'EN ESPERA':
+                                                            $style = 'btn btn-sm btn-info btn-round';
                                                             break;
                                                     }
                                                     echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';
+                                                }elseif($campos_reales[$i]=='fk_tipo_denuncia'){
+                                                    echo $tipo_denuncias[$fila[$campos_reales[$i]]];
                                                 }else{
                                                     echo $fila[$campos_reales[$i]];
                                                 }

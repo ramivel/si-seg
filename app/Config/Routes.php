@@ -44,6 +44,9 @@ $routes->add('pdf_formulario_denuncia/(:num)', 'Publico::pdfFormularioDenuncia/$
 $routes->add('ajax_provincias', 'Publico::ajaxProvincias');
 $routes->add('ajax_municipios', 'Publico::ajaxMunicipios');
 
+/* Descargar Documentos */
+$routes->add('documentos/descargar/(:num)', 'Documentos::descargar/$1');
+
 /*$routes->group('usuarios', function($routes){
     $routes->get('index', 'Usuarios::index', ['as'=>'usuarios.index']);
 });*/
@@ -193,6 +196,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->post('archivar_denuncia_web', 'MineriaIlegal::archivarDenunciaWeb');
         $routes->add('listado_recepcion', 'MineriaIlegal::listadoRecepcion');
         $routes->add('recibir/(:num)', 'MineriaIlegal::recibir/$1');
+        $routes->post('recibir_multiple', 'MineriaIlegal::recibirMultiple');
         $routes->add('atender/(:num)', 'MineriaIlegal::atender/$1');
         $routes->post('guardar_atender', 'MineriaIlegal::guardarAtender');
         $routes->add('ajax_area_minera_mineria_ilegal', 'MineriaIlegal::ajaxAreaMineraMineriaIlegal');
@@ -220,8 +224,10 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_provincias', 'MineriaIlegal::ajaxProvincias');
         $routes->add('ajax_municipios', 'MineriaIlegal::ajaxMunicipios');
 
-        $routes->add('denuncia_manual', 'MineriaIlegal::denunciaManual');
-
+        $routes->add('denuncia_manual', 'MineriaIlegal::denunciaManual');        
+        $routes->add('listado_denuncias_manuales', 'MineriaIlegal::listadoDenunciasManuales');
+        $routes->add('revisar_denuncia_manual/(:num)', 'MineriaIlegal::revisarDenunciaManual/$1');
+        $routes->post('guardar_revisar_denuncia_manual', 'MineriaIlegal::guardarRevisarDenunciaManual');
 
     });
 
@@ -252,7 +258,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('rechazar_anulacion/(:num)/(:num)', 'Documentos::rechazarAnulacion/$1/$2');
         $routes->add('ajax_documentos', 'Documentos::ajaxDocumentos');
         $routes->add('ajax_datos_documento', 'Documentos::ajaxDatosDocumento');
-        $routes->add('descargar/(:num)', 'Documentos::descargar/$1');
+        
         $routes->add('reporte/(:num)', 'Documentos::reporte/$1');
         $routes->add('ajax_documentos_mineria_ilegal', 'Documentos::ajaxDocumentosMineriaIlegal');
     });

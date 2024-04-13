@@ -17,7 +17,7 @@ class Usuarios extends BaseController
         100 => 'Administrador de Sistemas',
         1 => 'Migrar SINCOBOL',
         2 => 'Anular Documentos',
-        //3 => 'Fecha Notificación',
+        3 => 'Buscador de Trámites a Nivel Nacional',
         4 => 'Asignación Responsable',
         5 => 'Finalizar Trámite',
         6 => 'Reporte por Usuario',
@@ -29,6 +29,7 @@ class Usuarios extends BaseController
         12 => 'Responsable Atender Denuncias Página Web',
         13 => 'Responsable Minería Ilegal DFCCI',
         14 => 'Responsable Minería Ilegal Dirección Departamental o Regional',
+        15 => 'Cargar Registro Manuales de Minería Ilegal',
     );
 
     public function index()

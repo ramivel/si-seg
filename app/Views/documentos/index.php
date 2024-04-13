@@ -35,7 +35,7 @@
                                         <th class="nosort" width="90px"></th>
                                         <?php for($i=0;$i<count($campos_listar);$i++){?>
                                         <th class="text-center"><?php echo $campos_listar[$i];?></th>
-                                        <?php }?>                                        
+                                        <?php }?>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -43,22 +43,31 @@
                                     <?php foreach ($datos as $n=>$fila){?>
                                     <tr>
                                         <td class="text-center">
-                                            <?php if($fila['estado'] !== 'ANULADO' && $fila['estado'] !== 'ANEXADO'){?>                                            
+                                            <?php if($fila['estado'] !== 'ANULADO' && $fila['estado'] !== 'ANEXADO'){?>
                                                 <div class="dropdown-info dropdown open">
                                                     <button class="btn btn-sm btn-info dropdown-toggle waves-effect waves-light " type="button" id="dropdown-4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Acciones</button>
                                                     <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                         <?php echo anchor('documentos/descargar/'.$fila['id'], 'Descargar Word',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                         <?php if($fila['estado'] == 'SUELTO'){?>
                                                         <?php echo anchor('documentos/editar/'.$id_tramite.'/'.$fila['id'], 'Editar',array('class' =>'dropdown-item waves-light waves-effect'));?>
-                                                        <?php echo anchor('documentos/anular/'.$id_tramite.'/'.$fila['id'], 'Solicitar Anulación',array('class' =>'dropdown-item waves-light waves-effect'));?>                                                        
-                                                        <?php }?>                                                        
+                                                        <?php echo anchor('documentos/anular/'.$id_tramite.'/'.$fila['id'], 'Solicitar Anulación',array('class' =>'dropdown-item waves-light waves-effect'));?>
+                                                        <?php }?>
                                                     </div>
                                                 </div>
                                             <?php }?>
                                         </td>
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>
                                         <td class="text-center">
-                                        <?= $fila[$campos_reales[$i]];?>
+                                            <?php
+                                            if($campos_reales[$i] == 'doc_digital'){
+                                                if(isset($fila['doc_digital']) && $fila['doc_digital'])
+                                                    echo "<a href='".base_url($ruta_archivos.$fila['fk_area_minera'].'/'.$fila['doc_digital'])."' target='_blank' title='Ver Documento'><i class='feather icon-file'></i> Ver Documento</a>";
+                                                else
+                                                    echo "";
+                                            }else{
+                                                echo $fila[$campos_reales[$i]];
+                                            }
+                                            ?>
                                         </td>
                                         <?php }?>
                                     </tr>

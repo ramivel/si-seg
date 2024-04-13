@@ -29,10 +29,16 @@
                     </div>
                     <div class="card-block">
                         <div class="dt-responsive table-responsive">
+                            <?= form_open_multipart($controlador.'recibir_multiple');?>
+                            <div class="row">                            
+                                <div class="col-sm-4 text-left mb-2">
+                                    <?php echo form_submit('enviar', 'RECIBIR SELECCIONADOS','class="btn btn-danger recibir-form"');?>
+                                </div>
+                            </div>
                             <table id="tabla-listado" class="table table-striped table-bordered nowrap" style="font-size: small;">
                                 <thead>
                                     <tr>
-                                        <th class="nosort">Select All</th>
+                                        <th class="nosort text-center"><input id="seleccionar-todo" type="checkbox"/></th>
                                         <th class="nosort"></th>
                                         <?php for($i=0;$i<count($campos_listar);$i++){?>
                                         <th class="text-center"><?php echo $campos_listar[$i];?></th>
@@ -44,7 +50,7 @@
                                 <?php if(!empty($datos) && count($datos)>0){?>
                                     <?php foreach ($datos as $fila){?>
                                     <tr id="hr<?= $fila['id_hoja_ruta']; ?>">
-                                        <td>select</td>
+                                    <td class="text-center"><input name="recibir[]" value="<?= $fila['id_hoja_ruta'];?>" type="checkbox" class="seleccionado"/></td>
                                         <td class="text-center">
                                             <?= anchor($controlador.'recibir/'.$fila['id_hoja_ruta'], '<i class="fa fa-exchange"></i> RECIBIR',array('class' =>'btn btn-sm btn-primary recibir_tramite'));?><br>
                                             <button type="button" class="btn btn-sm btn-warning devolver_correspondencia mt-1" data-direccion="<?= base_url($controlador.'devolver')?>" data-idtra="<?=$fila['id_hoja_ruta'];?>" data-hr="<?=$fila['correlativo_hr'];?>"><i class="fa fa-reply"></i> DEVOLVER</button><br>                                            
@@ -90,6 +96,7 @@
                                 <?php }?>
                                 </tbody>
                             </table>
+                            <?= form_close();?>
                         </div>
 
                         <div class="modal fade" id="devolver-modal" tabindex="-1" role="dialog">

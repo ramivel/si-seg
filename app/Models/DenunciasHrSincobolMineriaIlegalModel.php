@@ -11,6 +11,15 @@ class DenunciasHrSincobolMineriaIlegalModel extends Model{
 
     protected $returnType     = 'array';    
 
-    protected $allowedFields = ['fk_denuncia', 'fk_hoja_ruta'];
+    protected $allowedFields = [
+        'fk_denuncia',
+        'fk_hoja_ruta',
+        'correlativo',
+        'fecha',
+        'referencia',
+        'remitente',
+        'cite',
+        'tipo_hoja_ruta',
+    ];
 
 }

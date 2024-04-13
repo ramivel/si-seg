@@ -1155,7 +1155,6 @@ class Cam extends BaseController
         }
         session()->setFlashdata('fail', 'No se pudo recepcionar los trámites.');
         return redirect()->to($this->controlador.'mis_tramites');
-
     }
     public function recibirTramite($id_tramite){
         $actoAdministrativoModel = new ActoAdministrativoModel();
@@ -1951,17 +1950,19 @@ class Cam extends BaseController
             if(!$validation){
                 $contenido['validation'] = $this->validator;
             }else{
+                $validate = true;
                 $db = \Config\Database::connect();
-                $campos = array('ac.id', 'ac.ultimo_estado', 'ac.correlativo', 'dam.codigo_unico', 'dam.denominacion',
+                $campos = array('ac.id', 'ac.ultimo_estado', 'ac.correlativo', 'ofi.nombre as oficina', 'dam.codigo_unico', 'dam.denominacion',
                 "CONCAT(ur.nombre_completo, '<br><b>',pr.nombre,'</b>') as remitente", "CONCAT(ud.nombre_completo, '<br><b>',pd.nombre,'</b>') as destinatario",
                 'ac.ultimo_instruccion', "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
                 "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion");
                 $builder = $db->table('public.acto_administrativo as ac')
                 ->select($campos)
                 ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+                ->join('public.oficinas as ofi', 'ac.fk_oficina = ofi.id', 'left')
                 ->join('usuarios as ur', 'ac.ultimo_fk_usuario_remitente = ur.id', 'left')
                 ->join('perfiles as pr', 'ur.fk_perfil=pr.id', 'left')
-                ->join('usuarios as ud', 'ac.fk_usuario_actual = ud.id', 'left')
+                ->join('usuarios as ud', 'ac.ultimo_fk_usuario_destinatario = ud.id', 'left')
                 ->join('perfiles as pd', 'ud.fk_perfil=pd.id', 'left')
                 ->join('estado_tramite as etp', 'ac.ultimo_fk_estado_tramite_padre = etp.id', 'left')
                 ->join('estado_tramite as eth', 'ac.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
@@ -1970,6 +1971,16 @@ class Cam extends BaseController
                     'ac.deleted_at' => NULL,
                     'ac.fk_oficina' => session()->get('registroOficina')
                 );
+                if(in_array(3, session()->get('registroPermisos')))
+                    $where = array(
+                        'ac.deleted_at' => NULL,
+                    );
+                else
+                    $where = array(
+                        'ac.deleted_at' => NULL,
+                        'ac.fk_oficina' => session()->get('registroOficina')
+                    );
+
                 $texto = mb_strtoupper(trim($this->request->getPost('texto')));
 
                 switch($this->request->getPost('campo')){
@@ -1977,15 +1988,21 @@ class Cam extends BaseController
                         $query = $builder->where($where)->like('ac.correlativo', $texto);
                         break;
                     case 'codigo_unico':
-                        $where['dam.codigo_unico'] = $texto;
-                        $query = $builder->where($where);
+                        if(is_numeric($texto)){
+                            $where['dam.codigo_unico'] = $texto;
+                            $query = $builder->where($where);
+                        }else{
+                            $validate = false;
+                        }
                         break;
                     case 'denominacion':
                         $query = $builder->where($where)->like('dam.denominacion', $texto);
                         break;
                 }
-                $datos = $query->get()->getResultArray();
-                $contenido['datos'] = $datos;
+                if($validate){
+                    $datos = $query->get()->getResultArray();
+                    $contenido['datos'] = $datos;
+                }
             }
         }
         $campos_buscar=array(
@@ -1994,10 +2011,10 @@ class Cam extends BaseController
             'denominacion' => 'Denominación',
         );
         $campos_listar=array(
-            ' ','Fecha Derivación/Devolución','H.R. Madre','Código Único','Denominación','Remitente','Destinatario','Instrucción','Estado Trámite',
+            ' ','Fecha Derivación<br>o Devolución','H.R. Madre','Departamental o Regional','Código Único','Denominación','Remitente','Destinatario','Instrucción','Estado Trámite',
         );
         $campos_reales=array(
-            'ultimo_estado','ultimo_fecha_derivacion','correlativo','codigo_unico','denominacion','remitente','destinatario','ultimo_instruccion','estado_tramite',
+            'ultimo_estado','ultimo_fecha_derivacion','correlativo','oficina','codigo_unico','denominacion','remitente','destinatario','ultimo_instruccion','estado_tramite',
         );
         $cabera['titulo'] = $this->titulo;
         $cabera['navegador'] = true;
@@ -2052,7 +2069,7 @@ class Cam extends BaseController
                 ->orderBY('ac.fecha_mecanizada', 'DESC');
                 $where = array(
                     'ac.deleted_at' => NULL,
-                    'ac.fk_oficina' => session()->get('registroOficina')
+                    //'ac.fk_oficina' => session()->get('registroOficina')
                 );
                 $texto = mb_strtoupper(trim($this->request->getPost('texto')));
 
@@ -3633,8 +3650,9 @@ class Cam extends BaseController
             ->select($campos)
             ->join('contratos_licencias.actor_minero as acm', 'am.fk_actor_minero_poseedor = acm.id', 'left')
             ->join('contratos_licencias.tipo_actor_minero as tam', 'acm.fk_tipo_actor_minero = tam.id', 'left')
-            ->where($where)
+            //->where($where)
             ->like("CONCAT(am.codigo_unico,' - ',am.nombre)", $cadena)
+            ->whereIn('am.fk_tipo_area_minera', array(1, 11))
             ->orderBy('am.id','DESC')
             ->limit(20);
             $datos = $builder->get()->getResultArray();
@@ -4091,7 +4109,7 @@ class Cam extends BaseController
             'migrado' => false,
             'fk_oficina' => 2,
         );
-        if($datos = $migrarModel->where($where)->findAll(200)){            
+        if($datos = $migrarModel->where($where)->findAll(200)){
             foreach($datos as $n => $row){
                 $hoja_ruta = $this->obtenerDatosMigracion($row['fk_hoja_ruta_sincobol']);
                 $errorActoAdministrativo = 'NO';
@@ -4165,7 +4183,7 @@ class Cam extends BaseController
                             $errorDerivacion = 'SI';
                         }else{
                             $campos = array('id', 'fk_hoja_ruta');
-                            $where = array(                                
+                            $where = array(
                                 'fk_hoja_ruta' => $hoja_ruta['fk_hoja_ruta'],
                             );
                             $ultima_derivacion = $derivacionSincobolModel->select($campos)->where($where)->orderBY('id', 'DESC')->first();
@@ -4289,7 +4307,7 @@ class Cam extends BaseController
                             $errorDerivacion = 'SI';
                         }else{
                             $campos = array('id', 'fk_hoja_ruta');
-                            $where = array(                                
+                            $where = array(
                                 'fk_hoja_ruta' => $row['fk_hoja_ruta_sincobol'],
                             );
                             $ultima_derivacion = $derivacionSincobolModel->select($campos)->where($where)->orderBY('id', 'DESC')->first();

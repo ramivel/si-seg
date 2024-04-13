@@ -209,12 +209,19 @@
                                 <span class="pcoded-mtext"><?= $row['menu'] ?></span>
                             </a>
                             <ul class="pcoded-submenu">
-                                
-                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'denuncia_manual') ? 'active' : '';?>">
-                                    <a href="<?= base_url($row['controlador'].'denuncia_manual');?>">
-                                        <span class="pcoded-mtext">Denuncia Manual</span>
-                                    </a>
-                                </li>                                
+
+                                <?php if(in_array(15, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'denuncia_manual') ? 'active' : '';?>">
+                                        <a href="<?= base_url($row['controlador'].'denuncia_manual');?>">
+                                            <span class="pcoded-mtext">Agregar Manual</span>
+                                        </a>
+                                    </li>                                
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_denuncias_manuales') ? 'active' : '';?>">
+                                        <a href="<?= base_url($row['controlador'].'listado_denuncias_manuales');?>">
+                                            <span class="pcoded-mtext">Mis Denuncias Manuales</span>
+                                        </a>
+                                    </li>
+                                <?php }?>
 
                                 <?php if(in_array(12, session()->get('registroPermisos'))){?>
                                     <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'denuncias_web') ? 'active' : '';?>">
