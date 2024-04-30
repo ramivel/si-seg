@@ -108,7 +108,7 @@ class TipoDocumento extends BaseController
         $contenido['accion'] = $this->controlador.'agregar';
         $contenido['validation'] = $this->validator;
         $contenido['tramites'] = $tramitesModel->findAll();
-        $contenido['perfiles'] = $perfilesModel->findAll();
+        $contenido['perfiles'] = $perfilesModel->orderBy('nombre', 'ASC')->findAll();
         $contenido['controlador'] = $this->controlador;
         $data['content'] = view($this->carpeta.'agregar', $contenido);
         $data['menu_actual'] = $this->menuActual;
@@ -133,7 +133,7 @@ class TipoDocumento extends BaseController
             $contenido['validation'] = $this->validator;
             $contenido['tramites'] = $tramitesModel->findAll();
             $contenido['tramites_elegidos'] = explode(',',$fila['tramites']);
-            $contenido['perfiles'] = $perfilesModel->findAll();
+            $contenido['perfiles'] = $perfilesModel->orderBy('nombre', 'ASC')->findAll();
             $contenido['perfiles_elegidos'] = explode(',',$fila['perfiles']);
             $contenido['controlador'] = $this->controlador;
             $data['content'] = view($this->carpeta.'editar', $contenido);
@@ -184,7 +184,7 @@ class TipoDocumento extends BaseController
                 $contenido['validation'] = $this->validator;
                 $contenido['controlador'] = $this->controlador;
                 $contenido['tramites'] = $tramitesModel->findAll();
-                $contenido['perfiles'] = $perfilesModel->findAll();
+                $contenido['perfiles'] = $perfilesModel->orderBy('nombre', 'ASC')->findAll();
                 $data['content'] = view($this->carpeta.'editar', $contenido);
                 $data['menu_actual'] = $this->menuActual;
                 $data['tramites_menu'] = $this->tramitesMenu();

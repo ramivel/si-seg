@@ -199,6 +199,8 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->post('recibir_multiple', 'MineriaIlegal::recibirMultiple');
         $routes->add('atender/(:num)', 'MineriaIlegal::atender/$1');
         $routes->post('guardar_atender', 'MineriaIlegal::guardarAtender');
+        $routes->add('editar/(:num)', 'MineriaIlegal::editar/$1');
+        $routes->post('guardar_editar', 'MineriaIlegal::guardarEditar');
         $routes->add('ajax_area_minera_mineria_ilegal', 'MineriaIlegal::ajaxAreaMineraMineriaIlegal');
         $routes->add('ajax_datos_area_minera_mineria_ilegal', 'MineriaIlegal::ajaxDatosAreaMineraMineriaIlegal');
         $routes->add('ajax_analista_destinario', 'MineriaIlegal::ajaxAnalistaDestinatario');
@@ -228,6 +230,10 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('listado_denuncias_manuales', 'MineriaIlegal::listadoDenunciasManuales');
         $routes->add('revisar_denuncia_manual/(:num)', 'MineriaIlegal::revisarDenunciaManual/$1');
         $routes->post('guardar_revisar_denuncia_manual', 'MineriaIlegal::guardarRevisarDenunciaManual');
+
+        $routes->add('buscador', 'MineriaIlegal::buscador');
+        $routes->add('ajax_hr_in_ex', 'MineriaIlegal::ajaxHrInEx');
+        $routes->add('ajax_datos_hr_in_ex', 'MineriaIlegal::ajaxDatosHrInEx');
 
     });
 

@@ -14,6 +14,7 @@ use App\Models\DatosAreaMineraModel;
 use App\Models\DerivacionModel;
 use App\Models\DerivacionSincobolModel;
 use App\Models\DocumentosModel;
+use App\Models\HojaRutaSisegModel;
 use App\Models\HrAnexadasModel;
 use App\Models\MigrarCAMModel;
 use App\Models\OficinasModel;
@@ -552,21 +553,6 @@ class Cam extends BaseController
             ->orderBY('der.id', 'DESC');
             $ultima_derivacion = $query->get()->getFirstRow('array');
 
-            $contenido['ultima_derivacion'] = $ultima_derivacion;
-
-            $campos = array(
-                'doc.id', 'doc.correlativo', "TO_CHAR(doc.fecha, 'DD/MM/YYYY') as fecha", 'td.nombre as tipo_documento', "TO_CHAR(doc.fecha_notificacion, 'DD/MM/YYYY') as fecha_notificacion"
-            );
-            $where = array(
-                'doc.fk_derivacion' => $ultima_derivacion['id'],
-                'doc.estado' => 'ANEXADO',
-            );
-            $query = $db->table('documentos AS doc')
-            ->select($campos)
-            ->join('tipo_documento AS td', 'doc.fk_tipo_documento = td.id', 'left')
-            ->where($where);
-            $contenido['documentos_anexados'] = $query->get()->getResultArray();
-
             $cabera['titulo'] = $this->titulo;
             $cabera['navegador'] = true;
             $cabera['subtitulo'] = 'Atender Tramite';
@@ -579,6 +565,7 @@ class Cam extends BaseController
 
             $contenido['id'] = $fila['id'];
             $contenido['fila'] = $fila;
+            $contenido['ultima_derivacion'] = $ultima_derivacion;
             $contenido['estadosTramites'] = $this->obtenerEstadosTramites($this->idTramite);
             $contenido['id_estado_padre'] = $ultima_derivacion['fk_estado_tramite_padre'];
             if($ultima_derivacion['fk_estado_tramite_hijo']){
@@ -588,6 +575,7 @@ class Cam extends BaseController
             }else{
                 $contenido['anexar_documentos'] = $ultima_derivacion['anexar_documentos_padre'];
             }
+            $contenido['documentos'] = $this->obtenerDocumentosAtender($fila['id']);
             $contenido['subtitulo'] = 'Atender Tramite';
             $contenido['accion'] = $this->controlador.'guardar_atender';
             $contenido['ruta_archivos'] = $this->rutaArchivos;
@@ -614,6 +602,8 @@ class Cam extends BaseController
             $id = $this->request->getPost('id');
             $id_derivacion = $this->request->getPost('id_derivacion');
             $fk_hoja_ruta_solicitud = $this->request->getPost('fk_hoja_ruta_solicitud');
+            $anexar_hr = $this->request->getPost('anexar_hr');
+            $documentos = $this->obtenerDocumentosAtender($id);
             $validation = $this->validate([
                 'id' => [
                     'rules' => 'required',
@@ -648,19 +638,13 @@ class Cam extends BaseController
             ]);
             if(!$validation){
                 $fk_tipo_hoja_ruta = $this->request->getPost('fk_tipo_hoja_ruta');
-                $db = \Config\Database::connect();
-                $campos = array(
-                    'doc.id', 'doc.correlativo', "TO_CHAR(doc.fecha, 'DD/MM/YYYY') as fecha", 'td.nombre as tipo_documento'
-                );
-                $where = array(
-                    'doc.fk_derivacion' => $id_derivacion,
-                    'doc.estado' => 'ANEXADO',
-                );
-                $query = $db->table('documentos AS doc')
-                ->select($campos)
-                ->join('tipo_documento AS td', 'doc.fk_tipo_documento = td.id', 'left')
-                ->where($where);
-                $contenido['documentos_anexados'] = $query->get()->getResultArray();
+
+                if(isset($anexar_hr) && count($anexar_hr) > 0){
+                    $hojas_ruta_anexadas = array();
+                    foreach($anexar_hr as $id_hoja_ruta)
+                        $hojas_ruta_anexadas[] = $this->obtenerDatosSelectHrInExSincobol($id_hoja_ruta);
+                    $contenido['hojas_ruta_anexadas'] = $hojas_ruta_anexadas;
+                }
 
                 $cabera['titulo'] = $this->titulo;
                 $cabera['navegador'] = true;
@@ -668,8 +652,7 @@ class Cam extends BaseController
                 $contenido['id_estado_padre'] = $this->request->getPost('fk_estado_tramite');
                 $contenido['estadosTramitesHijo'] = $this->obtenerEstadosTramitesHijo($this->request->getPost('fk_estado_tramite'));
                 $contenido['id_estado_hijo'] = $this->request->getPost('fk_estado_tramite_hijo');
-                if($this->request->getPost('id_documentos'))
-                    $contenido['documentos'] = $this->obtenerDatosDocumento($this->request->getPost('id_documentos'), $this->request->getPost('fecha_notificaciones'));
+                $contenido['documentos'] = $documentos;
                 $contenido['usu_destinatario'] = $this->obtenerUsuarioDestinatario($this->request->getPost('fk_usuario_destinatario'));
                 $contenido['title'] = view('templates/title',$cabera);
                 $contenido['id'] = $id;
@@ -701,7 +684,6 @@ class Cam extends BaseController
 
                 $data = array(
                     'id' => $id,
-                    //'fk_usuario_actual' => $this->request->getPost('fk_usuario_destinatario'),
                     'ultimo_estado' => $estado,
                     'ultimo_fk_estado_tramite_padre' => $this->request->getPost('fk_estado_tramite'),
                     'ultimo_fk_estado_tramite_hijo' => ((!empty($this->request->getPost('fk_estado_tramite_hijo'))) ? $this->request->getPost('fk_estado_tramite_hijo') : NULL),
@@ -715,8 +697,11 @@ class Cam extends BaseController
                     'ultimo_recurso_revocatoria' => ($this->request->getPost('recurso_revocatoria') ? 'true' : 'false'),
                     'ultimo_oposicion' => ($this->request->getPost('oposicion') ? 'true' : 'false'),
                 );
-                if($this->request->getPost('id_documentos')){
-                    $data['ultimo_fk_documentos'] = implode(",",$this->request->getPost('id_documentos'));
+                if(count($documentos)>0){
+                    $ultimo_fk_documentos = '';
+                    foreach($documentos as $row)
+                        $ultimo_fk_documentos .= $row['id'].',';
+                    $data['ultimo_fk_documentos'] = substr($ultimo_fk_documentos, 0, -1);
                 }
                 if(in_array(10, session()->get('registroPermisos'))){
                     $fila = $actoAdministrativoModel->find($id);
@@ -724,7 +709,6 @@ class Cam extends BaseController
                     if($fila['ultimo_estado'] == 'RECIBIDO')
                         $data['documentos_apm'] = $this->obtenerDocumentosAPM($id);
                 }
-
                 if($actoAdministrativoModel->save($data) === false){
                     session()->setFlashdata('fail', $actoAdministrativoModel->errors());
                 }else{
@@ -770,16 +754,14 @@ class Cam extends BaseController
                     if($derivacionModel->insert($dataDerivacion) === false){
                         session()->setFlashdata('fail', $derivacionModel->errors());
                     }else{
-                        $idDerivacion = $derivacionModel->getInsertID();
-                        if($this->request->getPost('id_documentos')){
-                            $documentos = $this->request->getPost('id_documentos');
-                            $fecha_notificaciones = $this->request->getPost('fecha_notificaciones');
-                            foreach($documentos as $i=>$id_documento){
+                        $id_derivacion = $derivacionModel->getInsertID();
+                        if(count($documentos)>0){
+                            foreach($documentos as $documento){
                                 $dataDocumento = array(
-                                    'id' => $id_documento,
+                                    'id' => $documento['id'],
                                     'estado' => 'ANEXADO',
-                                    'fk_derivacion' => $idDerivacion,
-                                    'fecha_notificacion'=>((!empty($fecha_notificaciones[$i])) ? $fecha_notificaciones[$i] : NULL),
+                                    'fk_derivacion' => $id_derivacion,
+                                    'fecha_notificacion'=>((!empty($this->request->getPost('fecha_notificacion'.$documento['id']))) ? $this->request->getPost('fecha_notificacion'.$documento['id']) : NULL),
                                 );
                                 if($documentosModel->save($dataDocumento) === false){
                                     session()->setFlashdata('fail', $documentosModel->errors());
@@ -787,10 +769,9 @@ class Cam extends BaseController
                             }
                         }
 
-                        if($this->request->getPost('anexar_hr')){
-                            $hr_anexar = $this->request->getPost('anexar_hr');
-                            foreach($hr_anexar as $fk_hoja_ruta){
-                                if(!$this->anexarHrSincobol($idDerivacion,$fk_hoja_ruta,$motivo_anexo, $fk_hoja_ruta_solicitud))
+                        if($anexar_hr){
+                            foreach($anexar_hr as $fk_hoja_ruta){
+                                if(!$this->anexarHrSincobolMejorado($id_derivacion, $fk_hoja_ruta, $id, session()->get('registroUserName')))
                                     session()->setFlashdata('fail', 'No se anexo la H.R.'.$fk_hoja_ruta);
                             }
                         }
@@ -829,6 +810,7 @@ class Cam extends BaseController
         ->where($where)
         ->orderBY('ac.id', 'DESC');
         if($fila = $builder->get()->getRowArray()){
+            $hrAnexadasModel = new HrAnexadasModel();
             $campos = array(
                 'der.id', 'der.domicilio_legal', 'der.domicilio_procesal', 'der.telefono_solicitante', 'der.fk_estado_tramite_padre', 'der.fk_estado_tramite_hijo',
                 'der.observaciones', 'der.fk_usuario_destinatario', 'der.instruccion', 'der.motivo_anexo', 'etp.anexar_documentos as anexar_documentos_padre',
@@ -844,20 +826,14 @@ class Cam extends BaseController
             ->where($where)
             ->orderBY('der.id', 'DESC');
             $derivacion = $query->get()->getFirstRow('array');
-            $contenido['derivacion'] = $derivacion;
-
-            $campos = array(
-                'doc.id', 'doc.correlativo', "TO_CHAR(doc.fecha, 'DD/MM/YYYY') as fecha", 'td.nombre as tipo_documento', 'td.notificacion', 'doc.fecha_notificacion'
-            );
-            $where = array(
-                'doc.fk_derivacion' => $derivacion['id'],
-                'doc.estado' => 'ANEXADO',
-            );
-            $query = $db->table('documentos AS doc')
-            ->select($campos)
-            ->join('tipo_documento AS td', 'doc.fk_tipo_documento = td.id', 'left')
-            ->where($where);
-            $contenido['documentos_anexados'] = $query->get()->getResultArray();
+            $hojas_ruta_anexadas = array();
+            $id_hojas_ruta_anexadas_ant = '';
+            if($hr_anexadas = $hrAnexadasModel->where(array('fk_derivacion' => $derivacion['id']))->orderBy('id', 'ASC')->findAll()){
+                foreach($hr_anexadas as $hr_anexada){
+                    $hojas_ruta_anexadas[] = $this->obtenerDatosSelectHrInExSincobolEditar($hr_anexada['fk_hoja_ruta']);
+                    $id_hojas_ruta_anexadas_ant .= $hr_anexada['fk_hoja_ruta'].',';
+                }
+            }
 
             $cabera['titulo'] = $this->titulo;
             $cabera['navegador'] = true;
@@ -870,7 +846,9 @@ class Cam extends BaseController
                 $contenido['datos'] = array_merge($this->informacionHRCmnCmc($fila['fk_hoja_ruta']), $this->informacionAreaMineraCmnCmc($fila['fk_area_minera']));
 
             $contenido['id'] = $fila['id'];
+            $contenido['id_hojas_ruta_anexadas_ant'] = substr($id_hojas_ruta_anexadas_ant, 0, -1);
             $contenido['fila'] = $fila;
+            $contenido['derivacion'] = $derivacion;
             $contenido['estadosTramites'] = $this->obtenerEstadosTramites($this->idTramite);
             $contenido['id_estado_padre'] = $derivacion['fk_estado_tramite_padre'];
             if($derivacion['fk_estado_tramite_hijo']){
@@ -880,7 +858,9 @@ class Cam extends BaseController
             }else{
                 $contenido['anexar_documentos'] = $derivacion['anexar_documentos_padre'];
             }
+            $contenido['documentos'] = $this->obtenerDocumentosEditar($fila['id'], $derivacion['id']);
             $contenido['usu_destinatario'] = $this->obtenerUsuarioDestinatario($derivacion['fk_usuario_destinatario']);
+            $contenido['hojas_ruta_anexadas'] = $hojas_ruta_anexadas;
             $contenido['subtitulo'] = 'Editar Derivación';
             $contenido['accion'] = $this->controlador.'guardar_editar';
             $contenido['ruta_archivos'] = $this->rutaArchivos;
@@ -907,6 +887,8 @@ class Cam extends BaseController
             $id = $this->request->getPost('id');
             $id_derivacion = $this->request->getPost('id_derivacion');
             $fk_hoja_ruta_solicitud = $this->request->getPost('fk_hoja_ruta_solicitud');
+            $anexar_hr = $this->request->getPost('anexar_hr');
+            $documentos =  $this->obtenerDocumentosEditar($id, $id_derivacion);
             $validation = $this->validate([
                 'id' => [
                     'rules' => 'required',
@@ -941,19 +923,13 @@ class Cam extends BaseController
             ]);
             if(!$validation){
                 $fk_tipo_hoja_ruta = $this->request->getPost('fk_tipo_hoja_ruta');
-                $db = \Config\Database::connect();
-                $campos = array(
-                    'doc.id', 'doc.correlativo', "TO_CHAR(doc.fecha, 'DD/MM/YYYY') as fecha", 'td.nombre as tipo_documento'
-                );
-                $where = array(
-                    'doc.fk_derivacion' => $id_derivacion,
-                    'doc.estado' => 'ANEXADO',
-                );
-                $query = $db->table('documentos AS doc')
-                ->select($campos)
-                ->join('tipo_documento AS td', 'doc.fk_tipo_documento = td.id', 'left')
-                ->where($where);
-                $contenido['documentos_anexados'] = $query->get()->getResultArray();
+
+                if(isset($anexar_hr) && count($anexar_hr) > 0){
+                    $hojas_ruta_anexadas = array();
+                    foreach($anexar_hr as $id_hoja_ruta)
+                        $hojas_ruta_anexadas[] = $this->obtenerDatosSelectHrInExSincobolEditar($id_hoja_ruta);
+                    $contenido['hojas_ruta_anexadas'] = $hojas_ruta_anexadas;
+                }
 
                 $cabera['titulo'] = $this->titulo;
                 $cabera['navegador'] = true;
@@ -961,8 +937,7 @@ class Cam extends BaseController
                 $contenido['id_estado_padre'] = $this->request->getPost('fk_estado_tramite');
                 $contenido['estadosTramitesHijo'] = $this->obtenerEstadosTramitesHijo($this->request->getPost('fk_estado_tramite'));
                 $contenido['id_estado_hijo'] = $this->request->getPost('fk_estado_tramite_hijo');
-                if($this->request->getPost('id_documentos'))
-                    $contenido['documentos_anexados'] = $this->obtenerDatosDocumento($this->request->getPost('id_documentos'), $this->request->getPost('fecha_notificaciones'));
+                $contenido['documentos'] = $documentos;
                 $contenido['usu_destinatario'] = $this->obtenerUsuarioDestinatario($this->request->getPost('fk_usuario_destinatario'));
                 $contenido['title'] = view('templates/title',$cabera);
                 $contenido['id'] = $id;
@@ -1007,9 +982,6 @@ class Cam extends BaseController
                     'ultimo_oposicion' => ($this->request->getPost('oposicion') ? 'true' : 'false'),
                 );
 
-                if($this->request->getPost('id_documentos')){
-                    $data['ultimo_fk_documentos'] = implode(",",$this->request->getPost('id_documentos'));
-                }
                 if(in_array(10, session()->get('registroPermisos'))){
                     $data['estado_tramite_apm'] = $this->obtenerEstadoTramiteAPM($this->request->getPost('fk_estado_tramite'), $this->request->getPost('fk_estado_tramite_hijo'));
                     //$data['documentos_apm'] = $this->obtenerDocumentosAPM($id);
@@ -1061,27 +1033,13 @@ class Cam extends BaseController
                         session()->setFlashdata('fail', $derivacionModel->errors());
                     }else{
 
-                        if($documentosAnteriores = $documentosModel->where(array('fk_derivacion' => $id_derivacion))->findAll()){
-                            foreach($documentosAnteriores as $documentoAnterior){
-                                $dataDocumentoAnterior = array(
-                                    'id' => $documentoAnterior['id'],
-                                    'estado' => 'SUELTO',
-                                    'fk_derivacion' => NULL,
-                                );
-                                if($documentosModel->save($dataDocumentoAnterior) === false)
-                                    session()->setFlashdata('fail', $documentosModel->errors());
-                            }
-                        }
-
-                        if($this->request->getPost('id_documentos')){
-                            $documentos = $this->request->getPost('id_documentos');
-                            $fecha_notificaciones = $this->request->getPost('fecha_notificaciones');
-                            foreach($documentos as $i=>$id_documento){
+                        if(count($documentos)>0){
+                            foreach($documentos as $documento){
                                 $dataDocumento = array(
-                                    'id' => $id_documento,
+                                    'id' => $documento['id'],
                                     'estado' => 'ANEXADO',
                                     'fk_derivacion' => $id_derivacion,
-                                    'fecha_notificacion'=>((!empty($fecha_notificaciones[$i])) ? $fecha_notificaciones[$i] : NULL),
+                                    'fecha_notificacion'=>((!empty($this->request->getPost('fecha_notificacion'.$documento['id']))) ? $this->request->getPost('fecha_notificacion'.$documento['id']) : NULL),
                                 );
                                 if($documentosModel->save($dataDocumento) === false){
                                     session()->setFlashdata('fail', $documentosModel->errors());
@@ -1089,13 +1047,13 @@ class Cam extends BaseController
                             }
                         }
 
-                        if($this->request->getPost('anexar_hr')){
+                        /*if($this->request->getPost('anexar_hr')){
                             $hr_anexar = $this->request->getPost('anexar_hr');
                             foreach($hr_anexar as $fk_hoja_ruta){
                                 if(!$this->anexarHrSincobol($id_derivacion,$fk_hoja_ruta,$motivo_anexo, $fk_hoja_ruta_solicitud))
                                     session()->setFlashdata('fail', 'No se anexo la H.R.'.$fk_hoja_ruta);
                             }
-                        }
+                        }*/
 
                     }
                     if(in_array(10, session()->get('registroPermisos')))
@@ -3762,14 +3720,13 @@ class Cam extends BaseController
             $oficinas = explode(',',$usuario['fk_oficina_sincobol']);
 
             $dbSincobol = \Config\Database::connect('sincobol');
-            $builder = $dbSincobol->table('sincobol.vista_buscador_hoja_ruta')
-            ->where("estado != 'CONCLUIDO'")
+            $builder = $dbSincobol->table('sincobol.vista_buscador_hoja_ruta_actualizado')
+            ->where("anexado_siseg = 'NO'")
             ->whereIn('fk_oficina', $oficinas)
             ->like("correlativo", $cadena)
             ->orderBy('id','DESC')
-            ->limit(5);
+            ->limit(10);
             $datos = $builder->get()->getResultArray();
-
             if($datos){
                 foreach($datos as $row){
                     $data[] = array(
@@ -4376,6 +4333,105 @@ class Cam extends BaseController
         );
         $estado = $estadoTramiteModel->where($where)->first();
         return $estado['id'];
+    }
+    private function obtenerDocumentosAtender($fk_acto_administrativo){
+        $db = \Config\Database::connect();
+        $campos = array('doc.id', 'doc.correlativo', "TO_CHAR(doc.fecha, 'DD/MM/YYYY') as fecha", 'td.nombre as tipo_documento', 'td.notificacion');
+        $where = array(
+            'doc.fk_usuario_creador' => session()->get('registroUser'),
+            'doc.fk_derivacion' => NULL,
+            'doc.estado' => 'SUELTO',
+            'doc.fk_acto_administrativo' => $fk_acto_administrativo,
+        );
+        $builder = $db->table('public.documentos AS doc')
+        ->select($campos)
+        ->join('public.tipo_documento AS td', 'doc.fk_tipo_documento = td.id', 'left')
+        ->where($where)
+        ->orderBY('doc.id', 'ASC');
+        return $builder->get()->getResultArray();
+    }
+    private function obtenerDocumentosEditar($fk_acto_administrativo, $id_derivacion){
+        $db = \Config\Database::connect();
+        $campos = array('doc.id', 'doc.correlativo', 'doc.fecha_notificacion', "TO_CHAR(doc.fecha, 'DD/MM/YYYY') as fecha", 'td.nombre as tipo_documento', 'td.notificacion');
+        $where = array(
+            'doc.fk_usuario_creador' => session()->get('registroUser'),
+            'doc.fk_derivacion' => $id_derivacion,
+            'doc.fk_acto_administrativo' => $fk_acto_administrativo,
+        );
+        $builder = $db->table('public.documentos AS doc')
+        ->select($campos)
+        ->join('public.tipo_documento AS td', 'doc.fk_tipo_documento = td.id', 'left')
+        ->where($where)
+        ->orderBY('doc.id', 'ASC');
+        return $builder->get()->getResultArray();
+    }
+    public function obtenerDatosSelectHrInExSincobol($idHojaRuta){
+        $dbSincobol = \Config\Database::connect('sincobol');
+        $where = array(
+            'anexado_siseg' => 'NO',
+            'id' => $idHojaRuta
+        );
+        $builder = $dbSincobol->table('sincobol.vista_buscador_hoja_ruta_actualizado')
+        ->where($where);
+        return $builder->get()->getRowArray();
+    }
+    public function obtenerDatosSelectHrInExSincobolEditar($idHojaRuta){
+        $dbSincobol = \Config\Database::connect('sincobol');
+        $where = array(
+            'id' => $idHojaRuta
+        );
+        $builder = $dbSincobol->table('sincobol.vista_buscador_hoja_ruta_actualizado')
+        ->where($where);
+        return $builder->get()->getRowArray();
+    }
+    public function anexarHrSincobolMejorado($id_derivacion, $fk_hoja_ruta, $fk_acto_administrativo, $usuario){
+        if($this->archivarHrSincobolMejorado($fk_hoja_ruta, $fk_acto_administrativo, $usuario)){
+            $hrAnexadasModel = new HrAnexadasModel();
+            $dataDerivacion = array(
+                'fk_derivacion' => $id_derivacion,
+                'fk_hoja_ruta' => $fk_hoja_ruta,
+            );
+            if($hrAnexadasModel->save($dataDerivacion) === false)
+                session()->setFlashdata('fail', $hrAnexadasModel->errors());
+            else
+                return true;
+        }
+        return false;
+    }
+    public function archivarHrSincobolMejorado($fk_hoja_ruta, $fk_acto_administrativo, $usuario){
+        $motivo = 'ANEXADO AL SISTEMA DE SEGUIMIENTO Y CONTROL DE TRAMITES - CAM POR '.$usuario;
+        $hojaRutaSisegModel = new HojaRutaSisegModel();
+        $derivacionSincobolModel = new DerivacionSincobolModel();
+        $where = array(
+            'fk_hoja_ruta'=> $fk_hoja_ruta,
+        );
+        if(!$hojaRutaSisegModel->where($where)->first()){
+            $dataHojaRutaSiseg = array(
+                'fk_hoja_ruta' => $fk_hoja_ruta,
+                'fk_tramite' => $this->idTramite,
+                'fk_siseg' => $fk_acto_administrativo,
+                'usuario' => $usuario,
+                'fecha' => date('Y-m-d H:i:s'),
+                'tabla_siseg' => 'public.acto_administrativo',
+            );
+            if($hojaRutaSisegModel->insert($dataHojaRutaSiseg) === false){
+                session()->setFlashdata('fail', $hojaRutaSisegModel->errors());
+            }else{
+                if($ultima_derivacion = $derivacionSincobolModel->where($where)->orderBy('id','DESC')->first()){
+                    $dataDerivacion = array(
+                        'id' => $ultima_derivacion['id'],
+                        'estado' => 'CONCLUIDO',
+                        'fecha_conclusion' => date('Y-m-d H:i:s'),
+                        'motivo_conclusion' => $motivo,
+                    );
+                    if($derivacionSincobolModel->save($dataDerivacion) === false)
+                        session()->setFlashdata('fail', $derivacionSincobolModel->errors());
+                    else
+                        return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

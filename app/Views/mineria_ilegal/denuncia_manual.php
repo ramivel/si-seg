@@ -313,7 +313,7 @@
                                         </div>
                                         <h4 class="sub-title mt-2 mb-2">HOJA(S) DE RUTA(S) INTERNA(S) O EXTERNA(S) DE INICIO</h4>
                                         <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Anexar H.R. <span class="mytooltip tooltip-effect-5">
+                                            <label class="col-sm-2 col-form-label">Buscador H.R. SINCOBOL <span class="mytooltip tooltip-effect-5">
                                                 <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
                                                 <span class="tooltip-content clearfix">
                                                     <span class="tooltip-text">Debe escribir el correlativo de la Hoja de Ruta Interna o Externa que desea anexar.</span>
@@ -321,7 +321,7 @@
                                             </span> * : </label>
                                             <div class="col-sm-8">
                                                 <?php $campo = 'fk_hoja_ruta';?>
-                                                <select id="<?= $campo;?>" name="<?= $campo;?>" class="hr-in-ex-ajax col-sm-12">
+                                                <select id="<?= $campo;?>" name="<?= $campo;?>" data-controlador="<?= $controlador;?>" class="hr-in-ex-mejorado-ajax col-sm-12">
                                                     <option value="">Escriba el correlativo de la Hoja de Ruta Interna o Externa...</option>
                                                 </select>
                                                 <span class="messages"></span>
@@ -331,7 +331,7 @@
                                                 <?php }?>
                                             </div>
                                             <div class="col-sm-2">
-                                                <button type="button" class="btn btn-info agregar_hr_in_ex"><i class="fa fa-paperclip"></i> Anexar Hoja de Ruta</button>
+                                                <button type="button" class="btn btn-info agregar_hr_in_ex_mejorado" data-controlador="<?= $controlador;?>" data-selector=".hr-in-ex-mejorado-ajax" data-tabla="#tabla_hojas_rutas"><i class="fa fa-paperclip"></i> Anexar Hoja de Ruta</button>
                                             </div>
                                             <div class="col-md-12 col-sm-12 mt-2">
                                                 <div class="dt-responsive table-responsive">
@@ -393,7 +393,7 @@
                                         <div class="row">
                                             <div class="col-sm-12">
                                                 <div class="form-group row">
-                                                    <label class="col-sm-2 col-form-label">Buscar Persona : </label>
+                                                    <label class="col-sm-2 col-form-label">Buscador de Personas : </label>
                                                     <div class="col-sm-6">
                                                         <?php $campo = 'id_denunciante'; ?>
                                                         <select id="<?= $campo; ?>" name="<?= $campo; ?>" class="denunciante-ajax col-sm-12">
@@ -619,7 +619,7 @@
                                     </div>
                                     <div class="tab-pane " id="areas_mineras_identificadas" role="tabpanel">
                                         <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Buscador de Área Minera : </label>
+                                            <label class="col-sm-2 col-form-label">Buscador de Áreas Mineras : </label>
                                             <div class="col-sm-8">
                                                 <?php $campo = 'fk_area_minera';?>
                                                 <select id="<?= $campo;?>" name="<?= $campo;?>" class="area-minera-mineria-ilegal-ajax col-sm-12">

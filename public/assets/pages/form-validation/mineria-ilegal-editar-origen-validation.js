@@ -17,17 +17,64 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
-        id:{
+        id_hoja_ruta: {
             presence: true,
         },
-        domicilio_legal: {
+        id_derivacion: {
             presence: true,
         },
-        domicilio_procesal: {
+        id_denuncia: {
             presence: true,
         },
-        telefono_solicitante: {
+        origen_oficio: {
+            presence: {
+                message: "^Debe seleccionar una opción."
+            },
+        },
+        enlace: {
+            url: {
+                message: "^Debe ingresar una dirección URL correcta."
+            },
+        },
+        informe_tecnico_numero: {
             presence: true,
+        },
+        informe_tecnico_fecha: {
+            presence: true,
+        },        
+        descripcion_oficio: {
+            presence: true,
+        },
+        hr_anexados: {
+            presence: function(){
+                if($('#origen_oficio').val() == 'HOJA DE RUTA EXTERNA/INTERNA' && $('#hr_anexados').val().length == 0)
+                    return true;
+                return false;
+            }
+        },
+        departamento:{
+            presence: {
+                message: "^Debe seleccionar un Departamento."
+            },
+        },
+        provincia:{
+            presence: {
+                message: "^Debe seleccionar una Provincia."
+            },
+        },
+        fk_municipio:{
+            presence: {
+                message: "^Debe seleccionar un Municipio."
+            },
+        },
+        comunidad_localidad: {
+            presence: true,
+        },
+        descripcion_lugar: {
+            presence: true,
+        },
+        coordenadas: {
+            presence: false,
         },
         fk_estado_tramite: {
             presence: {
@@ -41,10 +88,7 @@ $(document).ready(function () {
                 else
                     return false;
             }
-        },        
-        /*observaciones: {
-            presence: errorDocumento,
-        },*/
+        },
         fk_usuario_destinatario:{
             presence: {
                 message: "^Debe seleccionar el Destinatario."
@@ -183,20 +227,6 @@ $(document).ready(function () {
                 document.getElementById("formulario").submit();
             }
         });
-    }
-
-    function errorDocumento(){        
-        var fk_estado_tramite_padre = $('#fk_estado_tramite').val();
-        var ultimo_fk_estado_tramite_padre = $('#ultimo_fk_estado_tramite_padre').val();
-        var fk_estado_tramite_hijo = $('#fk_estado_tramite_hijo').val();
-        var ultimo_fk_estado_tramite_hijo = $('#ultimo_fk_estado_tramite_hijo').val();
-        if(ultimo_fk_estado_tramite_padre == fk_estado_tramite_padre && ultimo_fk_estado_tramite_hijo == fk_estado_tramite_hijo){
-            return false;
-        }else if(ultimo_fk_estado_tramite_padre == fk_estado_tramite_padre){
-            return false;
-        }
-
-        return true;
     }
 
 });

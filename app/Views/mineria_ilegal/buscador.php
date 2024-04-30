@@ -33,7 +33,7 @@
                                     echo form_input(array(
                                         'name' => $campo,
                                         'id' => $campo,
-                                        'placeholder' => 'Escriba la H.R. Madre / Código Único / Denominación buscada',
+                                        'placeholder' => 'Escriba la H.R. / F.M.I.',
                                         'class' => 'form-control form-control-uppercase',
                                         'value' => set_value($campo,'',false)
                                     ));
@@ -46,6 +46,12 @@
                                 <?php
                                     $campo = 'campo';
                                     echo form_dropdown($campo, $campos_buscar, set_value($campo), array('class' => 'form-control'));
+                                ?>
+                            </div>
+                            <div class="col-sm-2">
+                                <?php
+                                    $campo = 'tipo_denuncia';
+                                    echo form_dropdown($campo, $tipos_denuncias, set_value($campo), array('class' => 'form-control'));
                                 ?>
                             </div>
                             <div class="col-sm-1">
@@ -75,19 +81,19 @@
                                                     $style = '';
                                                     switch($fila[$campos_reales[$i]]){
                                                         case 'MIGRADO':
-                                                            $style = 'btn btn-sm btn-inverse btn-round';
+                                                            $style = 'btn btn-sm btn-danger btn-round';
                                                             break;
                                                         case 'ATENDIDO':
                                                             $style = 'btn btn-sm btn-success btn-round';
                                                             break;
-                                                        case 'DERIVADO':
+                                                        case 'RECIBIDO':
                                                             $style = 'btn btn-sm btn-primary btn-round';
                                                             break;
                                                         case 'DEVUELTO':
                                                             $style = 'btn btn-sm btn-warning btn-round';
                                                             break;
-                                                        case 'FINALIZADO':
-                                                            $style = 'btn btn-sm btn-danger btn-round';
+                                                        case 'DERIVADO':
+                                                            $style = 'btn btn-sm btn-inverse btn-round';
                                                             break;
                                                         case 'EN ESPERA':
                                                             $style = 'btn btn-sm btn-info btn-round';

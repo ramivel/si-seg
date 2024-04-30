@@ -47,13 +47,10 @@ $(document).ready(function () {
                 else
                     return false;
             }
-        },
-        documentos_anexados: {
+        },        
+        /*observaciones: {
             presence: errorDocumento,
-        },
-        observaciones: {
-            presence: errorDocumento,
-        },
+        },*/
         fk_usuario_destinatario:{
             presence: {
                 message: "^Debe seleccionar el Destinatario."
@@ -194,8 +191,7 @@ $(document).ready(function () {
         });
     }
 
-    function errorDocumento(){
-        var anexar_documentos = $('#anexar_documentos').val();
+    function errorDocumento(){        
         var fk_estado_tramite_padre = $('#fk_estado_tramite').val();
         var ultimo_fk_estado_tramite_padre = $('#ultimo_fk_estado_tramite_padre').val();
         var fk_estado_tramite_hijo = $('#fk_estado_tramite_hijo').val();
@@ -203,8 +199,6 @@ $(document).ready(function () {
         if(ultimo_fk_estado_tramite_padre == fk_estado_tramite_padre && ultimo_fk_estado_tramite_hijo == fk_estado_tramite_hijo){
             return false;
         }else if(ultimo_fk_estado_tramite_padre == fk_estado_tramite_padre){
-            return false;
-        }else if (anexar_documentos == 'NO'){
             return false;
         }
 

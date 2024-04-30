@@ -64,6 +64,11 @@
                                                     <?php
                                                     switch($fila['ultimo_estado']){
                                                         case 'REGULARIZACIÓN':
+                                                            echo anchor('documentos/agregar/'.$id_tramite.'/'.$fila['id_hoja_ruta'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
+                                                            echo anchor($controlador.'atender/'.$fila['id_hoja_ruta'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));
+                                                            if($fila['editar'] == 't')
+                                                                echo anchor($controlador.'editar/'.$fila['id_hoja_ruta'], 'Editar Regularización',array('class' =>'dropdown-item waves-light waves-effect'));
+                                                            break;
                                                         case 'RECIBIDO':
                                                         case 'DEVUELTO':
                                                             echo anchor('documentos/agregar/'.$id_tramite.'/'.$fila['id_hoja_ruta'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
@@ -75,7 +80,8 @@
                                                             break;
                                                         case 'DERIVADO':
                                                         case 'MIGRADO':
-                                                            echo anchor($controlador.'editar/'.$fila['id_hoja_ruta'], 'Editar Derivación',array('class' =>'dropdown-item waves-light waves-effect'));
+                                                            if($fila['editar'] == 't')
+                                                                echo anchor($controlador.'editar/'.$fila['id_hoja_ruta'], 'Editar Derivación',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             break;
                                                         case 'EN ESPERA':
                                                             echo anchor($controlador.'atender/'.$fila['id_hoja_ruta'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));

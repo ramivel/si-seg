@@ -34,11 +34,12 @@
                             <table id="tabla-listado" class="table table-striped table-bordered nowrap" style="font-size: small;">
                                 <thead>
                                     <tr>
+                                        <!--
                                         <th class="nosort"></th>
+                                        -->
                                         <?php for($i=0;$i<count($campos_listar);$i++){?>
                                         <th class="text-center"><?php echo $campos_listar[$i];?></th>
                                         <?php }?>
-
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -54,9 +55,11 @@
                                         }*/
                                         ?>
                                     <tr class="<?=$style?>">
+                                        <!--
                                         <td class="text-center">
                                             <?= anchor($controlador.'revisar_denuncia_manual/'.$fila['id_hoja_ruta'], '<i class="fa fa-check-square-o"></i> REVISAR',array('class' =>'btn btn-sm btn-primary'));?><br>                                            
                                         </td>
+                                        -->
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>
                                         <td class="text-center" >
                                             <?php

@@ -401,6 +401,62 @@ $(document).ready(function () {
       });
     }
   });
+  $(".hr-in-ex-mejorado-ajax").select2({
+    language: "es",
+    placeholder: "Escriba el correlativo de la Hoja de Ruta Interna o Externa..",
+    minimumInputLength: 3,
+    ajax: {
+      url: baseUrl + $(".hr-in-ex-mejorado-ajax").data('controlador') + "ajax_hr_in_ex",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+  $(".agregar_hr_in_ex_mejorado").click(function () {
+    var fk_hoja_ruta = $("#fk_hoja_ruta").val();
+    var controlador = $(this).data('controlador');
+    var selector = $(this).data('selector');
+    var tabla = $(this).data('tabla');
+    if (fk_hoja_ruta.length > 0) {
+      $.ajax({
+        url: baseUrl + controlador + "ajax_datos_hr_in_ex",
+        type: "POST",
+        data: {
+          id: fk_hoja_ruta,
+        },
+        dataType: "json",
+        success: function (result) {
+          if(result.estado == 'success'){
+            var markup = "<tr id='hr"+result.id+"'>"+
+              "<td class='text-center form-group'><input type='hidden' name='id_hojas_rutas[]' value='"+result.id+"' /><span class='messages'></span>"+result.tipo_hoja_ruta+"</td>"+
+              "<td class='text-center'>"+result.correlativo+"</td>"+
+              "<td class='text-center'>"+result.fecha+"</td>"+
+              "<td class='text-center'>"+result.referencia+"</td>"+
+              "<td class='text-center'>"+result.remitente+"</td>"+
+              "<td class='text-center'>"+result.cite+"</td>"+
+              "<td class='text-center'><button type='button' class='btn btn-sm btn-danger waves-effect waves-light' title='Desanexar Hoja Ruta' onclick='desanexar_hoja_ruta("+result.id+");'><span class='icofont icofont-ui-delete'></span></button></td>"+
+            "</tr>";
+            $(tabla + " tbody").append(markup);
+            $(selector).val('').trigger('change');
+            $("#hr_anexados").val('SI');
+          }else{
+            console.log(result);
+          }
+        },
+      });
+    }
+  });
   /* Estado Tramite Hijo */
 
   if (
@@ -744,7 +800,7 @@ function verificarOrigen(){
       break;
   }
 }
-function verificarTipoMineriaManual(){  
+function verificarTipoMineriaManual(){
   switch($("#fk_tipo_denuncia").val()) {
     case '3':
       $('#verificacion-oficio-manual').show();

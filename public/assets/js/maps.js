@@ -52,7 +52,11 @@ function actualizarInputCoordenadas(lat, lon){
 }
 
 function limpiarCoordenadas(){
-    markers.clearLayers();
+    //markers.clearLayers();
+    myMap.eachLayer((layer) => {
+      if (layer instanceof L.Marker)
+         layer.remove();
+    });
     document.getElementById("coordenadas").value = "";
 }
 

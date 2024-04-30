@@ -215,7 +215,7 @@
                                         <a href="<?= base_url($row['controlador'].'denuncia_manual');?>">
                                             <span class="pcoded-mtext">Agregar Manual</span>
                                         </a>
-                                    </li>                                
+                                    </li>
                                     <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_denuncias_manuales') ? 'active' : '';?>">
                                         <a href="<?= base_url($row['controlador'].'listado_denuncias_manuales');?>">
                                             <span class="pcoded-mtext">Mis Denuncias Manuales</span>
@@ -231,19 +231,13 @@
                                     </li>
                                 <?php }?>
 
-                                <!--
-                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'agregar_fiscalizacion') ? 'active' : '';?>">
-                                    <a href="<?= base_url($row['controlador'].'agregar_fiscalizacion');?>">
-                                        <span class="pcoded-mtext">Nueva Denuncia DFCCI</span>
-                                    </a>
-                                </li>
-                                -->
-
-                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'agregar_oficio') ? 'active' : '';?>">
-                                    <a href="<?= base_url($row['controlador'].'agregar_oficio');?>">
-                                        <span class="pcoded-mtext">Verificación de Oficio</span>
-                                    </a>
-                                </li>
+                                <?php if(in_array(13, session()->get('registroPermisos')) || in_array(14, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'agregar_oficio') ? 'active' : '';?>">
+                                        <a href="<?= base_url($row['controlador'].'agregar_oficio');?>">
+                                            <span class="pcoded-mtext">Verificación de Oficio</span>
+                                        </a>
+                                    </li>
+                                <?php }?>
 
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documento/listado') ? 'active' : '';?>">
                                     <a href="<?= base_url('documentos/listado/'.$row['id']);?>">
@@ -264,12 +258,14 @@
                                 </li>
 
                                 <!--
-                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador_mis_tramites') ? 'active' : '';?>">
-                                    <a href="<?= base_url($row['controlador'].'buscador_mis_tramites');?>">
-                                        <span class="pcoded-mtext">Buscador de Mis Tramites</span>
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'buscador');?>">
+                                        <span class="pcoded-mtext">Buscador Hojas Rutas</span>
                                     </a>
                                 </li>
+                                -->
 
+                                <!--
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador') ? 'active' : '';?>">
                                     <a href="<?= base_url($row['controlador'].'buscador');?>">
                                         <span class="pcoded-mtext">Buscador de Tramites</span>
