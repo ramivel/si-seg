@@ -257,21 +257,12 @@
                                     </a>
                                 </li>
 
-                                <!--
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador') ? 'active' : '';?>">
                                     <a href="<?= base_url($row['controlador'].'buscador');?>">
                                         <span class="pcoded-mtext">Buscador Hojas Rutas</span>
                                     </a>
                                 </li>
-                                -->
 
-                                <!--
-                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador') ? 'active' : '';?>">
-                                    <a href="<?= base_url($row['controlador'].'buscador');?>">
-                                        <span class="pcoded-mtext">Buscador de Tramites</span>
-                                    </a>
-                                </li>
-                                -->
                             </ul>
                         </li>
                     <?php }?>

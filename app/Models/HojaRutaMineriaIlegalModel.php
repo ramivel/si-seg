@@ -30,6 +30,7 @@ class HojaRutaMineriaIlegalModel extends Model{
         'adjuntos',
         'editar',
         'fecha_hoja_ruta',
+        'fk_hoja_ruta_anexada',
     ];
 
     protected $useTimestamps = true;

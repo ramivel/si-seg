@@ -3102,6 +3102,123 @@ class MineriaIlegal extends BaseController
             }
         }
     }
+    public function anexar($id_hoja_ruta){
+        $hojaRutaMineriaIlegalModel = new HojaRutaMineriaIlegalModel();
+        $campos = array('*', 'fk_denuncia', 'correlativo as correlativo_hr', "to_char(fecha_hoja_ruta, 'DD/MM/YYYY HH24:MI') as fecha_hr");
+        if($hoja_ruta = $hojaRutaMineriaIlegalModel->select($campos)->find($id_hoja_ruta)){
+            $db = \Config\Database::connect();
+            $derivacionMineriaIlegalModel = new DerivacionMineriaIlegalModel();
+            $denunciasMineriaIlegalModel = new DenunciasMineriaIlegalModel();
+            $denuncia = $denunciasMineriaIlegalModel->select("*, correlativo as correlativo_denuncia, to_char(fecha_denuncia, 'DD/MM/YYYY HH24:MI') as fecha_denuncia")->find($hoja_ruta['fk_denuncia']);
+
+            $campos = array('de.id', 'de.nombres', 'de.apellidos', 'de.documento_identidad', 'de.expedido', "de.telefonos", "de.email", 'de.direccion', 'de.documento_identidad_digital');
+            $where = array(
+                'dd.fk_denuncia' => $hoja_ruta['fk_denuncia'],
+            );
+            $builder = $db->table('mineria_ilegal.denuncias_denunciantes AS dd')
+            ->select($campos)
+            ->join('mineria_ilegal.denunciantes AS de', 'dd.fk_denunciante = de.id', 'left')
+            ->where($where)
+            ->orderBY('dd.id', 'ASC');
+            $denunciantes = $builder->get()->getResultArray();
+
+            $cabera['titulo'] = $this->titulo;
+            $cabera['navegador'] = true;
+            $cabera['subtitulo'] = 'Anexar Hoja de Ruta de Minería Ilegal';
+            $contenido['title'] = view('templates/title',$cabera);
+            $contenido['subtitulo'] = 'Anexar Hoja de Ruta de Minería Ilegal';
+            $contenido['accion'] = $this->controlador.'guardar_anexar';
+            $contenido['controlador'] = $this->controlador;
+            $contenido['hoja_ruta'] = $hoja_ruta;
+            $contenido['ultima_derivacion'] = $derivacionMineriaIlegalModel->where(array('fk_hoja_ruta' => $hoja_ruta['id']))->orderBy('id', 'DESC')->first();
+            $contenido['denuncia'] = $denuncia;
+            $contenido['id_hoja_ruta'] = $hoja_ruta['id'];
+            $contenido['denunciantes'] = $denunciantes;
+            $contenido['tipo_denuncias'] = $this->tipoDenuncias;
+            $contenido['tipos_origen_oficio'] = array_merge(array(''=>'SELECCIONE UNA OPCIÓN'), $this->tiposOrigenOficio);
+            $contenido['id_tramite'] = $this->idTramite;
+            $contenido['url_atras'] = base_url($this->controlador.'mis_tramites');
+            $data['content'] = view($this->carpeta.'anexar', $contenido);
+            $data['menu_actual'] = $this->menuActual.'mis_tramites';
+            $data['validacion_js'] = 'mineria-ilegal-anexar-validation.js';
+            $data['tramites_menu'] = $this->tramitesMenu();
+            $data['alertas'] = $this->alertasTramites();
+            echo view('templates/template', $data);
+        }else{
+            session()->setFlashdata('fail', 'El registro no existe.');
+            return redirect()->to($this->controlador);
+        }
+    }
+    public function guardarAnexar(){
+        if ($this->request->getPost()) {
+            $denunciasMineriaIlegalModel = new DenunciasMineriaIlegalModel();
+            $id_hoja_ruta = $this->request->getPost('id_hoja_ruta');
+            $id_derivacion = $this->request->getPost('id_derivacion');
+            $id_denuncia = $this->request->getPost('id_denuncia');
+            $camposValidacion = array(
+                'id_hoja_ruta' => [
+                    'rules' => 'required',
+                ],
+                'id_derivacion' => [
+                    'rules' => 'required',
+                ],
+                'id_denuncia' => [
+                    'rules' => 'required',
+                ],
+                'motivo_conclusion' => [
+                    'rules' => 'required',
+                ],
+            );
+
+            if(!$this->validate($camposValidacion)){
+                $cabera['titulo'] = $this->titulo;
+                $cabera['navegador'] = true;
+                $cabera['subtitulo'] = 'Anexar Hoja de Ruta de Minería Ilegal';
+                $contenido['title'] = view('templates/title',$cabera);
+                $contenido['subtitulo'] = 'Anexar Hoja de Ruta de Minería Ilegal';
+                $contenido['accion'] = $this->controlador.'guardar_anexar';
+                $contenido['controlador'] = $this->controlador;
+                $contenido['denuncia'] = $denunciasMineriaIlegalModel->select("*, correlativo as correlativo_denuncia, to_char(fecha_denuncia, 'DD/MM/YYYY HH24:MI') as fecha_denuncia")->find($id_denuncia);
+                $contenido['tipo_denuncias'] = $this->tipoDenuncias;
+                $contenido['tipos_origen_oficio'] = array_merge(array(''=>'SELECCIONE UNA OPCIÓN'), $this->tiposOrigenOficio);
+                $contenido['id_tramite'] = $this->idTramite;
+                $contenido['url_atras'] = base_url($this->controlador.'mis_tramites');
+                $data['content'] = view($this->carpeta.'anexar', $contenido);
+                $data['menu_actual'] = $this->menuActual.'mis_tramites';
+                $data['validacion_js'] = 'mineria-ilegal-anexar-validation.js';
+                $data['tramites_menu'] = $this->tramitesMenu();
+                $data['alertas'] = $this->alertasTramites();
+                $data['mapas'] = true;
+                $data['puntos'] = $this->obtenerCoordenadas($this->request->getPost('coordenadas'));
+                echo view('templates/template', $data);
+            }else{
+                $hojaRutaMineriaIlegalModel = new HojaRutaMineriaIlegalModel();
+                $derivacionMineriaIlegalModel = new DerivacionMineriaIlegalModel();
+
+                $dataDerivacion = array(
+                    'id' => $id_derivacion,
+                    'estado' => 'ANEXADO',
+                    'motivo_conclusion' => mb_strtoupper($this->request->getPost('motivo_conclusion')),
+                    'fecha_atencion' => date('Y-m-d H:i:s'),
+                    'fk_hoja_ruta_anexada' => $this->request->getPost('fk_hoja_ruta_anexada'),
+                );
+                if($derivacionMineriaIlegalModel->save($dataDerivacion) === false)
+                    session()->setFlashdata('fail', $derivacionMineriaIlegalModel->errors());
+
+                $dataHojaRuta = array(
+                    'id' => $id_hoja_ruta,
+                    'ultimo_estado' => 'ANEXADO',
+                    'fk_hoja_ruta_anexada' => $this->request->getPost('fk_hoja_ruta_anexada'),
+                    'editar' => 'false',
+                );
+                if($hojaRutaMineriaIlegalModel->save($dataHojaRuta) === false)
+                    session()->setFlashdata('fail', $hojaRutaMineriaIlegalModel->errors());
+
+                session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información.');
+                return redirect()->to($this->controlador.'mis_tramites');
+            }
+        }
+    }
 
     public function ajaxAreaMineraMineriaIlegal(){
         $cadena = mb_strtoupper($this->request->getPost('texto'));
@@ -3345,7 +3462,8 @@ class MineriaIlegal extends BaseController
                 "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as responsable",'d.instruccion',
                 "CASE WHEN d.fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
                 "to_char(d.created_at, 'DD/MM/YYYY HH24:MI') as fecha_derivacion", "to_char(d.fecha_recepcion, 'DD/MM/YYYY HH24:MI') as fecha_recepcion", "to_char(d.fecha_atencion, 'DD/MM/YYYY HH24:MI') as fecha_atencion",
-                'motivo_anexo', "to_char(d.fecha_devolucion, 'DD/MM/YYYY HH24:MI') as fecha_devolucion", 'd.estado'
+                'motivo_anexo', "to_char(d.fecha_devolucion, 'DD/MM/YYYY HH24:MI') as fecha_devolucion", 'd.estado',
+                "motivo_conclusion"
                 );
             $where = array(
                 'd.fk_hoja_ruta' => $hoja_ruta['id'],
@@ -3373,6 +3491,7 @@ class MineriaIlegal extends BaseController
                 'Destinatario',
                 'Responsable Trámite',
                 'Instrucción',
+                'Motivo Conclusión',
                 'Estado Tramite',
                 'Documentos Anexados',
                 'H.R. Anexada(s)',
@@ -3387,6 +3506,7 @@ class MineriaIlegal extends BaseController
                 'destinatario',
                 'responsable',
                 'instruccion',
+                'motivo_conclusion',
                 'estado_tramite',
                 'documentos_anexados',
                 'hoja_ruta_anexadas',
@@ -4337,35 +4457,37 @@ class MineriaIlegal extends BaseController
                 $contenido['validation'] = $this->validator;
             }else{
                 $db = \Config\Database::connect();
-                $campos = array('ac.id', 'ac.ultimo_estado', 'ac.correlativo', 'ac.codigo_unico', 'ac.denominacion',
-                "CONCAT(ur.nombre_completo, '<br><b>',pr.nombre,'</b>') as remitente", "CONCAT(ud.nombre_completo, '<br><b>',pd.nombre,'</b>') as destinatario",
-                'ac.ultimo_instruccion', "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
-                "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion");
-                $builder = $db->table('public.acto_administrativo as ac')
+                $campos = array('d.id as id_denuncia','hr.id as id_hoja_ruta', 'hr.ultimo_estado', "to_char(hr.ultimo_fecha_derivacion, 'DD/MM/YYYY') as fecha_derivacion",
+                'hr.correlativo as correlativo_hoja_ruta', 'ofi.nombre as oficina', 'd.correlativo as correlativo_denuncia', 'd.fk_tipo_denuncia', 'd.departamento',
+                "CONCAT(urem.nombre_completo,'<br><b>',prem.nombre,'<b>') as remitente", "CONCAT(udes.nombre_completo,'<br><b>',pdes.nombre,'<b>') as destinatario",
+                'hr.ultimo_instruccion', "CONCAT(ures.nombre_completo,'<br><b>',pres.nombre,'<b>') as responsable",
+                "CASE WHEN hr.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
+                );
+                $builder = $db->table('mineria_ilegal.denuncias AS d')
                 ->select($campos)
-                ->join('usuarios as ur', 'ac.ultimo_fk_usuario_remitente = ur.id', 'left')
-                ->join('perfiles as pr', 'ur.fk_perfil=pr.id', 'left')
-                ->join('usuarios as ud', 'ac.fk_usuario_actual = ud.id', 'left')
-                ->join('perfiles as pd', 'ud.fk_perfil=pd.id', 'left')
-                ->join('estado_tramite as etp', 'ac.ultimo_fk_estado_tramite_padre = etp.id', 'left')
-                ->join('estado_tramite as eth', 'ac.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
-                ->orderBY('ac.fecha_mecanizada', 'DESC');
+                ->join('mineria_ilegal.hoja_ruta AS hr', 'd.id = hr.fk_denuncia', 'left')
+                ->join('public.oficinas AS ofi', 'hr.fk_oficina = ofi.id', 'left')
+                ->join('usuarios as ures', 'hr.ultimo_fk_usuario_responsable = ures.id', 'left')
+                ->join('perfiles as pres', 'ures.fk_perfil = pres.id', 'left')
+                ->join('usuarios as urem', 'hr.ultimo_fk_usuario_remitente = urem.id', 'left')
+                ->join('perfiles as prem', 'urem.fk_perfil = prem.id', 'left')
+                ->join('usuarios as udes', 'hr.ultimo_fk_usuario_destinatario = udes.id', 'left')
+                ->join('perfiles as pdes', 'udes.fk_perfil = pdes.id', 'left')
+                ->join('estado_tramite as etp', 'hr.ultimo_fk_estado_tramite_padre = etp.id', 'left')
+                ->join('estado_tramite as eth', 'hr.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
+                ->orderBY('d.id', 'DESC');
+
                 $where = array(
-                    'ac.deleted_at' => NULL,
-                    'ac.fk_oficina' => session()->get('registroOficina')
+                    'd.deleted_at' => NULL,
                 );
                 $texto = mb_strtoupper(trim($this->request->getPost('texto')));
 
                 switch($this->request->getPost('campo')){
-                    case 'correlativo':
-                        $query = $builder->where($where)->like('ac.correlativo', $texto);
+                    case 'correlativo_hoja_ruta':
+                        $query = $builder->where($where)->like('hr.correlativo', $texto);
                         break;
-                    case 'codigo_unico':
-                        $where['ac.codigo_unico'] = $texto;
-                        $query = $builder->where($where);
-                        break;
-                    case 'denominacion':
-                        $query = $builder->where($where)->like('ac.denominacion', $texto);
+                    case 'correlativo_denuncia':
+                        $query = $builder->where($where)->like('d.correlativo', $texto);
                         break;
                 }
                 $datos = $query->get()->getResultArray();
@@ -4377,10 +4499,12 @@ class MineriaIlegal extends BaseController
             'correlativo_denuncia' => 'Formulario Minería Ilegal',
         );
         $campos_listar=array(
-            ' ','Fecha Derivación/Devolución','Hoja de Ruta', 'Remitente','Destinatario','Instrucción', 'Responsable Trámite', 'Estado', 'Denuncia', 'Tipo', 'Denunciante', 'Departamento'
+            ' ','Fecha Derivación/Devolución','Hoja de Ruta', 'Departamental o Regional', 'F.M.I', 'Tipo', 'Departamento',
+            'Remitente','Destinatario','Instrucción', 'Responsable Trámite', 'Estado',
         );
         $campos_reales=array(
-            'ultimo_estado','ultimo_fecha_derivacion','correlativo','codigo_unico','denominacion','remitente','destinatario','ultimo_instruccion','estado_tramite',
+            'ultimo_estado','fecha_derivacion','correlativo_hoja_ruta','oficina','correlativo_denuncia', 'fk_tipo_denuncia', 'departamento',
+            'remitente','destinatario','ultimo_instruccion', 'responsable','estado_tramite',
         );
         $cabera['titulo'] = $this->titulo;
         $cabera['navegador'] = true;
@@ -4389,7 +4513,7 @@ class MineriaIlegal extends BaseController
         $contenido['campos_listar'] = $campos_listar;
         $contenido['campos_reales'] = $campos_reales;
         $contenido['campos_buscar'] = $campos_buscar;
-        $contenido['tipos_denuncias'] = array(''=>'Todos los Tipos de F.M.I.') + $this->tipoDenuncias;
+        $contenido['tipos_denuncias'] = $this->tipoDenuncias;
         $contenido['subtitulo'] = 'Buscador de Hojas de Ruta / Formulario de Minería Ilegal';
         $contenido['accion'] = $this->controlador.'buscador';
         $contenido['controlador'] = $this->controlador;
@@ -6962,6 +7086,44 @@ class MineriaIlegal extends BaseController
         ->where($where)
         ->orderBY('doc.id', 'ASC');
         return $builder->get()->getResultArray();
+    }
+
+    public function ajaxHojaRutaMineriaIlegal(){
+        $cadena = mb_strtoupper($this->request->getPost('texto'));
+        $id_hoja_ruta_actual = $this->request->getPost('id_hoja_ruta_actual');
+        if(!empty($cadena) && !empty($id_hoja_ruta_actual) && session()->get('registroUser')){
+            $data = array();
+            $db = \Config\Database::connect();
+            $campos = array('hr.id', 'd.fk_tipo_denuncia', 'hr.correlativo', "to_char(hr.fecha_hoja_ruta, 'DD/MM/YYYY') as fecha_hoja_ruta");
+            $where = array(
+                'hr.id <>' => $id_hoja_ruta_actual,
+                'hr.deleted_at' => NULL,
+                'hr.fk_hoja_ruta_anexada' => NULL,
+                'hr.fk_usuario_actual' => session()->get('registroUser'),
+            );
+            $builder = $db->table('mineria_ilegal.hoja_ruta as hr')
+            ->select($campos)
+            ->join('mineria_ilegal.denuncias as d', 'hr.fk_denuncia = d.id', 'left')
+            ->where($where)
+            ->whereIn('hr.ultimo_estado',array('REGULARIZACIÓN', 'RECIBIDO', 'DEVUELTO'))
+            ->limit(10)
+            ->orderBy('hr.id', 'ASC');
+            $datos = $builder->get()->getResultArray();
+            if($datos){
+                foreach($datos as $row){
+                    $data[] = array(
+                        'id' => $row['id'],
+                        'text' => $row['correlativo'].' - '.$row['fecha_hoja_ruta'].' - '.$this->tipoDenuncias[$row['fk_tipo_denuncia']],
+                    );
+                }
+            }else{
+                $data[] = array(
+                    'id' => 0,
+                    'text' => 'No se encuentra la hoja de ruta que busca'
+                );
+            }
+            echo json_encode($data);
+        }
     }
 
 }

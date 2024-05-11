@@ -681,7 +681,7 @@
                                             </div>
                                         <?php }?>
                                         <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Buscador de Áreas Mineras * : </label>
+                                            <label class="col-sm-2 col-form-label">Buscador de Áreas Mineras : </label>
                                             <div class="col-sm-8">
                                                 <?php $campo = 'fk_area_minera';?>
                                                 <select id="<?= $campo;?>" name="<?= $campo;?>" class="area-minera-mineria-ilegal-ajax col-sm-12">

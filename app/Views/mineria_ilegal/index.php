@@ -58,9 +58,7 @@
                                             <div class="dropdown-info dropdown open">
                                                 <button class="btn btn-sm btn-info dropdown-toggle waves-effect waves-light " type="button" id="dropdown-4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Acciones</button>
                                                 <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                    <?php echo anchor($controlador.'ver/2/'.$fila['id_hoja_ruta'], 'Ver',array('class' =>'dropdown-item waves-light waves-effect'));?>                                                    
-                                                    <?php echo anchor($controlador.'hoja_ruta_pdf/'.$fila['id_hoja_ruta'], 'Imprimir H.R.',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
-                                                    <?php echo anchor($controlador.'formulario_denuncia_pdf/'.$fila['id_denuncia'], 'Imprimir Formulario Denuncia',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
+                                                    <?php echo anchor($controlador.'ver/2/'.$fila['id_hoja_ruta'], 'Ver',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                     <?php
                                                     switch($fila['ultimo_estado']){
                                                         case 'REGULARIZACIÓN':
@@ -73,10 +71,7 @@
                                                         case 'DEVUELTO':
                                                             echo anchor('documentos/agregar/'.$id_tramite.'/'.$fila['id_hoja_ruta'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             echo anchor($controlador.'atender/'.$fila['id_hoja_ruta'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            echo anchor($controlador.'espera/'.$fila['id_hoja_ruta'], 'En Espera',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            //echo anchor($controlador.'devolver/'.$fila['id_hoja_ruta'], 'Devolver',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            if(in_array(5, session()->get('registroPermisos')))
-                                                                echo anchor($controlador.'finalizar/'.$fila['id_hoja_ruta'], 'Finalizar',array('class' =>'dropdown-item waves-light waves-effect'));
+                                                            echo anchor($controlador.'anexar/'.$fila['id_hoja_ruta'], 'Anexar',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             break;
                                                         case 'DERIVADO':
                                                         case 'MIGRADO':
@@ -88,6 +83,8 @@
                                                             break;
                                                     }
                                                     ?>
+                                                    <?php echo anchor($controlador.'hoja_ruta_pdf/'.$fila['id_hoja_ruta'], 'Imprimir H.R.',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
+                                                    <?php echo anchor($controlador.'formulario_denuncia_pdf/'.$fila['id_denuncia'], 'Imprimir Formulario Denuncia',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
                                                 </div>
                                             </div>
                                         </td>

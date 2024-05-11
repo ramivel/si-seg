@@ -312,7 +312,7 @@
                                                         case 'FINALIZADO':
                                                             $style = 'btn btn-sm btn-danger btn-round';
                                                             break;
-                                                        case 'EN ESPERA':
+                                                        case 'ANEXADO':
                                                             $style = 'btn btn-sm btn-info btn-round';
                                                             break;
                                                     }

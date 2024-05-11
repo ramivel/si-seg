@@ -33,7 +33,7 @@
                                     echo form_input(array(
                                         'name' => $campo,
                                         'id' => $campo,
-                                        'placeholder' => 'Escriba la H.R. / F.M.I.',
+                                        'placeholder' => 'Escriba el Correlativo',
                                         'class' => 'form-control form-control-uppercase',
                                         'value' => set_value($campo,'',false)
                                     ));
@@ -48,12 +48,14 @@
                                     echo form_dropdown($campo, $campos_buscar, set_value($campo), array('class' => 'form-control'));
                                 ?>
                             </div>
+                            <!--
                             <div class="col-sm-2">
                                 <?php
                                     $campo = 'tipo_denuncia';
                                     echo form_dropdown($campo, $tipos_denuncias, set_value($campo), array('class' => 'form-control'));
                                 ?>
                             </div>
+                            -->
                             <div class="col-sm-1">
                                 <button class="btn btn-info"><i class="fa fa-search"></i>Buscar</button>
                             </div>
@@ -64,51 +66,50 @@
                                 <table id="tabla-buscador" class="table table-striped table-bordered nowrap" style="font-size: small;">
                                     <thead>
                                         <tr>
-                                            <?php for($i=0;$i<count($campos_listar);$i++){?>
-                                            <th class="text-center"><?php echo $campos_listar[$i];?></th>
-                                            <?php }?>
                                             <th class="nosort"></th>
+                                            <?php for($i=0;$i<count($campos_listar);$i++){?>
+                                                <th class="text-center"><?php echo $campos_listar[$i];?></th>
+                                            <?php }?>
                                         </tr>
                                     </thead>
                                     <tbody>
                                     <?php if(!empty($datos) && count($datos)>0){?>
                                         <?php foreach ($datos as $fila){?>
                                         <tr>
+                                            <td class="text-center">
+                                                <?php echo anchor($controlador.'ver/4/'.$fila['id_hoja_ruta'], '<i class="fa fa-eye"></i> Ver',array('class' =>'btn btn-sm btn-info'));?>
+                                            </td>
                                             <?php for($i=0;$i<count($campos_reales);$i++){?>
-                                            <td class="text-center">
-                                            <?php
-                                                if($campos_reales[$i]=='ultimo_estado'){
-                                                    $style = '';
-                                                    switch($fila[$campos_reales[$i]]){
-                                                        case 'MIGRADO':
-                                                            $style = 'btn btn-sm btn-danger btn-round';
-                                                            break;
-                                                        case 'ATENDIDO':
-                                                            $style = 'btn btn-sm btn-success btn-round';
-                                                            break;
-                                                        case 'RECIBIDO':
-                                                            $style = 'btn btn-sm btn-primary btn-round';
-                                                            break;
-                                                        case 'DEVUELTO':
-                                                            $style = 'btn btn-sm btn-warning btn-round';
-                                                            break;
-                                                        case 'DERIVADO':
-                                                            $style = 'btn btn-sm btn-inverse btn-round';
-                                                            break;
-                                                        case 'EN ESPERA':
-                                                            $style = 'btn btn-sm btn-info btn-round';
-                                                            break;
+                                                <td class="text-center">
+                                                <?php
+                                                    if($campos_reales[$i]=='ultimo_estado'){
+                                                        $style = '';
+                                                        switch($fila[$campos_reales[$i]]){
+                                                            case 'REGULARIZACIÓN':
+                                                                $style = 'btn btn-sm btn-danger btn-round';
+                                                                break;                                                            
+                                                            case 'RECIBIDO':
+                                                                $style = 'btn btn-sm btn-primary btn-round';
+                                                                break;
+                                                            case 'DEVUELTO':
+                                                                $style = 'btn btn-sm btn-warning btn-round';
+                                                                break;
+                                                            case 'DERIVADO':
+                                                                $style = 'btn btn-sm btn-inverse btn-round';
+                                                                break;
+                                                            case 'ANEXADO':
+                                                                $style = 'btn btn-sm btn-info btn-round';
+                                                                break;
+                                                        }
+                                                        echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';
+                                                    }elseif($campos_reales[$i]=='fk_tipo_denuncia'){
+                                                        echo $tipos_denuncias[$fila[$campos_reales[$i]]];
+                                                    }else{
+                                                        echo $fila[$campos_reales[$i]];
                                                     }
-                                                    echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';
-                                                }else{
-                                                    echo $fila[$campos_reales[$i]];
-                                                }
-                                            ?>
-                                            </td>
+                                                ?>
+                                                </td>
                                             <?php }?>
-                                            <td class="text-center">
-                                            <?php echo anchor($controlador.'ver/4/'.$fila['id'], '<i class="fa fa-eye"></i> Ver',array('class' =>'btn btn-sm btn-info'));?>
-                                            </td>
                                         </tr>
                                         <?php }?>
                                     <?php }?>

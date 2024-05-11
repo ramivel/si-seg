@@ -457,8 +457,34 @@ $(document).ready(function () {
       });
     }
   });
-  /* Estado Tramite Hijo */
 
+  /* Buscador Hoja de Ruta Mineria Ilegal*/
+  $(".hoja-ruta-mineria-ilegal-ajax").select2({
+    language: "es",
+    placeholder: "Escriba la Hoja de Ruta Minería Ilegal...",
+    minimumInputLength: 1,
+    ajax: {
+      url: baseUrl + "mineria_ilegal/ajax_hoja_ruta_mineria_ilegal",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+          id_hoja_ruta_actual: $("#id_hoja_ruta").val(),
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+  /* Fin Buscador Hoja de Ruta Mineria Ilegal*/
+
+  /* Estado Tramite Hijo */
   if (
     $("#fk_estado_tramite").children("option:selected").data("padre") == "t"
   ) {
