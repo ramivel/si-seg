@@ -566,6 +566,9 @@ $(document).ready(function () {
         $("#nacionalidad").val(result.nacionalidad);
         $("#titular").val(result.titular);
         $("#clasificacion").val(result.clasificacion);
+        $("#remitente").val(result.remitente);
+        $("#destinatario").val(result.destinatario);
+        $("#responsable").val(result.responsable);
       },
     });
   });

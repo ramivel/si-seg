@@ -16,6 +16,7 @@ use App\Models\DerivacionSincobolModel;
 use App\Models\DocumentosModel;
 use App\Models\HojaRutaSisegModel;
 use App\Models\HrAnexadasModel;
+use App\Models\LogsBuscadoresModel;
 use App\Models\MigrarCAMModel;
 use App\Models\OficinasModel;
 use App\Models\SolicitudLicenciaContratoModel;
@@ -1732,17 +1733,19 @@ class Cam extends BaseController
     {
         $db = \Config\Database::connect();
         $campos = array('ac.id', 'ac.ultimo_estado', 'ac.correlativo', 'dam.codigo_unico', 'dam.denominacion', 'dam.extension', 'dam.departamentos', 'dam.provincias', 'dam.municipios', 'dam.area_protegida',
-        "CONCAT(ur.nombre_completo, '<br><b>',pr.nombre,'</b>') as remitente", 'ac.ultimo_instruccion', "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion",
+        "CONCAT(ur.nombre_completo, '<br><b>',pr.nombre,'</b>') as remitente", "CONCAT(ud.nombre_completo,'<br><b>',pd.nombre,'<b>') as destinatario", 'ac.ultimo_instruccion', "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion",
         "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite");
         $where = array(
             'ac.deleted_at' => NULL,
-            'ac.fk_usuario_actual' => session()->get('registroUser'),
+            'ac.ultimo_fk_usuario_responsable' => session()->get('registroUser'),
         );
         $builder = $db->table('public.acto_administrativo as ac')
         ->select($campos)
         ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
         ->join('usuarios as ur', 'ac.ultimo_fk_usuario_remitente = ur.id', 'left')
         ->join('perfiles as pr', 'ur.fk_perfil=pr.id', 'left')
+        ->join('usuarios as ud', 'ac.ultimo_fk_usuario_destinatario = ud.id', 'left')
+        ->join('perfiles as pd', 'ud.fk_perfil = pd.id', 'left')
         ->join('estado_tramite as etp', 'ac.ultimo_fk_estado_tramite_padre = etp.id', 'left')
         ->join('estado_tramite as eth', 'ac.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
         ->where($where)
@@ -1795,10 +1798,10 @@ class Cam extends BaseController
             'remitente' => 'Remitente',
         );
         $campos_listar=array(
-            ' ', 'Fecha Derivación/Devolución', 'H.R. Madre','Código Único','Denominación','Extensión','Departamento(s)','Provincia(s)','Municipio(s)','Área Protegida','Remitente','Instrucción','Estado Trámite',
+            ' ', 'Fecha Derivación/Devolución', 'H.R. Madre', 'Remitente', 'Destinatario', 'Instrucción','Estado Trámite', 'Código Único','Denominación','Extensión','Departamento(s)','Provincia(s)','Municipio(s)','Área Protegida',
         );
         $campos_reales=array(
-            'ultimo_estado','ultimo_fecha_derivacion','correlativo','codigo_unico','denominacion','extension','departamentos','provincias','municipios','area_protegida','remitente','ultimo_instruccion','estado_tramite',
+            'ultimo_estado','ultimo_fecha_derivacion','correlativo', 'remitente', 'destinatario', 'ultimo_instruccion', 'estado_tramite', 'codigo_unico','denominacion','extension','departamentos','provincias','municipios','area_protegida',
         );
 
         if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
@@ -1807,13 +1810,13 @@ class Cam extends BaseController
 
         $cabera['titulo'] = $this->titulo;
         $cabera['navegador'] = true;
-        $cabera['subtitulo'] = 'Buscador de Mis Tramites';
+        $cabera['subtitulo'] = 'Reporte de Mis Tramites como Responsable';
         $contenido['title'] = view('templates/title',$cabera);
         $contenido['datos'] = $datos;
         $contenido['campos_listar'] = $campos_listar;
         $contenido['campos_reales'] = $campos_reales;
         $contenido['campos_buscar'] = $campos_buscar;
-        $contenido['subtitulo'] = 'Buscador de Mis Tramites';
+        $contenido['subtitulo'] = 'Reporte de Mis Tramites como Responsable';
         $contenido['accion'] = $this->controlador.'buscador_mis_tramites';
         $contenido['controlador'] = $this->controlador;
         $data['content'] = view($this->carpeta.'buscador_mis_tramites', $contenido);
@@ -1893,6 +1896,12 @@ class Cam extends BaseController
 
     public function buscador()
     {
+        $campos_buscar=array(
+            'correlativo' => 'H.R. Madre',
+            'codigo_unico' => 'Código Único',
+            'denominacion' => 'Denominación',
+            'solicitante' => 'Solicitante',
+        );
         if ($this->request->getPost()) {
             $validation = $this->validate([
                 'texto' => [
@@ -1910,7 +1919,8 @@ class Cam extends BaseController
             }else{
                 $validate = true;
                 $db = \Config\Database::connect();
-                $campos = array('ac.id', 'ac.ultimo_estado', 'ac.correlativo', 'ofi.nombre as oficina', 'dam.codigo_unico', 'dam.denominacion',
+                $logsBuscadoresModel = new LogsBuscadoresModel();
+                $campos = array('ac.id', 'ac.ultimo_estado', 'ac.correlativo', 'ofi.nombre as oficina', 'dam.codigo_unico', 'dam.denominacion', 'dam.titular as solicitante',
                 "CONCAT(ur.nombre_completo, '<br><b>',pr.nombre,'</b>') as remitente", "CONCAT(ud.nombre_completo, '<br><b>',pd.nombre,'</b>') as destinatario",
                 'ac.ultimo_instruccion', "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
                 "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion");
@@ -1956,23 +1966,31 @@ class Cam extends BaseController
                     case 'denominacion':
                         $query = $builder->where($where)->like('dam.denominacion', $texto);
                         break;
+                    case 'solicitante':
+                        $query = $builder->where($where)->like('dam.titular', $texto);
+                        break;
                 }
+                $dataLog = array(
+                    'tramite' => 'CAM',
+                    'modulo' => 'Buscador de Trámites',
+                    'fk_usuario' => session()->get('registroUser'),
+                    'texto' => $texto,
+                    'campo' => $campos_buscar[$this->request->getPost('campo')],
+                    'fecha' => date('Y-m-d H:i:s'),
+                );
+                $logsBuscadoresModel->insert($dataLog);                
                 if($validate){
                     $datos = $query->get()->getResultArray();
                     $contenido['datos'] = $datos;
                 }
             }
         }
-        $campos_buscar=array(
-            'correlativo' => 'H.R. Madre',
-            'codigo_unico' => 'Código Único',
-            'denominacion' => 'Denominación',
-        );
+        
         $campos_listar=array(
-            ' ','Fecha Derivación<br>o Devolución','H.R. Madre','Departamental o Regional','Código Único','Denominación','Remitente','Destinatario','Instrucción','Estado Trámite',
+            ' ','Fecha Derivación<br>o Devolución','H.R. Madre','Departamental o Regional','Código Único','Denominación','Solicitante','Remitente','Destinatario','Instrucción','Estado Trámite',
         );
         $campos_reales=array(
-            'ultimo_estado','ultimo_fecha_derivacion','correlativo','oficina','codigo_unico','denominacion','remitente','destinatario','ultimo_instruccion','estado_tramite',
+            'ultimo_estado','ultimo_fecha_derivacion','correlativo','oficina','codigo_unico','denominacion','solicitante','remitente','destinatario','ultimo_instruccion','estado_tramite',
         );
         $cabera['titulo'] = $this->titulo;
         $cabera['navegador'] = true;
@@ -1993,6 +2011,11 @@ class Cam extends BaseController
 
     public function buscadorVentanilla()
     {
+        $campos_buscar=array(
+            'correlativo' => 'H.R. Madre',
+            'codigo_unico' => 'Código Único',
+            'denominacion' => 'Denominación',
+        );
         if ($this->request->getPost()) {
             $validation = $this->validate([
                 'texto' => [
@@ -2008,8 +2031,10 @@ class Cam extends BaseController
             if(!$validation){
                 $contenido['validation'] = $this->validator;
             }else{
+                $validate = true;
                 $db = \Config\Database::connect();
-                $campos = array('ac.id', 'ac.ultimo_estado', 'ac.correlativo', 'dam.codigo_unico', 'dam.denominacion',
+                $logsBuscadoresModel = new LogsBuscadoresModel();
+                $campos = array('ac.id', 'ac.ultimo_estado', 'ac.correlativo', 'dam.codigo_unico', 'dam.denominacion', 'dam.representante_legal', 'dam.nacionalidad', 'dam.titular', 'dam.clasificacion_titular',
                 "CONCAT(ur.nombre_completo, '<br><b>',pr.nombre,'</b>') as remitente", "CONCAT(ud.nombre_completo, '<br><b>',pd.nombre,'</b>') as destinatario",
                 'ac.ultimo_instruccion', "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
                 "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion", "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as responsable");
@@ -2036,27 +2061,37 @@ class Cam extends BaseController
                         $query = $builder->where($where)->like('ac.correlativo', $texto);
                         break;
                     case 'codigo_unico':
-                        $where['dam.codigo_unico'] = $texto;
-                        $query = $builder->where($where);
+                        if(is_numeric($texto)){
+                            $where['dam.codigo_unico'] = $texto;
+                            $query = $builder->where($where);
+                        }else{
+                            $validate = false;
+                        }                        
                         break;
                     case 'denominacion':
                         $query = $builder->where($where)->like('dam.denominacion', $texto);
                         break;
                 }
-                $datos = $query->get()->getResultArray();
-                $contenido['datos'] = $datos;
+                $dataLog = array(
+                    'tramite' => 'CAM',
+                    'modulo' => 'Buscador de Trámites - Ventanilla Única',
+                    'fk_usuario' => session()->get('registroUser'),
+                    'texto' => $texto,
+                    'campo' => $campos_buscar[$this->request->getPost('campo')],
+                    'fecha' => date('Y-m-d H:i:s'),
+                );
+                $logsBuscadoresModel->insert($dataLog);                
+                if($validate){
+                    $datos = $query->get()->getResultArray();
+                    $contenido['datos'] = $datos;
+                }
             }
-        }
-        $campos_buscar=array(
-            'correlativo' => 'H.R. Madre',
-            'codigo_unico' => 'Código Único',
-            'denominacion' => 'Denominación',
-        );
+        }        
         $campos_listar=array(
-            ' ','Fecha Derivación/Devolución','H.R. Madre', 'Remitente','Destinatario','Responsable Trámite','Estado Trámite','Código Único','Denominación',
+            ' ','Fecha Derivación/Devolución','H.R. Madre', 'Remitente','Destinatario','Responsable Trámite','Estado Trámite','Código Único','Denominación', 'Representante Legal', 'Nacionalidad', 'Solicitante', 'Clasificación APM'
         );
         $campos_reales=array(
-            'ultimo_estado','ultimo_fecha_derivacion','correlativo','remitente','destinatario','responsable','estado_tramite','codigo_unico','denominacion',
+            'ultimo_estado','ultimo_fecha_derivacion','correlativo','remitente','destinatario','responsable','estado_tramite','codigo_unico','denominacion', 'representante_legal', 'nacionalidad', 'titular', 'clasificacion_titular'
         );
         $cabera['titulo'] = $this->titulo;
         $cabera['navegador'] = true;
@@ -3918,12 +3953,21 @@ class Cam extends BaseController
         $id = $this->request->getPost('id');
         if(!empty($id)){
             $db = \Config\Database::connect();
+            $campos = array('ac.id', 'dam.codigo_unico', 'dam.denominacion', 'dam.representante_legal', 'dam.nacionalidad', 'dam.titular', 'dam.clasificacion_titular',
+                "CONCAT(ur.nombre_completo, ' - ',pr.nombre) as remitente", "CONCAT(ud.nombre_completo, ' - ',pd.nombre) as destinatario", "CONCAT(ua.nombre_completo,' - ',pa.nombre) as responsable");
             $where = array(
                 'ac.deleted_at' => NULL,
                 'ac.id' => $id,
             );
             $builder = $db->table('public.acto_administrativo as ac')
+            ->select($campos)
             ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+            ->join('usuarios as ur', 'ac.ultimo_fk_usuario_remitente = ur.id', 'left')
+            ->join('perfiles as pr', 'ur.fk_perfil=pr.id', 'left')
+            ->join('usuarios as ud', 'ac.fk_usuario_actual = ud.id', 'left')
+            ->join('perfiles as pd', 'ud.fk_perfil=pd.id', 'left')
+            ->join('usuarios as ua', 'ac.ultimo_fk_usuario_responsable = ua.id', 'left')
+            ->join('perfiles as pa', 'ua.fk_perfil = pa.id', 'left')
             ->where($where);
             $resultado = array();
             if($tramite = $builder->get()->getRowArray()){
@@ -3931,8 +3975,11 @@ class Cam extends BaseController
                 $resultado['denominacion'] = $tramite['denominacion'];
                 $resultado['representante_legal'] = $tramite['representante_legal'];
                 $resultado['nacionalidad'] = $tramite['nacionalidad'];
-                $resultado['titular'] = $tramite['titular'];
+                $resultado['titular'] = $tramite['titular'];                
                 $resultado['clasificacion'] = $tramite['clasificacion_titular'];
+                $resultado['remitente'] = $tramite['remitente'];
+                $resultado['destinatario'] = $tramite['destinatario'];
+                $resultado['responsable'] = $tramite['responsable'];
             }
             echo json_encode($resultado);
         }

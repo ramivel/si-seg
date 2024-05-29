@@ -34,9 +34,7 @@
                             <table id="tabla-listado" class="table table-striped table-bordered nowrap" style="font-size: small;">
                                 <thead>
                                     <tr>
-                                        <!--
                                         <th class="nosort"></th>
-                                        -->
                                         <?php for($i=0;$i<count($campos_listar);$i++){?>
                                         <th class="text-center"><?php echo $campos_listar[$i];?></th>
                                         <?php }?>
@@ -55,11 +53,18 @@
                                         }*/
                                         ?>
                                     <tr class="<?=$style?>">
-                                        <!--
                                         <td class="text-center">
-                                            <?= anchor($controlador.'revisar_denuncia_manual/'.$fila['id_hoja_ruta'], '<i class="fa fa-check-square-o"></i> REVISAR',array('class' =>'btn btn-sm btn-primary'));?><br>                                            
+                                            <div class="dropdown-info dropdown open">
+                                                <button class="btn btn-sm btn-info dropdown-toggle waves-effect waves-light " type="button" id="dropdown-4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Acciones</button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                    <?php
+                                                    if($fila['id_hoja_ruta'])
+                                                        echo anchor($controlador.'hoja_ruta_pdf/'.$fila['id_hoja_ruta'], 'Imprimir H.R.',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));
+                                                    echo anchor($controlador.'formulario_denuncia_pdf/'.$fila['id_denuncia'], 'Imprimir Formulario Denuncia',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));
+                                                    ?>
+                                                </div>
+                                            </div>
                                         </td>
-                                        -->
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>
                                         <td class="text-center" >
                                             <?php

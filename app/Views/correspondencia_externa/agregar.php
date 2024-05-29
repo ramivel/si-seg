@@ -118,6 +118,52 @@
                                 ?>
                             </div>
                         </div>
+                        <h5 class="sub-title">ULTIMA DERIVACIÓN</h5>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">Remitente:</label>
+                            <div class="col-sm-10">
+                                <?php
+                                $campo = 'remitente';
+                                echo form_input(array(
+                                    'name' => $campo,
+                                    'id' => $campo,
+                                    'class' => 'form-control form-control-uppercase',
+                                    'readonly' => true,
+                                    'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
+                                ));
+                                ?>
+                            </div>                            
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">Destinatario:</label>
+                            <div class="col-sm-10">
+                                <?php
+                                $campo = 'destinatario';
+                                echo form_input(array(
+                                    'name' => $campo,
+                                    'id' => $campo,
+                                    'class' => 'form-control form-control-uppercase',
+                                    'readonly' => true,
+                                    'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
+                                ));
+                                ?>
+                            </div>                            
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">Responsable:</label>
+                            <div class="col-sm-10">
+                                <?php
+                                $campo = 'responsable';
+                                echo form_input(array(
+                                    'name' => $campo,
+                                    'id' => $campo,
+                                    'class' => 'form-control form-control-uppercase',
+                                    'readonly' => true,
+                                    'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
+                                ));
+                                ?>
+                            </div>                            
+                        </div>                        
                         <h5 class="sub-title">Datos del Documento Externo</h5>
                         <div class="row">
                             <div class="col-sm-8">

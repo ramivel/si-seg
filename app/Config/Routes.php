@@ -228,7 +228,8 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_provincias', 'MineriaIlegal::ajaxProvincias');
         $routes->add('ajax_municipios', 'MineriaIlegal::ajaxMunicipios');
 
-        $routes->add('denuncia_manual', 'MineriaIlegal::denunciaManual');        
+        $routes->add('denuncia_manual', 'MineriaIlegal::denunciaManual');
+        $routes->add('denuncia_manual_fmi', 'MineriaIlegal::denunciaManualFmi');
         $routes->add('listado_denuncias_manuales', 'MineriaIlegal::listadoDenunciasManuales');
         $routes->add('revisar_denuncia_manual/(:num)', 'MineriaIlegal::revisarDenunciaManual/$1');
         $routes->post('guardar_revisar_denuncia_manual', 'MineriaIlegal::guardarRevisarDenunciaManual');
@@ -267,7 +268,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('rechazar_anulacion/(:num)/(:num)', 'Documentos::rechazarAnulacion/$1/$2');
         $routes->add('ajax_documentos', 'Documentos::ajaxDocumentos');
         $routes->add('ajax_datos_documento', 'Documentos::ajaxDatosDocumento');
-        
+
         $routes->add('reporte/(:num)', 'Documentos::reporte/$1');
         $routes->add('ajax_documentos_mineria_ilegal', 'Documentos::ajaxDocumentosMineriaIlegal');
     });

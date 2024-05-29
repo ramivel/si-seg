@@ -16,7 +16,7 @@
                                 <!-- Nav tabs -->
                                 <ul class="nav nav-tabs  tabs" role="tablist">
                                     <li class="nav-item">
-                                        <a class="nav-link active" data-toggle="tab" href="#datos_hoja_ruta" role="tab"><strong>Datos de la H.R. y F.M.I.</strong></a>
+                                        <a class="nav-link active" data-toggle="tab" href="#datos_hoja_ruta" role="tab"><strong>Datos de la F.M.I.</strong></a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link " data-toggle="tab" href="#datos_personales" role="tab"><strong>Datos del Denunciante(s)</strong></a>
@@ -40,90 +40,8 @@
                                 <!-- Tab panes -->
                                 <div class="tab-content tabs card-block">
                                     <div class="tab-pane active" id="datos_hoja_ruta" role="tabpanel">
-                                        <h4 class="sub-title mt-2 mb-2">HOJA DE RUTA</h4>
-                                        <p><strong>Nota.</strong> El correlativo de la Hoja de Ruta se lo realiza con la Dirección Departamental o Regional seleccionada.</p>
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Dirección Departamental o Regional * :</label>
-                                            <div class="col-sm-6">
-                                                <?php
-                                                    $campo = 'fk_oficina';
-                                                    echo form_dropdown($campo, $oficinas, set_value($campo, set_value($campo,(isset($denuncia[$campo]) ? $denuncia[$campo] : ''))), array('id' => $campo, 'class' => 'form-control'));
-                                                ?>
-                                                <span class="messages"></span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 col-sm-12">
-                                                <div class="form-group row">
-                                                    <label class="col-sm-7 col-form-label">Nº de Correlativo Hoja de Ruta Minería Ilegal <span class="mytooltip tooltip-effect-5">
-                                                        <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
-                                                        <span class="tooltip-content clearfix">
-                                                            <span class="tooltip-text">Debe escribir solo el NÚMERO de correlativo de la Hoja de Ruta.</span>
-                                                        </span>
-                                                    </span> * : </label>
-                                                    <div class="col-sm-5">
-                                                        <?php
-                                                            $campo = 'n_correlativo_hoja_ruta';
-                                                            echo form_input(array(
-                                                                'name' => $campo,
-                                                                'id' => $campo,
-                                                                'type' => 'number',
-                                                                'class' => 'form-control form-control-uppercase',
-                                                                'value' => set_value($campo, '')
-                                                            ));
-                                                        ?>
-                                                        <span class="messages"></span>
-                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                        <?php }?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-sm-12">
-                                                <div class="form-group row">
-                                                    <label class="col-sm-2 col-form-label">Fecha * : </label>
-                                                    <div class="col-sm-5">
-                                                        <?php
-                                                            $campo = 'fecha_hoja_ruta';
-                                                            echo form_input(array(
-                                                                'name' => $campo,
-                                                                'id' => $campo,
-                                                                'type' => 'date',
-                                                                'class' => 'form-control',
-                                                                'value' => set_value($campo, '')
-                                                            ));
-                                                        ?>
-                                                        <span class="messages"></span>
-                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                        <?php }?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <p><strong>Nota.</strong> Debe seleccionar al usuario destino que aparecera en la Hoja de Ruta.</p>
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Usuario Destino * : </label>
-                                            <div class="col-sm-10">
-                                                <?php $campo = 'fk_usuario_destino';?>
-                                                <select id="<?= $campo;?>" name="<?= $campo;?>" class="analista-destinatario-mineria-ilegal-ajax col-sm-12">
-                                                    <?php if(isset($usu_destinatario)){ ?>
-                                                        <option value="<?= $usu_destinatario['id'];?>"><?= $usu_destinatario['nombre'];?></option>
-                                                    <?php }else{ ?>
-                                                        <option value="">Escriba el Nombre o Cargo...</option>
-                                                    <?php } ?>
-                                                </select>
-                                                <span class="messages"></span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
-                                            </div>
-                                        </div>
-                                        <h4 class="sub-title mt-2 mb-2">FORMULARIO DE MINERIA ILEGAL</h4>
                                         <p><strong>Nota.</strong> El correlativo del Formulario de Minería Ilegal se lo estructura con el Departamento seleccionado en la sección de Descripción de la Actividad minera.</p>
+                                        <p class="text-center"><strong>ESTE FORMULARIO ES PARA REGULARIZAR LAS DENUNCIAS ATENDIDAS ANTES DE LA GESTIÓN 2024.</strong></p>
                                         <div class="row">
                                             <div class="col-md-6 col-sm-12">
                                                 <div class="form-group row">
@@ -727,7 +645,7 @@
                                                 </div>
                                             </div>
                                             <div class="col-sm-12 col-md-2">
-                                                <button type="button" class="btn btn-inverse" onclick="agregarPunto();"><i class="fa fa-map-marker"></i> Agregar Punto</button>                                                
+                                                <button type="button" class="btn btn-inverse" onclick="agregarPunto();"><i class="fa fa-map-marker"></i> Agregar Punto</button>
                                             </div>
                                         </div>
                                         <div class="row">

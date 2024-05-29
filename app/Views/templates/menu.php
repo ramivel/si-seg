@@ -150,12 +150,12 @@
 
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'mis_tramites') ? 'active' : '';?>">
                                 <a href="<?= base_url($row['controlador'].'mis_tramites');?>">
-                                        <span class="pcoded-mtext">Mis Tramites</span>
+                                        <span class="pcoded-mtext">Mis Trámites</span>
                                     </a>
                                 </li>
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador_mis_tramites') ? 'active' : '';?>">
                                     <a href="<?= base_url($row['controlador'].'buscador_mis_tramites');?>">
-                                        <span class="pcoded-mtext">Buscador de Mis Tramites</span>
+                                        <span class="pcoded-mtext">Reporte de mis Trámites como Responsable</span>
                                     </a>
                                 </li>
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador') ? 'active' : '';?>">
@@ -211,9 +211,14 @@
                             <ul class="pcoded-submenu">
 
                                 <?php if(in_array(15, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'denuncia_manual_fmi') ? 'active' : '';?>">
+                                        <a href="<?= base_url($row['controlador'].'denuncia_manual_fmi');?>">
+                                            <span class="pcoded-mtext">Agregar F.M.I. Manual</span>
+                                        </a>
+                                    </li>
                                     <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'denuncia_manual') ? 'active' : '';?>">
                                         <a href="<?= base_url($row['controlador'].'denuncia_manual');?>">
-                                            <span class="pcoded-mtext">Agregar Manual</span>
+                                            <span class="pcoded-mtext">Agregar H.R. y F.M.I. Manual</span>
                                         </a>
                                     </li>
                                     <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_denuncias_manuales') ? 'active' : '';?>">

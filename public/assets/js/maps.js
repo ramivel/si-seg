@@ -20,6 +20,53 @@ myMap.on('dblclick', e => {
   actualizarInputCoordenadas(lat, lng);
 });
 
+var geojsonFeature = {
+  "type": "Feature",
+  "properties": {
+      "name": "Coors Field",
+      "amenity": "Baseball Stadium",
+      "popupContent": "This is where the Rockies play!"
+  },
+  "geometry": {
+      "type": "Point",
+      "coordinates": [-104.99404, 39.75621]
+  }
+};
+var campus = {
+  "type": "Feature",
+  "properties": {
+      "popupContent": "This is the Auraria West Campus",
+      "style": {
+          weight: 2,
+          color: "#999",
+          opacity: 1,
+          fillColor: "#B0DE5C",
+          fillOpacity: 0.8
+      }
+  },
+  "geometry": {
+      "type": "MultiPolygon",
+      "coordinates": [
+          [
+              [
+                  [-105.00942707061768, 39.73989736613708],
+                  [-105.00942707061768, 39.73910536278566],
+                  [-105.00685214996338, 39.73923736397631],
+                  [-105.00384807586671, 39.73910536278566],
+                  [-105.00174522399902, 39.73903936209552],
+                  [-105.00041484832764, 39.73910536278566],
+                  [-105.00041484832764, 39.73979836621592],
+                  [-105.00535011291504, 39.73986436617916],
+                  [-105.00942707061768, 39.73989736613708]
+              ]
+          ]
+      ]
+  }
+};
+
+L.geoJSON(campus).addTo(myMap);
+
+
 function agregarPunto(){
   var latitude = document.getElementById("latitude").value;
   var longitude = document.getElementById("longitude").value;
