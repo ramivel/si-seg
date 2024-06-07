@@ -145,4 +145,21 @@ $(document).ready(function () {
         });
     });
 
+    $('.desanexar').on('click',function(e){
+        e.preventDefault();
+        var link = $(this).attr('href');
+        swal({
+            title: "Esta seguro de DESANEXAR?",
+            type: "info",
+            showCancelButton: true,
+            confirmButtonClass: "btn-primary",
+            confirmButtonText: "Si, DESANEXAR!",
+            cancelButtonText: "Cancelar",
+            closeOnConfirm: false
+        },
+        function(){
+            window.location.href = link;
+        });
+    });
+
 });

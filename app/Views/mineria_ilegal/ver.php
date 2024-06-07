@@ -5,6 +5,7 @@
             <div class="col-sm-12 text-left">
                 <a href="<?= $url_atras;?>" class="btn btn-success"><i class="feather icon-arrow-left"></i> ATRAS</a>
                 <a href="<?= base_url($controlador.'hoja_ruta_pdf/'.$hoja_ruta['id']);?>" target="_blank" class="btn btn-warning"><i class="fa fa-print"></i> IMPRIMIR H.R.</a>
+                <a href="<?= base_url($controlador.'formulario_denuncia_pdf/'.$denuncia['id']);?>" target="_blank" class="btn btn-primary"><i class="fa fa-print"></i> IMPRIMIR F.M.I</a>
             </div>
         </div>
         <div class="row">
@@ -33,9 +34,10 @@
                                 </tbody>
                             </table>
                         </div>
-                        <?php if($denuncia['fk_tipo_denuncia']==3){?>
+                        <?php if($denuncia['fk_tipo_denuncia']==3 || (isset($hojas_rutas) && count($hojas_rutas)>0)){?>
                             <h4 class="sub-title mt-2 mb-2">Origen</h4>
                             <div class="table-responsive">
+                                <?php if($denuncia['fk_tipo_denuncia']==3){?>
                                 <table class="table table-bordered mb-0">
                                     <tbody>
                                         <tr>
@@ -61,6 +63,7 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                                <?php }?>
                                 <?php if(isset($hojas_rutas) && count($hojas_rutas)>0){?>
                                     <table class="table table-bordered mb-0">
                                         <thead>

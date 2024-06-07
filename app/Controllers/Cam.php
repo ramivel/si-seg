@@ -24,7 +24,6 @@ use App\Models\TipoDocumentoExternoModel;
 use App\Models\TipoDocumentoModel;
 use App\Models\TramitesModel;
 use App\Models\UsuariosModel;
-
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -1805,7 +1804,8 @@ class Cam extends BaseController
         );
 
         if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
-            $this->exportarMisTramites($campos_listar, $campos_reales, $datos);
+            $file_name = 'reporte_mis_tramites-'.date('YmdHis').'.xlsx';
+            $this->exportarXLS($campos_listar, $campos_reales, $datos, $file_name);
         }
 
         $cabera['titulo'] = $this->titulo;
@@ -1826,8 +1826,8 @@ class Cam extends BaseController
         echo view('templates/template', $data);
     }
 
-    public function exportarMisTramites($campos_listar, $campos_reales, $datos){
-        $file_name = 'reporte_mis_tramites-'.date('YmdHis').'.xlsx';
+    public function exportarXLS($campos_listar, $campos_reales, $datos, $file_name)
+    {
         $spreadsheet = new Spreadsheet();
         $activeWorksheet = $spreadsheet->getActiveSheet();
         $activeWorksheet->setTitle("Mis Tramites");
@@ -1978,14 +1978,14 @@ class Cam extends BaseController
                     'campo' => $campos_buscar[$this->request->getPost('campo')],
                     'fecha' => date('Y-m-d H:i:s'),
                 );
-                $logsBuscadoresModel->insert($dataLog);                
+                $logsBuscadoresModel->insert($dataLog);
                 if($validate){
                     $datos = $query->get()->getResultArray();
                     $contenido['datos'] = $datos;
                 }
             }
         }
-        
+
         $campos_listar=array(
             ' ','Fecha Derivación<br>o Devolución','H.R. Madre','Departamental o Regional','Código Único','Denominación','Solicitante','Remitente','Destinatario','Instrucción','Estado Trámite',
         );
@@ -2066,7 +2066,7 @@ class Cam extends BaseController
                             $query = $builder->where($where);
                         }else{
                             $validate = false;
-                        }                        
+                        }
                         break;
                     case 'denominacion':
                         $query = $builder->where($where)->like('dam.denominacion', $texto);
@@ -2080,13 +2080,13 @@ class Cam extends BaseController
                     'campo' => $campos_buscar[$this->request->getPost('campo')],
                     'fecha' => date('Y-m-d H:i:s'),
                 );
-                $logsBuscadoresModel->insert($dataLog);                
+                $logsBuscadoresModel->insert($dataLog);
                 if($validate){
                     $datos = $query->get()->getResultArray();
                     $contenido['datos'] = $datos;
                 }
             }
-        }        
+        }
         $campos_listar=array(
             ' ','Fecha Derivación/Devolución','H.R. Madre', 'Remitente','Destinatario','Responsable Trámite','Estado Trámite','Código Único','Denominación', 'Representante Legal', 'Nacionalidad', 'Solicitante', 'Clasificación APM'
         );
@@ -3975,7 +3975,7 @@ class Cam extends BaseController
                 $resultado['denominacion'] = $tramite['denominacion'];
                 $resultado['representante_legal'] = $tramite['representante_legal'];
                 $resultado['nacionalidad'] = $tramite['nacionalidad'];
-                $resultado['titular'] = $tramite['titular'];                
+                $resultado['titular'] = $tramite['titular'];
                 $resultado['clasificacion'] = $tramite['clasificacion_titular'];
                 $resultado['remitente'] = $tramite['remitente'];
                 $resultado['destinatario'] = $tramite['destinatario'];
@@ -4479,6 +4479,195 @@ class Cam extends BaseController
             }
         }
         return false;
+    }
+
+    /* Reportes Administración */
+    public function reporteResponsable()
+    {
+        $oficinaModel = new OficinasModel();
+        $tmpOficinas = $oficinaModel->findAll();
+        $oficinas = array('' => 'SELECCIONE UNA DIRECCIÓN');
+        $usuarios = array('' => 'SELECCIONE UN USUARIO');
+        foreach($tmpOficinas as $row)
+            $oficinas[$row['id']] = $row['nombre'];
+        $datos = array();
+        $campos_listar=array(
+            'Estado','Fecha','Días<br>Pasados','H.R. Madre', 'Remitente', 'Destinatario', 'Instrucción', 'Estado Tramite', 'Responsable Trámite', 'Codigo Unico','Denominacion','Representante Legal','Solicitante','Departamentos',
+        );
+        $campos_reales=array(
+            'ultimo_estado','ultimo_fecha_derivacion','dias','correlativo', 'remitente', 'destinatario', 'ultimo_instruccion', 'estado_tramite', 'responsable', 'codigo_unico', 'denominacion','representante_legal','titular', 'departamentos',
+        );
+
+        if ($this->request->getPost()) {
+            $oficina = $this->request->getPost('oficina');
+            $usuario = $this->request->getPost('usuario');
+            if(!empty($oficina))
+                $usuarios = $usuarios + $this->obtenerUsuariosOficina($oficina);
+            $camposValidacion = array(
+                'oficina' => [
+                    'rules' => 'required',
+                ],
+                'usuario' => [
+                    'rules' => 'required',
+                ],
+            );
+            if(!$this->validate($camposValidacion)){
+                $contenido['validation'] = $this->validator;
+            }else{
+
+                $db = \Config\Database::connect();
+                $campos = array('ac.id', 'ac.fk_area_minera', 'ac.correlativo', "to_char(ac.fecha_mecanizada, 'DD/MM/YYYY') as fecha_mecanizada", 'ac.ultimo_instruccion', 'ac.ultimo_estado',
+                'dam.codigo_unico', 'dam.denominacion', 'dam.titular', 'dam.departamentos', "CONCAT(ur.nombre_completo,'<br><b>',pr.nombre,'<b>') as remitente", "CONCAT(ud.nombre_completo,'<br><b>',pd.nombre,'<b>') as destinatario",
+                "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
+                "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 AND eth.finalizar THEN 'SI' WHEN etp.finalizar THEN 'SI'  ELSE 'NO' END as finalizar",
+                "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion", "(CURRENT_DATE - ac.ultimo_fecha_derivacion::date) as dias", 'etp.dias_intermedio', 'etp.dias_limite', 'etp.notificar',
+                'ac.ultimo_fk_documentos', "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as responsable", 'dam.representante_legal', 'ac.ultimo_recurso_jerarquico', 'ac.ultimo_recurso_revocatoria', 'ac.ultimo_oposicion', 'ac.editar'
+                );
+                $where = array(
+                    'ac.deleted_at' => NULL,
+                    'ac.ultimo_fk_usuario_responsable' => $usuario,
+                );
+                $builder = $db->table('public.acto_administrativo as ac')
+                ->select($campos)
+                ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+                ->join('usuarios as ur', 'ac.ultimo_fk_usuario_remitente = ur.id', 'left')
+                ->join('perfiles as pr', 'ur.fk_perfil = pr.id', 'left')
+                ->join('usuarios as ud', 'ac.ultimo_fk_usuario_destinatario = ud.id', 'left')
+                ->join('perfiles as pd', 'ud.fk_perfil = pd.id', 'left')
+                ->join('estado_tramite as etp', 'ac.ultimo_fk_estado_tramite_padre = etp.id', 'left')
+                ->join('estado_tramite as eth', 'ac.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
+                ->join('usuarios as ua', 'ac.ultimo_fk_usuario_responsable = ua.id', 'left')
+                ->join('perfiles as pa', 'ua.fk_perfil = pa.id', 'left')
+                ->where($where)
+                ->orderBY('ac.id', 'DESC');
+                $datos = $builder->get()->getResultArray();
+                if ($this->request->getPost('enviar')=='excel') {
+                    helper('security');
+                    $file_name = sanitize_filename(mb_strtolower($usuarios[$usuario])).' - responsable - '.date('YmdHis').'.xlsx';
+                    $this->exportarXLS($campos_listar, $campos_reales, $datos, $file_name);
+                }
+            }
+        }
+        $cabera['titulo'] = $this->titulo;
+        $cabera['navegador'] = true;
+        $cabera['subtitulo'] = 'Reporte de Trámites por Responsable';
+        $contenido['title'] = view('templates/title',$cabera);
+        $contenido['oficinas'] = $oficinas;
+        $contenido['usuarios'] = $usuarios;
+        $contenido['subtitulo'] = 'Reporte de Trámites por Responsable';
+        $contenido['datos'] = $datos;
+        $contenido['campos_listar'] = $campos_listar;
+        $contenido['campos_reales'] = $campos_reales;
+        $contenido['controlador'] = $this->controlador;
+        $contenido['accion'] = $this->controlador.'reporte_responsable';
+        $data['content'] = view($this->carpeta.'reporte_responsable', $contenido);
+        $data['menu_actual'] = $this->menuActual.'reporte_responsable';
+        $data['tramites_menu'] = $this->tramitesMenu();
+        $data['alertas'] = $this->alertasTramites();
+        echo view('templates/template', $data);
+    }
+    public function reporteMisTramites()
+    {
+        $oficinaModel = new OficinasModel();
+        $tmpOficinas = $oficinaModel->findAll();
+        $oficinas = array('' => 'SELECCIONE UNA DIRECCIÓN');
+        $usuarios = array('' => 'SELECCIONE UN USUARIO');
+        foreach($tmpOficinas as $row)
+            $oficinas[$row['id']] = $row['nombre'];
+        $datos = array();
+        $campos_listar=array(
+            'Estado','Fecha','Días<br>Pasados','H.R. Madre', 'Remitente', 'Destinatario', 'Instrucción', 'Estado Tramite', 'Responsable Trámite', 'Codigo Unico','Denominacion','Representante Legal','Solicitante','Departamentos',
+        );
+        $campos_reales=array(
+            'ultimo_estado','ultimo_fecha_derivacion','dias','correlativo', 'remitente', 'destinatario', 'ultimo_instruccion', 'estado_tramite', 'responsable', 'codigo_unico', 'denominacion','representante_legal','titular', 'departamentos',
+        );
+
+        if ($this->request->getPost()) {
+            $oficina = $this->request->getPost('oficina');
+            $usuario = $this->request->getPost('usuario');
+            if(!empty($oficina))
+                $usuarios = $usuarios + $this->obtenerUsuariosOficina($oficina);
+            $camposValidacion = array(
+                'oficina' => [
+                    'rules' => 'required',
+                ],
+                'usuario' => [
+                    'rules' => 'required',
+                ],
+            );
+            if(!$this->validate($camposValidacion)){
+                $contenido['validation'] = $this->validator;
+            }else{
+                $db = \Config\Database::connect();
+                $campos = array('ac.id', 'ac.fk_area_minera', 'ac.correlativo', "to_char(ac.fecha_mecanizada, 'DD/MM/YYYY') as fecha_mecanizada", 'ac.ultimo_instruccion', 'ac.ultimo_estado',
+                'dam.codigo_unico', 'dam.denominacion', 'dam.titular', 'dam.departamentos', "CONCAT(ur.nombre_completo,'<br><b>',pr.nombre,'<b>') as remitente", "CONCAT(ud.nombre_completo,'<br><b>',pd.nombre,'<b>') as destinatario",
+                "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
+                "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 AND eth.finalizar THEN 'SI' WHEN etp.finalizar THEN 'SI'  ELSE 'NO' END as finalizar",
+                "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion", "(CURRENT_DATE - ac.ultimo_fecha_derivacion::date) as dias", 'etp.dias_intermedio', 'etp.dias_limite', 'etp.notificar',
+                'ac.ultimo_fk_documentos', "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as responsable", 'dam.representante_legal', 'ac.ultimo_recurso_jerarquico', 'ac.ultimo_recurso_revocatoria', 'ac.ultimo_oposicion', 'ac.editar'
+                );
+                $where = array(
+                    'ac.deleted_at' => NULL,
+                    'ac.fk_usuario_actual' => $usuario,
+                );
+                $builder = $db->table('public.acto_administrativo as ac')
+                ->select($campos)
+                ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+                ->join('usuarios as ur', 'ac.ultimo_fk_usuario_remitente = ur.id', 'left')
+                ->join('perfiles as pr', 'ur.fk_perfil = pr.id', 'left')
+                ->join('usuarios as ud', 'ac.ultimo_fk_usuario_destinatario = ud.id', 'left')
+                ->join('perfiles as pd', 'ud.fk_perfil = pd.id', 'left')
+                ->join('estado_tramite as etp', 'ac.ultimo_fk_estado_tramite_padre = etp.id', 'left')
+                ->join('estado_tramite as eth', 'ac.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
+                ->join('usuarios as ua', 'ac.ultimo_fk_usuario_responsable = ua.id', 'left')
+                ->join('perfiles as pa', 'ua.fk_perfil = pa.id', 'left')
+                ->where($where)
+                ->orderBY('ac.id', 'DESC');
+                $datos = $builder->get()->getResultArray();
+                if ($this->request->getPost('enviar')=='excel') {
+                    helper('security');
+                    $file_name = sanitize_filename(mb_strtolower($usuarios[$usuario])).' - bandeja - '.date('YmdHis').'.xlsx';
+                    $this->exportarXLS($campos_listar, $campos_reales, $datos, $file_name);
+                }
+            }
+        }
+        $cabera['titulo'] = $this->titulo;
+        $cabera['navegador'] = true;
+        $cabera['subtitulo'] = 'Reporte de Trámites por Bandeja';
+        $contenido['title'] = view('templates/title',$cabera);
+        $contenido['oficinas'] = $oficinas;
+        $contenido['usuarios'] = $usuarios;
+        $contenido['subtitulo'] = 'Reporte de Trámites por Bandeja';
+        $contenido['datos'] = $datos;
+        $contenido['campos_listar'] = $campos_listar;
+        $contenido['campos_reales'] = $campos_reales;
+        $contenido['controlador'] = $this->controlador;
+        $contenido['accion'] = $this->controlador.'reporte_mis_tramites';
+        $data['content'] = view($this->carpeta.'reporte_mis_tramites', $contenido);
+        $data['menu_actual'] = $this->menuActual.'reporte_mis_tramites';
+        $data['tramites_menu'] = $this->tramitesMenu();
+        $data['alertas'] = $this->alertasTramites();
+        echo view('templates/template', $data);
+    }
+
+    private function obtenerUsuariosOficina($oficina){
+        $db = \Config\Database::connect();
+        $campos = array('u.id', "CONCAT(u.nombre_completo, ' - ', p.nombre) as usuario");
+        $where = array(
+            'u.fk_oficina' => $oficina,
+            'u.deleted_at' => NULL,
+        );
+        $builder = $db->table('public.usuarios as u')
+        ->select($campos)
+        ->join('public.perfiles AS p', 'u.fk_perfil = p.id', 'left')
+        ->where($where)
+        ->orderBy('usuario','ASC');
+        $resultado = array();
+        if($tmpUsuarios = $builder->get()->getResultArray()){
+            foreach($tmpUsuarios as $row)
+                $resultado[$row['id']] = $row['usuario'];
+        }
+        return $resultado;
     }
 
 }

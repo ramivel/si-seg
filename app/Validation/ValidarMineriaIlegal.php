@@ -14,7 +14,10 @@ class ValidarMineriaIlegal {
         $request = \Config\Services::request();
         $oficinaModel = new OficinasModel();
         $hojaRutaMineriaIlegalModel = new HojaRutaMineriaIlegalModel();
-        $oficina = $oficinaModel->find($request->getPost('fk_oficina'));
+        if(in_array(13, session()->get('registroPermisos')))
+            $oficina = $oficinaModel->find($request->getPost('fk_oficina'));
+        else
+            $oficina = $oficinaModel->find(session()->get('registroOficina'));
         $correlativoHR = $oficina['correlativo'].'MIN-ILEGAL/'.$value.'/2024';
 
         if($hojaRutaMineriaIlegalModel->where(array('correlativo' => $correlativoHR))->first())

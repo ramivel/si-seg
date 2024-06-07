@@ -95,6 +95,9 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->post('guardar_cambiar_contraseña_usuario', 'Usuarios::guardarCambiarContraseñaUsuario');
         $routes->add('cambiar_contraseña/(:num)', 'Usuarios::cambiarContraseña/$1');
         $routes->post('guardar_cambiar_contraseña', 'Usuarios::guardarCambiarContraseña');
+
+        $routes->add('ajax_direccion_usuarios', 'Usuarios::ajaxDireccionUsuarios');
+
     });
 
     $routes->group('estado_tramite', function($routes){
@@ -165,6 +168,10 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
 
         $routes->add('migrar_sol_cam', 'Cam::migrarSolCam');
         $routes->add('migrar_cmn_cmc', 'Cam::migrarCmcCmc');
+
+        $routes->add('reporte_responsable', 'Cam::reporteResponsable');
+        $routes->add('reporte_mis_tramites', 'Cam::reporteMisTramites');
+
     });
 
     $routes->group('tipo_documento_externo', function($routes){
@@ -271,6 +278,14 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
 
         $routes->add('reporte/(:num)', 'Documentos::reporte/$1');
         $routes->add('ajax_documentos_mineria_ilegal', 'Documentos::ajaxDocumentosMineriaIlegal');
+
+        $routes->add('reporte_documentos/(:num)', 'Documentos::reporteDocumentos/$1');
+
+        $routes->add('buscador', 'Documentos::buscador');
+        $routes->add('desanexar/(:num)', 'Documentos::desanexar/$1');
+        $routes->add('buscador_sincobol', 'Documentos::buscadorSincobol');
+        $routes->add('desanexar_sincobol/(:num)/(:num)/(:num)/(:num)', 'Documentos::desanexarSincobol/$1/$2/$3/$4');
+        
     });
 });
 $routes->group('', ['filter'=>'AlreadyLogged'], function($routes){

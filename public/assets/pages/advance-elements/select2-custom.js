@@ -788,6 +788,28 @@ $(document).ready(function () {
   });
   /* FIN TIPO MINERIA ILEGAL MANUAL*/
 
+  /* Reporte Administracion Usuarios */
+  $("#oficina-reporte").on("change", function () {
+    $("#usuario-reporte").html('<option value="">SELECCIONE UN USUARIO</option>');
+    if (this.value.length > 0) {
+      $.ajax({
+        type: "POST",
+        url: baseUrl + "usuarios/ajax_direccion_usuarios",
+        data: {
+          fk_oficina: this.value,
+        },
+        error: function () {
+          console.log("error ajax.");
+        },
+        success: function (html) {
+          console.log(html);
+          $("#usuario-reporte").html(html);
+        },
+      });
+    }
+  });
+  /* Fin Reporte Administracion Usuarios */
+
 });
 function desanexar_documento(idDocumento) {
   var row = document.getElementById(idDocumento);

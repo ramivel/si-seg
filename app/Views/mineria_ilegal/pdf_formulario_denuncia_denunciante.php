@@ -9,6 +9,18 @@
     </tr>
 </table>
 <br /><br />
+<?php if(isset($hojas_ruta_sincobol)){?>
+<table border="1" cellpadding="3" cellspacing="0">
+    <tr>
+        <td bgcolor="<?= $color;?>" colspan="2" align="center"><b>ORIGEN</b></td>
+    </tr>
+    <tr>
+        <td width="148" bgcolor="<?= $color;?>" align="rigth"><b>Hoja(s) de Ruta(s):</b></td>
+        <td width="390"><?= $hojas_ruta_sincobol;?></td>
+    </tr>
+</table>
+<br /><br />
+<?php }?>
 <table border="1" cellpadding="3" cellspacing="0">
     <tr>
         <td bgcolor="<?= $color;?>" colspan="2" align="center"><b>DATOS DEL DENUNCIANTE</b></td>
@@ -119,7 +131,7 @@
                 <td align="center"><?= $area_minera['clasificacion'];?></td>
                 <td align="center"><?= $area_minera['departamentos'];?></td>
                 <td align="center"><?= $area_minera['provincias'];?></td>
-                <td align="center"><?= $area_minera['municipios'];?></td>                
+                <td align="center"><?= $area_minera['municipios'];?></td>
             </tr>
         <?php }?>
     </table>

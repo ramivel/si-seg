@@ -4,7 +4,7 @@
         <?php if(in_array(100, session()->get('registroPermisos'))){?>
             <div class="pcoded-navigatio-lavel">Administración</div>
             <ul class="pcoded-item pcoded-left-item">
-                <li class="pcoded-hasmenu <?= (isset($menu_actual) && in_array($menu_actual, array('oficinas', 'tramites', 'perfiles', 'usuarios', 'estado_tramite', 'tipo_documento', 'tipo_documento_externo'))) ? 'pcoded-trigger' : '';?>">
+                <li class="pcoded-hasmenu <?= (isset($menu_actual) && in_array($menu_actual, array('oficinas', 'tramites', 'perfiles', 'usuarios', 'estado_tramite', 'tipo_documento', 'tipo_documento_externo', 'documentos'))) ? 'pcoded-trigger' : '';?>">
                     <a href="javascript:void(0)">
                         <span class="pcoded-micon"><i class="feather icon-settings"></i></span>
                         <span class="pcoded-mtext">Configuraciones</span>
@@ -43,6 +43,24 @@
                         <li class="<?= (isset($menu_actual) && $menu_actual === 'tipo_documento_externo') ? 'active' : '';?>">
                             <a href="<?= base_url('tipo_documento_externo');?>">
                                 <span class="pcoded-mtext">Tipos Doc. Externos</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>                
+                <li class="pcoded-hasmenu <?= (isset($menu_actual) && ($menu_actual === 'documentos/buscador' || $menu_actual === 'documentos/buscador_sincobol') ) ? 'pcoded-trigger' : '';?>">
+                    <a href="javascript:void(0)">
+                        <span class="pcoded-micon"><i class="feather icon-file-minus"></i></span>
+                        <span class="pcoded-mtext">Desanexar</span>
+                    </a>
+                    <ul class="pcoded-submenu">
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'documentos/buscador') ? 'active' : '';?>">
+                            <a href="<?= base_url('documentos/buscador');?>">
+                                <span class="pcoded-mtext">Buscador Documentos</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'documentos/buscador_sincobol') ? 'active' : '';?>">
+                            <a href="<?= base_url('documentos/buscador_sincobol');?>">
+                                <span class="pcoded-mtext">Buscador H.R. SINCOBOL</span>
                             </a>
                         </li>
                     </ul>
@@ -195,6 +213,31 @@
                                         <a href="<?= base_url($row['controlador'].'reporte');?>">
                                             <span class="pcoded-mtext">Reporte General</span>
                                         </a>
+                                    </li>
+                                <?php }?>
+
+                                <?php if(in_array(16, session()->get('registroPermisos'))){?>
+                                    <li class="pcoded-hasmenu <?= (isset($menu_actual) && ($menu_actual == $row['controlador'].'reporte_responsable' || $menu_actual == $row['controlador'].'reporte_mis_tramites' || $menu_actual == $row['controlador'].'reporte_documentos') ) ? 'pcoded-trigger' : '';?> ">
+                                        <a href="javascript:void(0)">
+                                            <span class="pcoded-mtext">Reportes Administración</span>
+                                        </a>
+                                        <ul class="pcoded-submenu">
+                                            <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'reporte_responsable') ? 'active' : '';?>">
+                                                <a href="<?= base_url($row['controlador'].'reporte_responsable');?>">
+                                                    <span class="pcoded-mtext">Por Responsable</span>
+                                                </a>
+                                            </li>
+                                            <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'reporte_mis_tramites') ? 'active' : '';?>">
+                                                <a href="<?= base_url($row['controlador'].'reporte_mis_tramites');?>">
+                                                    <span class="pcoded-mtext">Bandeja de Trámites</span>
+                                                </a>
+                                            </li>
+                                            <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'reporte_documentos') ? 'active' : '';?>">
+                                                <a href="<?= base_url('documentos/reporte_documentos/'.$row['id']);?>">
+                                                    <span class="pcoded-mtext">Documentos por Usuario</span>
+                                                </a>
+                                            </li>
+                                        </ul>
                                     </li>
                                 <?php }?>
 

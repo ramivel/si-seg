@@ -8,8 +8,16 @@ use PhpOffice\PhpWord\Style\Font;
 use PhpOffice\PhpWord\IOFactory;
 
 use App\Models\CorrelativoDocumentosModel;
+use App\Models\DenunciasHrSincobolMineriaIlegalModel;
+use App\Models\DenunciasMineriaIlegalModel;
+use App\Models\DerivacionSincobolModel;
 use App\Models\TipoDocumentoModel;
 use App\Models\DocumentosModel;
+use App\Models\HojaRutaMineriaIlegalModel;
+use App\Models\HojaRutaSisegModel;
+use App\Models\HojasRutaAnexadasMineriaIlegalModel;
+use App\Models\HrAnexadasModel;
+use App\Models\OficinasModel;
 use App\Models\TramitesModel;
 
 use PhpOffice\PhpWord\TemplateProcessor;
@@ -53,7 +61,7 @@ class Documentos extends BaseController
 
     public function index($idTramite)
     {
-        if($tramite = $this->tramitesMenu($idTramite)){            
+        if($tramite = $this->tramitesMenu($idTramite)){
             $db = \Config\Database::connect();
             switch($tramite['controlador']){
                 case 'cam/':
@@ -115,7 +123,7 @@ class Documentos extends BaseController
             $contenido['subtitulo'] = 'Mis Documentos Generados';
             $contenido['controlador'] = $this->controlador;
             $contenido['id_tramite'] = $idTramite;
-            $contenido['ruta_archivos'] = 'archivos/'.$tramite['controlador'];            
+            $contenido['ruta_archivos'] = 'archivos/'.$tramite['controlador'];
             $data['content'] = view($this->carpeta.'index', $contenido);
             $data['menu_actual'] = $this->menuActual;
             $data['tramites_menu'] = $this->tramitesMenu();
@@ -650,6 +658,253 @@ class Documentos extends BaseController
         }
     }
 
+    public function buscador()
+    {
+        $tramitesModel = new TramitesModel();
+        $tmpTramites = $tramitesModel->findAll();
+        $tramites = array();
+        $datos = array();
+        foreach($tmpTramites as $row)
+            $tramites[$row['id']] = $row['nombre'];
+        $campos_buscar=array(
+            'correlativo' => 'Correlativo Documento',
+            'hoja_ruta' => 'Hoja de Ruta',
+        );
+        $campos_listar=array(
+            'Estado','Fecha','Correlativo', 'Tipo Documento', 'Referencia','Hoja de Ruta', 'Documento Digital', 'Usuario Creación', 'Usuario Anulación', 'Motivo Anulación'
+        );
+        $campos_reales=array(
+            'estado','fecha','correlativo', 'tipo_documento', 'referencia','hoja_ruta', 'doc_digital', 'usuario_creacion', 'usuario_anulacion', 'motivo_anulacion'
+        );
+        if ($this->request->getPost()) {
+            $validation = $this->validate([
+                'texto' => [
+                    'rules' => 'required',
+                ],
+            ]);
+            if(!$validation){
+                $contenido['validation'] = $this->validator;
+            }else{
+                $db = \Config\Database::connect();
+                $texto = mb_strtoupper(trim($this->request->getPost('texto')));
+                $where = array(
+                    'doc.deleted_at' => NULL,
+                    'doc.fk_tramite' => $this->request->getPost('tramite'),
+                );
+                switch($this->request->getPost('tramite')){
+                    case 1:
+                        $campos = array(
+                            'doc.id', 'doc.estado', "to_char(doc.fecha, 'DD/MM/YYYY') as fecha", "doc.correlativo", "td.nombre as tipo_documento", "doc.referencia", "adm.correlativo as hoja_ruta",
+                            "doc.doc_digital", "CONCAT(uc.nombre_completo, '<br><b>',pc.nombre,'</b>') as usuario_creacion",
+                            "CASE WHEN doc.estado = 'ANULADO' THEN CONCAT(ua.nombre_completo, '<br><b>',pa.nombre,'</b>') ELSE '' END as usuario_anulacion", "doc.motivo_anulacion", "adm.fk_area_minera"
+                        );
+                        $builder = $db->table('documentos AS doc')
+                        ->select($campos)
+                        ->join('public.tipo_documento AS td', 'doc.fk_tipo_documento = td.id', 'left')
+                        ->join('public.acto_administrativo AS adm', 'doc.fk_acto_administrativo = adm.id', 'left')
+                        ->join('usuarios AS uc', 'doc.fk_usuario_creador = uc.id', 'left')
+                        ->join('perfiles AS pc', 'uc.fk_perfil=pc.id', 'left')
+                        ->join('usuarios AS ua', 'doc.fk_usuario_aut_anulacion = ua.id', 'left')
+                        ->join('perfiles AS pa', 'ua.fk_perfil=pa.id', 'left')
+                        ->where($where)
+                        ->like('doc.correlativo', $texto)
+                        ->orderBY('doc.fecha', 'DESC');
+                        $datos = $builder->get()->getResultArray();
+                        break;
+                    case 2:
+                        $campos = array(
+                            'doc.id', 'doc.estado', "to_char(doc.fecha, 'DD/MM/YYYY') as fecha", "doc.correlativo", "td.nombre as tipo_documento", "doc.referencia", "hr.correlativo as hoja_ruta",
+                            "doc.doc_digital", "CONCAT(uc.nombre_completo, '<br><b>',pc.nombre,'</b>') as usuario_creacion",
+                            "CASE WHEN doc.estado = 'ANULADO' THEN CONCAT(ua.nombre_completo, '<br><b>',pa.nombre,'</b>') ELSE '' END as usuario_anulacion", "doc.motivo_anulacion"
+                        );
+                        $builder = $db->table('documentos AS doc')
+                        ->select($campos)
+                        ->join('public.tipo_documento AS td', 'doc.fk_tipo_documento = td.id', 'left')
+                        ->join('mineria_ilegal.hoja_ruta AS hr', 'doc.fk_hoja_ruta = hr.id', 'left')
+                        ->join('usuarios AS uc', 'doc.fk_usuario_creador = uc.id', 'left')
+                        ->join('perfiles AS pc', 'uc.fk_perfil=pc.id', 'left')
+                        ->join('usuarios AS ua', 'doc.fk_usuario_aut_anulacion = ua.id', 'left')
+                        ->join('perfiles AS pa', 'ua.fk_perfil=pa.id', 'left')
+                        ->where($where)
+                        ->like('doc.correlativo', $texto)
+                        ->orderBY('doc.fecha', 'DESC');
+                        $datos = $builder->get()->getResultArray();
+                        break;
+                }
+            }
+        }
+
+        $cabera['titulo'] = $this->titulo;
+        $cabera['navegador'] = true;
+        $cabera['subtitulo'] = 'Desanexar Documentos';
+        $contenido['title'] = view('templates/title',$cabera);
+        $contenido['campos_listar'] = $campos_listar;
+        $contenido['campos_reales'] = $campos_reales;
+        $contenido['datos'] = $datos;
+        $contenido['tramites'] = $tramites;
+        $contenido['campos_buscar'] = $campos_buscar;
+        $contenido['subtitulo'] = 'Desanexar Documentos';
+        $contenido['accion'] = $this->controlador.'buscador';
+        $contenido['controlador'] = $this->controlador;
+        $data['content'] = view($this->carpeta.'buscador', $contenido);
+        $data['menu_actual'] = 'documentos/buscador';
+        $data['tramites_menu'] = $this->tramitesMenu();
+        $data['alertas'] = $this->alertasTramites();
+        echo view('templates/template', $data);
+    }
+    public function desanexar($id){
+        $documentosModel = new DocumentosModel();
+        if($documento = $documentosModel->find($id)){
+            if($documento['estado']=='ANEXADO'){
+                $dataDocumento = array(
+                    'id' => $documento['id'],
+                    'fk_derivacion' => NULL,
+                    'estado' => 'SUELTO',
+                );
+                if($documentosModel->save($dataDocumento) === false)
+                    session()->setFlashdata('fail', $documentosModel->errors());
+                else
+                    session()->setFlashdata('success', 'Se actualizo correctamente la Información.');
+            }else{
+                session()->setFlashdata('fail', 'No existe el documento.');
+            }
+        }else{
+            session()->setFlashdata('fail', 'No existe el documento.');
+        }
+        return redirect()->to($this->controlador.'buscador');
+    }
+
+    public function buscadorSincobol()
+    {
+        $tramitesModel = new TramitesModel();
+        $tmpTramites = $tramitesModel->findAll();
+        $tramites = array();
+        $datos = array();
+        foreach($tmpTramites as $row)
+            $tramites[$row['id']] = $row['nombre'];
+        $datos = array();
+        $campos_buscar=array(
+            'correlativo' => 'Correlativo H.R. IN/EX',
+        );
+        $campos_listar=array(
+            'Usuario que Anexo', 'Hoja Ruta Anexada', 'Tipo Trámite', 'Hoja Ruta Interno/Externo','Referencia','Remitente Externo/Interno', 'Cite Externo/Interno',
+        );
+        $campos_reales=array(
+            'usuario', 'correlativo_siseg', 'id_tramite','correlativo','referencia', 'remitente','cite',
+        );
+        if ($this->request->getPost()) {
+            $validation = $this->validate([
+                'texto' => [
+                    'rules' => 'required',
+                ],
+            ]);
+            if(!$validation){
+                $contenido['validation'] = $this->validator;
+            }else{
+                $actoAdministrativoModel = new ActoAdministrativoModel();
+                $hojaRutaMineriaIlegalModel = new HojaRutaMineriaIlegalModel();
+                $dbSincobol = \Config\Database::connect('sincobol');
+                $texto = mb_strtoupper(trim($this->request->getPost('texto')));
+                $campos = array(
+                    'hrs.id as id_hoja_ruta_seguimiento', 'hrs.fk_tramite as id_tramite', 'hrs.fk_siseg as id_siseg','hr.id as id_hoja_ruta',
+                    'thr.nombre as tipo_hoja_ruta', 'hr.correlativo', "TO_CHAR(hr.fecha, 'DD/MM/YYYY') as fecha, hr.referencia",
+                    "CONCAT(pd.nombres, p.nombres, ' ', pd.apellido_paterno, p.apellido_paterno, ' ', pd.apellido_materno, p.apellido_materno, '<br />', c.nombre , e.cargo, '<br />', a.nombre ,e.institucion) as remitente",
+                    "CONCAT(d.correlativo, hr.cite_documento_externo, '<br />', TO_CHAR(d.fecha_creacion, 'DD/MM/YYYY'), TO_CHAR(hr.fecha_cite_externo, 'DD/MM/YYYY')) as cite",
+                    'hrs.usuario'
+                );
+                $builder = $dbSincobol->table('sincobol.hoja_ruta_siseg AS hrs')
+                ->select($campos)
+                ->join('sincobol.hoja_ruta AS hr', 'hrs.fk_hoja_ruta = hr.id', 'left')
+                ->join('sincobol.tipo_hoja_ruta as thr', 'hr.fk_tipo_hoja_ruta=thr.id', 'left')
+                ->join('sincobol.externo as e', 'e.id=hr.fk_externo_remitente', 'left')
+                ->join('sincobol.documento as d', 'd.id=hr.fk_documento_original', 'left')
+                ->join('sincobol.persona as p', 'p.id=e.fk_persona', 'left')
+                ->join('sincobol.asignacion_cargo as ac', 'ac.id=d.fk_asignacion_cargo', 'left')
+                ->join('sincobol.cargo as c', 'c.id=ac.fk_cargo', 'left')
+                ->join('sincobol.area as a', 'a.id=c.fk_area', 'left')
+                ->join('sincobol.persona as pd', 'pd.id=ac.fk_persona', 'left')
+                ->like('hr.correlativo', $texto)
+                ->orderBy('fecha', 'ASC');
+                if($hr_anexadas = $builder->get()->getResultArray()){
+                    foreach($hr_anexadas as $row){
+                        switch($row['id_tramite']){
+                            case 1:
+                                $tmp = $actoAdministrativoModel->select(array('correlativo as correlativo_siseg'))->find($row['id_siseg']);
+                                break;
+                            case 2:
+                                $tmp = $hojaRutaMineriaIlegalModel->select(array('correlativo as correlativo_siseg'))->where(array('fk_denuncia'=>$row['id_siseg']))->first();
+                                break;
+                        }
+                        if(!$tmp)
+                            $datos[] = array_merge($row, array('correlativo_siseg'=>''));
+                        else
+                            $datos[] = array_merge($row, $tmp);
+                    }
+                }
+            }
+        }
+
+        $cabera['titulo'] = $this->titulo;
+        $cabera['navegador'] = true;
+        $cabera['subtitulo'] = 'Desanexar Hojas de Ruta Internas/Externas';
+        $contenido['title'] = view('templates/title',$cabera);
+        $contenido['campos_listar'] = $campos_listar;
+        $contenido['campos_reales'] = $campos_reales;
+        $contenido['datos'] = $datos;
+        $contenido['campos_buscar'] = $campos_buscar;
+        $contenido['tramites'] = $tramites;
+        $contenido['subtitulo'] = 'Desanexar Hojas de Ruta Internas/Externas';
+        $contenido['accion'] = $this->controlador.'buscador_sincobol';
+        $contenido['controlador'] = $this->controlador;
+        $data['content'] = view($this->carpeta.'buscador_sincobol', $contenido);
+        $data['menu_actual'] = 'documentos/buscador_sincobol';
+        $data['tramites_menu'] = $this->tramitesMenu();
+        $data['alertas'] = $this->alertasTramites();
+        echo view('templates/template', $data);
+    }
+    public function desanexarSincobol($id_hoja_ruta_seguimiento, $id_tramite, $id_siseg, $id_hoja_ruta){
+        $hojaRutaSisegModel = new HojaRutaSisegModel();
+        $derivacionSincobolModel = new DerivacionSincobolModel();
+        if($hojaRutaSeguimiento = $hojaRutaSisegModel->find($id_hoja_ruta_seguimiento)){
+
+            $ultima_derivacion = $derivacionSincobolModel->select(array('id', 'fecha_recepcion'))->where(array('fk_hoja_ruta' => $id_hoja_ruta, 'estado' => 'CONCLUIDO'))
+            ->like('motivo_conclusion', 'ANEXADO AL SISTEMA DE SEGUIMIENTO Y CONTROL DE TRAMITES')->first();
+            $dataDerivacion = array(
+                'id' => $ultima_derivacion['id'],
+                'estado' =>  $ultima_derivacion['fecha_recepcion'] ? 'RECIBIDO' : 'ENVIADO',
+                'fecha_conclusion' => NULL,
+                'motivo_conclusion' => NULL,
+            );
+            if($derivacionSincobolModel->save($dataDerivacion) === false)
+                session()->setFlashdata('fail', $derivacionSincobolModel->errors());
+
+            switch($id_tramite){
+                case 1:
+                    $hrAnexadasModel = new HrAnexadasModel();
+                    if($hojaRutaAnexada = $hrAnexadasModel->where(array('fk_hoja_ruta' => $id_hoja_ruta))->first())
+                        $hrAnexadasModel->delete($hojaRutaAnexada['id']);
+                    break;
+                case 2:
+                    $hojasRutaAnexadasMineriaIlegalModel = new HojasRutaAnexadasMineriaIlegalModel();
+                    $denunciasHrSincobolMineriaIlegalModel = new DenunciasHrSincobolMineriaIlegalModel();
+
+                    if($hojaRutaAnexada = $hojasRutaAnexadasMineriaIlegalModel->where(array('fk_hoja_ruta' => $id_hoja_ruta))->first())
+                        $hojasRutaAnexadasMineriaIlegalModel->delete($hojaRutaAnexada['id']);
+
+                    if($denunciaHojaRutaAnexada = $denunciasHrSincobolMineriaIlegalModel->where(array('fk_hoja_ruta' => $id_hoja_ruta))->first())
+                        $denunciasHrSincobolMineriaIlegalModel->delete($denunciaHojaRutaAnexada['id']);
+
+                    break;
+            }
+            $hojaRutaSisegModel->delete($hojaRutaSeguimiento['id']);
+            session()->setFlashdata('success', 'Se actualizo correctamente la Información.');
+        }else{
+            session()->setFlashdata('fail', 'No se anexo la hoja de ruta.');
+        }        
+        return redirect()->to($this->controlador.'buscador_sincobol');
+    }
+
+
     public function descargar($id){
 
         $db = \Config\Database::connect();
@@ -1065,4 +1320,205 @@ class Documentos extends BaseController
         @unlink($file_name);
 		exit;
     }
+
+    public function reporteDocumentos($idTramite)
+    {
+        if($tramite = $this->tramitesMenu($idTramite)){
+            $oficinaModel = new OficinasModel();
+            $tmpOficinas = $oficinaModel->findAll();
+            $oficinas = array('' => 'SELECCIONE UNA DIRECCIÓN');
+            $usuarios = array('' => 'SELECCIONE UN USUARIO');
+            foreach($tmpOficinas as $row)
+                $oficinas[$row['id']] = $row['nombre'];
+            $datos = array();
+            $campos_listar=array();
+            $campos_reales=array();
+            if ($this->request->getPost()) {
+                $oficina = $this->request->getPost('oficina');
+                $usuario = $this->request->getPost('usuario');
+                if(!empty($oficina))
+                    $usuarios = $usuarios + $this->obtenerUsuariosOficina($oficina);
+                $camposValidacion = array(
+                    'oficina' => [
+                        'rules' => 'required',
+                    ],
+                    'usuario' => [
+                        'rules' => 'required',
+                    ],
+                );
+                if(!$this->validate($camposValidacion)){
+                    $contenido['validation'] = $this->validator;
+                }else{
+                    $db = \Config\Database::connect();
+                    $where = array(
+                        'doc.fk_tramite' => $idTramite,
+                        'doc.fk_usuario_creador' => $usuario,
+                    );
+                    switch($tramite['controlador']){
+                        case 'cam/':
+                            $campos = array(
+                                'doc.id', 'adm.fk_area_minera', 'doc.correlativo', "to_char(doc.fecha, 'DD/MM/YYYY') as fecha",
+                                'doc.referencia', 'dam.codigo_unico', 'adm.correlativo as hoja_ruta', 'doc.estado',
+                                'td.nombre as tipo_documento', 'doc.doc_digital', "CASE WHEN doc_digital IS NOT NULL THEN 'SI' ELSE 'NO' END as existe_digital"
+                            );
+                            $builder = $db->table('public.documentos as doc')
+                            ->select($campos)
+                            ->join('public.tipo_documento as td', 'doc.fk_tipo_documento = td.id', 'left')
+                            ->join('public.acto_administrativo as adm', 'doc.fk_acto_administrativo = adm.id', 'left')
+                            ->join('public.datos_area_minera as dam', 'adm.id = dam.fk_acto_administrativo', 'left')
+                            ->where($where)
+                            ->orderBY('doc.id', 'DESC');
+                            $datos = $builder->get()->getResult('array');
+                            $campos_listar=array(
+                                'Estado','Fecha','Correlativo', 'Tipo Documento', 'Referencia','Código Único','H.R. Madre', 'Documento Digital'
+                            );
+                            $campos_reales=array(
+                                'estado','fecha','correlativo', 'tipo_documento', 'referencia','codigo_unico','hoja_ruta', 'doc_digital'
+                            );
+                            if ($this->request->getPost('enviar')=='excel') {
+                                $campos_listar_reporte=array(
+                                    'Estado','Fecha','Correlativo', 'Tipo Documento', 'Referencia','Código Único','H.R. Madre', 'Documento Digital Cargado'
+                                );
+                                $campos_reales_reporte=array(
+                                    'estado','fecha','correlativo', 'tipo_documento', 'referencia','codigo_unico','hoja_ruta', 'existe_digital'
+                                );
+                                helper('security');
+                                $file_name = sanitize_filename(mb_strtolower($usuarios[$usuario])).' - documentos generados - '.date('YmdHis').'.xlsx';
+                                $this->exportarXLS($campos_listar_reporte, $campos_reales_reporte, $datos, $file_name);
+                            }
+                            break;
+                        case 'mineria_ilegal/':
+                            $campos = array(
+                                'doc.id', 'doc.correlativo', "to_char(doc.fecha, 'DD/MM/YYYY') as fecha", 'doc.referencia', 'hr.correlativo as hoja_ruta', 'doc.estado',
+                                'td.nombre as tipo_documento', 'doc.doc_digital', "CASE WHEN doc_digital IS NOT NULL THEN 'SI' ELSE 'NO' END as existe_digital"
+                            );
+                            $builder = $db->table('documentos AS doc')
+                            ->select($campos)
+                            ->join('mineria_ilegal.hoja_ruta AS hr', 'doc.fk_hoja_ruta = hr.id', 'left')
+                            ->join('mineria_ilegal.denuncias AS den', 'hr.fk_denuncia = den.id', 'left')
+                            ->join('usuarios as u', 'doc.fk_usuario_creador = u.id', 'left')
+                            ->join('perfiles as p', 'u.fk_perfil = p.id', 'left')
+                            ->where($where)
+                            ->orderBY('doc.id', 'DESC');
+                            $datos = $builder->get()->getResult('array');
+                            $campos_listar=array(
+                                'Estado','Fecha','Correlativo','Referencia','H.R. Minería Ilegal','Documento Digital'
+                            );
+                            $campos_reales=array(
+                                'estado','fecha','correlativo','referencia','hoja_ruta','doc_digital'
+                            );
+                            break;
+                    }
+                }
+            }
+
+            $this->menuActual = $tramite['controlador'].'reporte_documentos';
+            $cabera['titulo'] = $this->titulo;
+            $cabera['navegador'] = true;
+            $cabera['subtitulo'] = 'Reporte de Documentos Generados por Usuario';
+            $contenido['title'] = view('templates/title',$cabera);
+            $contenido['oficinas'] = $oficinas;
+            $contenido['usuarios'] = $usuarios;
+            $contenido['subtitulo'] = 'Reporte de Documentos Generados por Usuario';
+            $contenido['datos'] = $datos;
+            $contenido['campos_listar'] = $campos_listar;
+            $contenido['campos_reales'] = $campos_reales;
+            $contenido['controlador'] = $this->controlador;
+            $contenido['accion'] = $this->controlador.'reporte_documentos/'.$idTramite;
+            $contenido['id_tramite'] = $idTramite;
+            $contenido['ruta_archivos'] = 'archivos/'.$tramite['controlador'];
+            $data['content'] = view($this->carpeta.'reporte_documentos', $contenido);
+            $data['menu_actual'] = $this->menuActual;
+            $data['tramites_menu'] = $this->tramitesMenu();
+            $data['alertas'] = $this->alertasTramites();
+            echo view('templates/template', $data);
+        }
+    }
+    private function obtenerUsuariosOficina($oficina){
+        $db = \Config\Database::connect();
+        $campos = array('u.id', "CONCAT(u.nombre_completo, ' - ', p.nombre) as usuario");
+        $where = array(
+            'u.fk_oficina' => $oficina,
+            'u.deleted_at' => NULL,
+        );
+        $builder = $db->table('public.usuarios as u')
+        ->select($campos)
+        ->join('public.perfiles AS p', 'u.fk_perfil = p.id', 'left')
+        ->where($where)
+        ->orderBy('usuario','ASC');
+        $resultado = array();
+        if($tmpUsuarios = $builder->get()->getResultArray()){
+            foreach($tmpUsuarios as $row)
+                $resultado[$row['id']] = $row['usuario'];
+        }
+        return $resultado;
+    }
+    public function exportarXLS($campos_listar, $campos_reales, $datos, $file_name)
+    {
+        $spreadsheet = new Spreadsheet();
+        $activeWorksheet = $spreadsheet->getActiveSheet();
+        $activeWorksheet->setTitle("Mis Tramites");
+        $styleHeader = array(
+            'borders' => array(
+                'allBorders' => array(
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => array('rgb' => '000000'),
+                ),
+            ),
+            'font'  => array(
+                'bold'  => true,
+                'color' => array('rgb' => '000000'),
+                'size'  => 10,
+                'name'  => 'Verdana'
+            ),
+            'alignment' => [
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+            ],
+        );
+        $styleBody = array(
+            'borders' => array(
+                'allBorders' => array(
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => array('rgb' => '000000'),
+                ),
+            ),
+            'font'  => array(
+                'bold'  => false,
+                'color' => array('rgb' => '000000'),
+                'size'  => 10,
+                'name'  => 'Verdana'
+            )
+        );
+
+        $activeWorksheet->fromArray($campos_listar);
+        $activeWorksheet->getStyle('A1:'.$activeWorksheet->getHighestColumn().'1')->applyFromArray($styleHeader);
+        if($datos){
+            $nColumnas = 2;
+            foreach($datos as $fila){
+                $data = array();
+                foreach($campos_reales as $row)
+                    $data[] = str_replace('<br><b>',' - ', str_replace('</b>','',$fila[$row]));
+                $activeWorksheet->fromArray($data,NULL,'A'.$nColumnas);
+                $activeWorksheet->getStyle('A'.$nColumnas.':'.$activeWorksheet->getHighestColumn().$nColumnas)->applyFromArray($styleBody);
+                $nColumnas++;
+            }
+        }
+        foreach (range('A', $activeWorksheet->getHighestColumn()) as $col)
+            $activeWorksheet->getColumnDimension($col)->setAutoSize(true);
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($file_name);
+
+		header("Content-Type: application/vnd.ms-excel");
+		header('Content-Disposition: attachment; filename="' . basename($file_name) . '"');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate');
+		header('Pragma: public');
+		header('Content-Length:' . filesize($file_name));
+		flush();
+		readfile($file_name);
+        @unlink($file_name);
+		exit;
+    }
+
 }

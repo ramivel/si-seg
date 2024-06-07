@@ -503,7 +503,7 @@
                                                 <button type="button" class="btn btn-inverse" onclick="agregarPunto();"><i class="fa fa-map-marker"></i> Agregar Punto</button>
                                             </div>
                                         </div>
-                                        <div class="row">                                            
+                                        <div class="row">
                                             <div class="col-md-12 col-sm-12">
                                                 <div id="mi-map" class="set-map"></div>
                                             </div>
@@ -564,19 +564,41 @@
                                         </div>
                                     </div>
                                     <div class="tab-pane " id="hoja_ruta" role="tabpanel">
-                                    <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Dirección Departamental/Regional * :</label>
-                                            <div class="col-sm-10">
-                                                <?php
-                                                    $campo = 'fk_oficina';
-                                                    echo form_dropdown($campo, $oficinas, set_value($campo, set_value($campo,(isset($denuncia[$campo]) ? $denuncia[$campo] : ''))), array('id' => $campo, 'class' => 'form-control'));
-                                                ?>
-                                                <span class="messages"></span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
+                                        <?php if(in_array(13, session()->get('registroPermisos'))){?>
+                                            <div class="form-group row">
+                                                <label class="col-sm-2 col-form-label">Dirección Departamental o Regional * :</label>
+                                                <div class="col-sm-10">
+                                                    <?php
+                                                        $campo = 'fk_oficina';
+                                                        echo form_dropdown($campo, $oficinas, set_value($campo, set_value($campo,(isset($denuncia[$campo]) ? $denuncia[$campo] : ''))), array('id' => $campo, 'class' => 'form-control'));
+                                                    ?>
+                                                    <span class="messages"></span>
+                                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                    <?php }?>
+                                                </div>
                                             </div>
-                                        </div>
+                                        <?php }else{?>
+                                            <div class="form-group row">
+                                                <label class="col-sm-2 col-form-label">Dirección Departamental o Regional :</label>
+                                                <div class="col-sm-10">
+                                                    <?php
+                                                        $campo = 'fk_oficina';
+                                                        echo form_input(array(
+                                                            'name' => $campo,
+                                                            'id' => $campo,
+                                                            'class' => 'form-control',
+                                                            'readonly' => 'true',
+                                                            'value' => set_value($campo, $oficinas[session()->get('registroOficina')])
+                                                        ));
+                                                    ?>
+                                                    <span class="messages"></span>
+                                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                    <?php }?>
+                                                </div>
+                                            </div>
+                                        <?php }?>
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Destinatario*:</label>
                                             <div class="col-sm-10">

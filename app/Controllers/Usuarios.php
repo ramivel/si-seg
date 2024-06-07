@@ -14,22 +14,31 @@ class Usuarios extends BaseController
     protected $carpeta = 'usuarios/';
     protected $menuActual = 'usuarios';
     protected $permisos = array(
-        100 => 'Administrador de Sistemas',
-        1 => 'Migrar SINCOBOL',
-        2 => 'Anular Documentos',
-        3 => 'Buscador de Trámites a Nivel Nacional',
-        4 => 'Asignación Responsable',
-        5 => 'Finalizar Trámite',
-        6 => 'Reporte por Usuario',
-        7 => 'Reporte Documentos',
-        8 => 'Reporte General',
-        9 => 'Área(s) Protegida(s) Adicional(es)',
-        10 => 'Encargado de Cargar Documentación Digital',
-        11 => 'Correspondencia Externa',
-        12 => 'Responsable Atender Denuncias Página Web',
-        13 => 'Responsable Minería Ilegal DFCCI',
-        14 => 'Responsable Minería Ilegal Dirección Departamental o Regional',
-        15 => 'Cargar Registro Manuales de Minería Ilegal',
+        'Administración del Sistema' => array(
+            100 => 'Administrador de Sistemas',
+        ),
+        'Correspondencia Externa' => array(
+            11 => 'Correspondencia Externa',
+        ),
+        'Contratos Administrativos Mineros' => array(
+            1 => 'Migrar SINCOBOL',
+            2 => 'Anular Documentos',
+            3 => 'Buscador de Trámites a Nivel Nacional',
+            4 => 'Asignación Responsable',
+            5 => 'Finalizar Trámite',
+            6 => 'Reporte por Usuario',
+            7 => 'Reporte Documentos',
+            8 => 'Reporte General',
+            9 => 'Área(s) Protegida(s) Adicional(es)',
+            10 => 'Encargado de Cargar Documentación Digital',
+            16 => 'Reportes Administración',
+        ),
+        'Minería Ilegal' => array(
+            12 => 'Responsable Atender Denuncias Página Web',
+            13 => 'Responsable Minería Ilegal DFCCI',
+            14 => 'Responsable Minería Ilegal Dirección Departamental o Regional',
+            15 => 'Cargar Registro Manuales de Minería Ilegal',
+        ),
     );
 
     public function index()
@@ -148,6 +157,7 @@ class Usuarios extends BaseController
             $contenido['oficinas'] = $this->obtenerOficinas();
             $contenido['perfiles'] = $this->obtenerPerfiles();
             $contenido['tramites'] = $this->obtenerTramites();
+            $contenido['permisos'] = $this->permisos;
             $contenido['accion'] = $this->controlador.'guardar';
             $contenido['validation'] = $this->validator;
             $contenido['controlador'] = $this->controlador;
@@ -436,4 +446,27 @@ class Usuarios extends BaseController
         }
         return redirect()->to('usuarios');
     }
+
+    public function ajaxDireccionUsuarios(){
+        $fk_oficina = $this->request->getPost('fk_oficina');
+        if(!empty($fk_oficina) && session()->get('registroUser')){
+            $html = '<option value="">SELECCIONE UN USUARIO</option>';
+            $db = \Config\Database::connect();
+            $campos = array('u.id', "CONCAT(u.nombre_completo, ' - ', p.nombre) as usuario");
+            $where = array(
+                'u.fk_oficina' => $fk_oficina,
+                'u.deleted_at' => NULL,
+            );
+            $builder = $db->table('public.usuarios as u')
+            ->select($campos)
+            ->join('public.perfiles AS p', 'u.fk_perfil = p.id', 'left')
+            ->where($where)
+            ->orderBy('usuario','ASC');
+            $tmpUsuarios = $builder->get()->getResultArray();
+            foreach($tmpUsuarios as $row)
+                $html .= '<option value="'.$row['id'].'" >'.$row['usuario'].'</option>';
+            echo $html;
+        }
+    }
+
 }

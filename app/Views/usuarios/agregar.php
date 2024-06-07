@@ -88,7 +88,7 @@
                                         echo form_input(array(
                                             'name' => $campo,
                                             'id' => $campo,
-                                            'class' => 'form-control form-control-uppercase',                                            
+                                            'class' => 'form-control form-control-uppercase',
                                             'value' => set_value($campo,'LUNES A VIERNES EN HORARIOS DE OFICINA',false)
                                         ));
                                     ?>
@@ -154,17 +154,28 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-sm-2">Permisos:</label>
-                                <div class="col-sm-10">
+                                <label class="col-sm-12">Permisos:</label>
+                                <div class="col-sm-12">
                                     <?php $campo = 'permisos';?>
-                                    <?php foreach($permisos as $i => $row){?>
-                                        <div class="checkbox-fade fade-in-primary">
-                                            <label>
-                                                <input type="checkbox" id="checkbox" name="<?= $campo;?>[]" value="<?= $i;?>" <?= set_checkbox($campo.'[]', $i); ?> />
-                                                <span class="cr"><i class="cr-icon icofont icofont-ui-check txt-primary"></i></span><span><?= $row;?></span>
-                                            </label>
-                                        </div><br>
-                                    <?php }?>
+                                    <table class="table table-bordered">
+                                        <?php foreach($permisos as $titulo => $permiso){?>
+                                        <tbody>
+                                            <tr>
+                                                <th class="text-center"><?= $titulo;?></th>
+                                                <td>
+                                                <?php foreach($permiso as $i => $row){?>
+                                                    <div class="checkbox-fade fade-in-primary">
+                                                        <label>
+                                                            <input type="checkbox" id="checkbox" name="<?= $campo;?>[]" value="<?= $i;?>" <?= set_checkbox($campo.'[]', $i); ?> />
+                                                            <span class="cr"><i class="cr-icon icofont icofont-ui-check txt-primary"></i></span><span><?= $row;?></span>
+                                                        </label>
+                                                    </div><br>
+                                                <?php }?>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <?php }?>
+                                    </table>
                                     <span class="messages"></span>
                                     <?php if(isset($validation) && $validation->hasError($campo)){?>
                                         <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
