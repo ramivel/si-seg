@@ -726,6 +726,7 @@ class Cam extends BaseController
                         'nacionalidad' => mb_strtoupper($this->request->getPost('nacionalidad')),
                         'titular' => $this->request->getPost('titular'),
                         'clasificacion_titular' => $this->request->getPost('clasificacion'),
+                        'the_geom' => $this->obtenerPoligonoAreaMinera($this->request->getPost('fk_area_minera')),
                     );
 
                     if($datosAreaMineraModel->save($dataDatosAreaMinera) === false)
@@ -1004,6 +1005,7 @@ class Cam extends BaseController
                         'nacionalidad' => $this->request->getPost('nacionalidad'),
                         'titular' => $this->request->getPost('titular'),
                         'clasificacion_titular' => $this->request->getPost('clasificacion'),
+                        'the_geom' => $this->obtenerPoligonoAreaMinera($this->request->getPost('fk_area_minera')),
                     );
 
                     if($datosAreaMineraModel->save($dataDatosAreaMinera) === false)
@@ -1455,7 +1457,6 @@ class Cam extends BaseController
                     session()->setFlashdata('fail', $actoAdministrativoModel->errors());
                 }else{
 
-                    /*
                     $dataDatosAreaMinera = array(
                         'fk_acto_administrativo' => $this->request->getPost('id'),
                         'extension' => $this->request->getPost('extension'),
@@ -1464,13 +1465,14 @@ class Cam extends BaseController
                         'municipios' => $this->request->getPost('municipios'),
                         'regional' => $this->request->getPost('regional'),
                         'area_protegida' => $this->request->getPost('area_protegida'),
+                        'representante_legal' => mb_strtoupper($this->request->getPost('representante_legal')),
+                        'nacionalidad' => mb_strtoupper($this->request->getPost('nacionalidad')),
                         'titular' => $this->request->getPost('titular'),
                         'clasificacion_titular' => $this->request->getPost('clasificacion'),
+                        'the_geom' => $this->obtenerPoligonoAreaMinera($this->request->getPost('fk_area_minera')),
                     );
-
                     if($datosAreaMineraModel->save($dataDatosAreaMinera) === false)
                         session()->setFlashdata('fail', $datosAreaMineraModel->errors());
-                    */
 
                     $dataDerivacion = array(
                         'fk_acto_administrativo' => $this->request->getPost('id'),
@@ -1645,7 +1647,6 @@ class Cam extends BaseController
                     session()->setFlashdata('fail', $actoAdministrativoModel->errors());
                 }else{
 
-                    /*
                     $dataDatosAreaMinera = array(
                         'fk_acto_administrativo' => $this->request->getPost('id'),
                         'extension' => $this->request->getPost('extension'),
@@ -1654,13 +1655,14 @@ class Cam extends BaseController
                         'municipios' => $this->request->getPost('municipios'),
                         'regional' => $this->request->getPost('regional'),
                         'area_protegida' => $this->request->getPost('area_protegida'),
+                        'representante_legal' => mb_strtoupper($this->request->getPost('representante_legal')),
+                        'nacionalidad' => mb_strtoupper($this->request->getPost('nacionalidad')),
                         'titular' => $this->request->getPost('titular'),
                         'clasificacion_titular' => $this->request->getPost('clasificacion'),
+                        'the_geom' => $this->obtenerPoligonoAreaMinera($this->request->getPost('fk_area_minera')),
                     );
-
                     if($datosAreaMineraModel->save($dataDatosAreaMinera) === false)
                         session()->setFlashdata('fail', $datosAreaMineraModel->errors());
-                    */
 
                     $dataDerivacion = array(
                         'fk_acto_administrativo' => $this->request->getPost('id'),
@@ -2512,7 +2514,6 @@ class Cam extends BaseController
             $contenido['url_acto_administrativo'] = $url_acto_administrativo;
             $contenido['url_sincobol'] = $url_sincobol;
             $contenido['sincobol'] = $this->urlSincobol;
-            $contenido['ruta_archivos'] = $this->rutaArchivos.$fila['fk_area_minera'].'/externo/';
             $data['content'] = view($this->carpeta.'ver_correspondencia_externa', $contenido);
             $data['menu_actual'] = $menuActual;
             $data['tramites_menu'] = $this->tramitesMenu();
@@ -3370,6 +3371,18 @@ class Cam extends BaseController
         ->where($where);
         $datos = $builder->get()->getRowArray();
         return $datos;
+    }
+
+    public function obtenerPoligonoAreaMinera($id){
+        $db = \Config\Database::connect('sincobol');
+        $campos = array('the_geom');
+        $builder = $db->table('contratos_licencias.poligono_area_minera')
+        ->select($campos)
+        ->where("activo AND the_geom is not null AND fk_area_minera = ".$id)
+        ->orderBy('id', 'DESC');
+        if($poligono = $builder->get()->getRowArray())
+            return $poligono['the_geom'];
+        return '';
     }
 
     public function obtenerUsuarioDestinatario($id){
@@ -4669,5 +4682,51 @@ class Cam extends BaseController
         }
         return $resultado;
     }
+
+    /*public function actualizarPoligonoAreaMinera(){
+        $datosAreaMineraModel = new DatosAreaMineraModel();
+        $db = \Config\Database::connect();
+        $campos = array(
+            'dam.fk_acto_administrativo', 'ac.fk_area_minera', 'dam.codigo_unico',
+        );
+        $where = array(
+            'dam.the_geom' => NULL,
+        );
+        $builder = $db->table('public.datos_area_minera as dam')
+        ->select($campos)
+        ->join('public.acto_administrativo as ac', 'dam.fk_acto_administrativo = ac.id', 'left')
+        ->where($where)
+        ->orderBy('ac.fk_area_minera', 'ASC')
+        ->limit(1000);
+        if($datos = $builder->get()->getResultArray()){
+            foreach($datos as $row){
+                if($poligono = $this->obtenerPoligonoAreaMineraUno($row['fk_area_minera'])){
+                    $dataAreaMinera = array(
+                        'fk_acto_administrativo' => $row['fk_acto_administrativo'],
+                        'the_geom' => $poligono,
+                    );
+                    if($datosAreaMineraModel->save($dataAreaMinera) === false)
+                        echo "No se actualizo poligono de id_area_minera: ".$row['fk_area_minera']." codigo_unico: ".$row['codigo_unico']."<br>";
+                    else
+                        echo "Se actualizo poligono de id_area_minera: ".$row['fk_area_minera']." codigo_unico: ".$row['codigo_unico']."<br>";
+
+                }else{
+                    echo "No existe poligono de id_area_minera: ".$row['fk_area_minera']." codigo_unico: ".$row['codigo_unico']."<br>";
+                }
+
+            }
+        }
+    }
+    public function obtenerPoligonoAreaMineraUno($id){
+        $db = \Config\Database::connect('sincobol');
+        $campos = array('the_geom');
+        $builder = $db->table('contratos_licencias.poligono_area_minera')
+        ->select($campos)
+        ->where("the_geom is not null AND fk_area_minera = ".$id)
+        ->orderBy('id', 'DESC');
+        if($poligono = $builder->get()->getRowArray())
+            return $poligono['the_geom'];
+        return '';
+    }*/
 
 }

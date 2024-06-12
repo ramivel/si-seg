@@ -24,6 +24,12 @@
                         </div>
                         <div class="form-group row d-none">
                             <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'fk_area_minera','id'=>'fk_area_minera','value'=>set_value('fk_area_minera', (isset($fila['fk_area_minera']) ? $fila['fk_area_minera'] : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
                                 <?= form_hidden('ultimo_fk_usuario_remitente', set_value('ultimo_fk_usuario_remitente', (isset($fila['ultimo_fk_usuario_remitente']) ? $fila['ultimo_fk_usuario_remitente'] : ''), false));?>
                                 <span class="messages"></span>
                             </div>

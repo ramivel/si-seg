@@ -20,9 +20,9 @@ $(document).ready(function () {
         id: {
             presence: true,
         },
-        fk_acto_administrativo: {
+        fk_hoja_ruta: {
             presence: {
-                message: "^Debe seleccionar el Correlativo de H.R. Madre"
+                message: "^Debe seleccionar el correlativo de H.R. Minería Ilegal"
             },
         },
         cite: {

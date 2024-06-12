@@ -16,13 +16,10 @@ $(document).ready(function () {
     });
 
     // These are the constraints used to validate the form
-    var constraints = {
-        id: {
-            presence: true,
-        },
-        fk_acto_administrativo: {
+    var constraints = {        
+        fk_hoja_ruta: {
             presence: {
-                message: "^Debe seleccionar el Correlativo de H.R. Madre"
+                message: "^Debe seleccionar el Correlativo de H.R. Minería Ilegal"
             },
         },
         cite: {
@@ -44,7 +41,10 @@ $(document).ready(function () {
         },
         adjuntos: {
             presence: true,
-        },        
+        },
+        doc_digital: {
+            presence: true,
+        },                
     };
 
     // Hook up the form so we can prevent it from being posted

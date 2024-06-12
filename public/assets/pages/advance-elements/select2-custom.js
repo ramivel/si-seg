@@ -596,6 +596,51 @@ $(document).ready(function () {
     },
   });
 
+  $(".buscar-hoja-ruta-ajax").select2({
+    language: "es",
+    placeholder:
+      "Escriba la Hoja de Ruta Minería Ilegal",
+    minimumInputLength: 1,
+    ajax: {
+      url: baseUrl + "mineria_ilegal/ajax_buscar_tramite",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+  $(".buscar-hoja-ruta-ajax").on("select2:select", function (e) {
+    var data = e.params.data;
+    $.ajax({
+      url: baseUrl + "mineria_ilegal/ajax_datos_tramite",
+      type: "POST",
+      data: data,
+      dataType: "json",
+      success: function (result) {
+        $("#fecha_hr").val(result.fecha_hr);
+        $("#tipo_denuncia").val(result.tipo_denuncia);
+        $("#correlativo_denuncia").val(result.correlativo_denuncia);
+        $("#fecha_denuncia").val(result.fecha_denuncia);
+        $("#departamento").val(result.departamento);
+        $("#provincia").val(result.provincia);
+        $("#municipio").val(result.municipio);
+        $("#remitente").val(result.remitente);
+        $("#destinatario").val(result.destinatario);
+        $("#responsable").val(result.responsable);
+      },
+    });
+  });
+
   /* FIN CORRESPONDENCIA EXTERNA */
 
   /* UBICACION MINERIA ILEGAL */

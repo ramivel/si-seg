@@ -130,7 +130,7 @@
                                         <?php for($i=0;$i<count($campos_derivacion);$i++){?>
                                             <?php if($campos_derivacion[$i]=='doc_digital'){ ?>
                                                 <?php if($derivacion[$campos_derivacion[$i]]){?>
-                                                    <td><a href="<?= base_url($ruta_archivos.$derivacion[$campos_derivacion[$i]]);?>" target="_blank" title="Ver Documento"><i class="feather icon-file"></i> Ver Documento</a></td>
+                                                    <td><a href="<?= base_url($derivacion[$campos_derivacion[$i]]);?>" target="_blank" title="Ver Documento"><i class="feather icon-file"></i> Ver Documento</a></td>
                                                 <?php }else{?>
                                                     <td></td>
                                                 <?php }?>

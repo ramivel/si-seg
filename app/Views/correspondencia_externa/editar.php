@@ -15,20 +15,18 @@
                                 <?= form_hidden('id', set_value('id',isset($fila['id']) ? $fila['id']:''));?>
                                 <span class="messages"></span>
                             </div>
-                        </div>                        
+                        </div>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">Correlativo H.R. Madre*:</label>
                             <div class="col-sm-10">
-                                <?php
-                                    $campo = 'correlativo_hr';
-                                    echo form_input(array(
-                                        'name' => $campo,
-                                        'id' => $campo,
-                                        'class' => 'form-control form-control-uppercase',
-                                        'readonly' => true,
-                                        'value' => set_value($campo, (isset($hr_madre['hr']) ? $hr_madre['hr'] : ''), false)
-                                    ));
-                                ?>                                
+                                <?php $campo = 'fk_acto_administrativo'; ?>
+                                <select id="<?= $campo; ?>" name="<?= $campo; ?>" class="buscar-tramite-ajax col-sm-12">
+                                    <?php if (isset($hr_madre)) { ?>
+                                        <option value="<?= $hr_madre['id']; ?>"><?= $hr_madre['hr']; ?></option>
+                                    <?php } else { ?>
+                                        <option value="">Escriba la Hoja de Ruta Madre o el Código Único del Área Minera</option>
+                                    <?php } ?>
+                                </select>
                                 <span class="messages"></span>
                                 <?php if (isset($validation) && $validation->hasError($campo)) { ?>
                                     <span class="form-bar text-danger"><?= $validation->getError($campo); ?></span>
@@ -119,6 +117,52 @@
                                 ));
                                 ?>
                             </div>
+                        </div>
+                        <h5 class="sub-title">ULTIMA DERIVACIÓN</h5>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">Remitente:</label>
+                            <div class="col-sm-10">
+                                <?php
+                                $campo = 'remitente';
+                                echo form_input(array(
+                                    'name' => $campo,
+                                    'id' => $campo,
+                                    'class' => 'form-control form-control-uppercase',
+                                    'readonly' => true,
+                                    'value' => set_value($campo, (isset($acto_administrativo[$campo]) ? $acto_administrativo[$campo] : ''), false)
+                                ));
+                                ?>
+                            </div>                            
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">Destinatario:</label>
+                            <div class="col-sm-10">
+                                <?php
+                                $campo = 'destinatario';
+                                echo form_input(array(
+                                    'name' => $campo,
+                                    'id' => $campo,
+                                    'class' => 'form-control form-control-uppercase',
+                                    'readonly' => true,
+                                    'value' => set_value($campo, (isset($acto_administrativo[$campo]) ? $acto_administrativo[$campo] : ''), false)
+                                ));
+                                ?>
+                            </div>                            
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">Responsable:</label>
+                            <div class="col-sm-10">
+                                <?php
+                                $campo = 'responsable';
+                                echo form_input(array(
+                                    'name' => $campo,
+                                    'id' => $campo,
+                                    'class' => 'form-control form-control-uppercase',
+                                    'readonly' => true,
+                                    'value' => set_value($campo, (isset($acto_administrativo[$campo]) ? $acto_administrativo[$campo] : ''), false)
+                                ));
+                                ?>
+                            </div>                            
                         </div>
                         <h5 class="sub-title">Datos del Documento Externo</h5>
                         <div class="row">
@@ -255,8 +299,8 @@
                                     </span>
                                 </span> : </label>
                             <div class="col-sm-10">
-                                <?= form_hidden('doc_digital_anterior', set_value('doc_digital_anterior', (isset($fila[$campo]) ? $fila['doc_digital'] : '') ));?>
-                                <a href="<?= base_url($ruta_archivos.$tramite['controlador'].$acto_administrativo['fk_area_minera'].'/externo/'.$fila['doc_digital']);?>" class="btn btn-inverse" target="_blank"><i class="icofont icofont-download-alt"></i>Descargar</a>                                
+                                <?= form_hidden('doc_digital_anterior', set_value('doc_digital_anterior', (isset($doc_digital_anterior) ? $doc_digital_anterior : '') ));?>
+                                <a href="<?= base_url($doc_digital_anterior);?>" class="btn btn-inverse" target="_blank"><i class="icofont icofont-download-alt"></i>Descargar</a>
                             </div>
                         </div>
                         <div class="form-group row">

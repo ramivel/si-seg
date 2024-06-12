@@ -13,8 +13,24 @@ class CorrespondenciaExternaModel extends Model{
     protected $useSoftDeletes = true;
 
     protected $allowedFields = [
-        'fk_tramite', 'fk_acto_administrativo', 'fk_persona_externa', 'cite', 'fecha_cite', 'referencia', 'fojas', 'adjuntos', 'doc_digital',
-        'estado', 'fk_usuario_creador', 'fk_usuario_editor', 'fk_usuario_recepcion', 'fecha_recepcion', 'editar', 'fk_tipo_documento_externo', 'observacion_recepcion'
+        'fk_tramite',
+        'fk_acto_administrativo',
+        'fk_hoja_ruta',
+        'fk_persona_externa',
+        'cite',
+        'fecha_cite',
+        'referencia',
+        'fojas',
+        'adjuntos',
+        'doc_digital',
+        'estado',
+        'fk_usuario_creador',
+        'fk_usuario_editor',
+        'fk_usuario_recepcion',
+        'fecha_recepcion',
+        'editar',
+        'fk_tipo_documento_externo',
+        'observacion_recepcion',
     ];
 
     protected $useTimestamps = true;

@@ -105,16 +105,31 @@
                         <span class="pcoded-mtext">Minería Ilegal</span>
                     </a>
                     <ul class="pcoded-submenu">
-                    <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/agregar_ventanilla') ? 'active' : '';?>">
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/buscador_ventanilla') ? 'active' : '';?>">
+                            <a href="<?= base_url('mineria_ilegal/buscador_ventanilla');?>">
+                                <span class="pcoded-mtext">Buscador</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/agregar_minilegal') ? 'active' : '';?>">
+                            <a href="<?= base_url('correspondencia_externa/agregar_minilegal');?>">
+                                <span class="pcoded-mtext">Nuevo Ingresos</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/mis_ingresos_minilegal') ? 'active' : '';?>">
+                            <a href="<?= base_url('correspondencia_externa/mis_ingresos_minilegal');?>">
+                                <span class="pcoded-mtext">Mis Ingresos</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/agregar_ventanilla') ? 'active' : '';?>">
                             <a href="<?= base_url('mineria_ilegal/agregar_ventanilla');?>">
-                                <span class="pcoded-mtext">Nuevo Ingreso</span>
+                                <span class="pcoded-mtext">Nueva Denuncia</span>
                             </a>
                         </li>
                         <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/mis_ingresos') ? 'active' : '';?>">
                             <a href="<?= base_url('mineria_ilegal/mis_ingresos');?>">
-                                <span class="pcoded-mtext">Mis Ingresos</span>
+                                <span class="pcoded-mtext">Denuncias Ingresadas</span>
                             </a>
-                        </li>
+                        </li>                        
                     </ul>
                 </li>
             </ul>

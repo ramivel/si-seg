@@ -24,6 +24,7 @@ class DatosAreaMineraModel extends Model{
         'nacionalidad',
         'titular',
         'clasificacion_titular',
+        'the_geom',
     ];
 
 }

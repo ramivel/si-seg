@@ -172,6 +172,8 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('reporte_responsable', 'Cam::reporteResponsable');
         $routes->add('reporte_mis_tramites', 'Cam::reporteMisTramites');
 
+        //$routes->add('actualizar_poligono_area_minera', 'Cam::actualizarPoligonoAreaMinera');        
+
     });
 
     $routes->group('tipo_documento_externo', function($routes){
@@ -188,6 +190,14 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('editar/(:num)', 'CorrespondenciaExterna::editar/$1');
         $routes->post('guardar_editar', 'CorrespondenciaExterna::guardarEditar');
         $routes->add('ajax_recibir', 'CorrespondenciaExterna::recibirAjax');
+        
+        $routes->add('mis_ingresos_minilegal', 'CorrespondenciaExterna::misIngresosMinilegal');
+        $routes->add('agregar_minilegal', 'CorrespondenciaExterna::agregarMinilegal');
+        $routes->add('editar_minilegal/(:num)', 'CorrespondenciaExterna::editarMinilegal/$1');
+        $routes->post('guardar_editar_minilegal', 'CorrespondenciaExterna::guardarEditarMinilegal');
+        
+        //$routes->add('actualizar_path', 'CorrespondenciaExterna::actualizarPath');
+        
     });
 
     $routes->group('persona_externa', function($routes){
@@ -216,6 +226,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_guardar_devolver', 'MineriaIlegal::ajaxGuardarDevolver');
 
         $routes->add('ver/(:num)/(:num)', 'MineriaIlegal::ver/$1/$2');
+        $routes->add('ver_correspondencia_externa/(:num)/(:num)', 'MineriaIlegal::verCorrespondenciaExterna/$1/$2');
 
         $routes->add('mis_ingresos', 'MineriaIlegal::misIngresos');
         $routes->add('agregar_ventanilla', 'MineriaIlegal::agregarVentanilla');
@@ -246,6 +257,11 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_datos_hr_in_ex', 'MineriaIlegal::ajaxDatosHrInEx');
         $routes->add('ajax_hoja_ruta_mineria_ilegal', 'MineriaIlegal::ajaxHojaRutaMineriaIlegal');
 
+        $routes->add('buscador_ventanilla', 'MineriaIlegal::buscadorVentanilla');
+        $routes->add('ajax_buscar_tramite', 'MineriaIlegal::ajaxBuscarTramite');
+        $routes->add('ajax_datos_tramite', 'MineriaIlegal::ajaxDatosTramite');
+
+        $routes->add('correspondencia_externa/(:num)', 'MineriaIlegal::correspondenciaExterna/$1');
     });
 
     /*$routes->group('acto_administrativo', function($routes){

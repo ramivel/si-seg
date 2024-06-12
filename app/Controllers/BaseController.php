@@ -129,6 +129,25 @@ class BaseController extends Controller
                                 'text' => '<a href="'.base_url($tramite['controlador'].'listado_recepcion').'" class="btn btn-danger">Recibir Trámites</a>',
                             );
                         /* Fin Trámites Pendientes */
+                        /* Correspondencia Externa Pendiente */
+                        $db = \Config\Database::connect();
+                        $where = array(
+                            'ce.fk_tramite' => 2,
+                            'ce.estado' => 'INGRESADO',
+                            'ce.deleted_at' => NULL,
+                            'hr.fk_usuario_actual' => session()->get('registroUser'),
+                            'hr.deleted_at' => NULL,
+                        );
+                        $builder = $db->table('public.correspondencia_externa AS ce')->select('count(*) as n')
+                        ->join('mineria_ilegal.hoja_ruta AS hr', "ce.fk_hoja_ruta = hr.id", 'left')
+                        ->where($where);
+                        $totalCorrespondencia = $builder->get()->getRowArray();                        
+                        if($totalCorrespondencia['n'] > 0)
+                            $resultado[] = array(
+                                'title' => '<strong>Tiene correspondencia externa ('.$totalCorrespondencia['n'].') de Minería Ilegal pendientes de recepción!</strong>',
+                                'text' => '<a href="'.base_url($tramite['controlador'].'mis_tramites').'" class="btn btn-danger">Recibir Trámites</a>',
+                            );
+                        /* Fin Correspondencia Externa Pendiente */
                         break;
                 }
             }

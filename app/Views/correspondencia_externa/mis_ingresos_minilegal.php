@@ -43,10 +43,10 @@
                                     <?php foreach ($datos as $fila){?>
                                     <tr>
                                         <td class="text-center">
-                                            <?php 
+                                            <?php
                                             if($fila['editar'] == 't' && $fila['estado'] == 'INGRESADO'){
-                                                echo anchor($controlador.'editar/'.$fila['id'], '<i class="fa fa-edit"></i> Editar',array('class' =>'btn btn-sm btn-info'));
-                                            }                                            
+                                                echo anchor($controlador.'editar_minilegal/'.$fila['id'], '<i class="fa fa-edit"></i> Editar',array('class' =>'btn btn-sm btn-info'));
+                                            }
                                             ?>
                                         </td>
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>

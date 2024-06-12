@@ -17,14 +17,14 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">Correlativo H.R. Madre*:</label>
+                            <label class="col-sm-2 col-form-label">Correlativo H.R. Minería Ilegal*:</label>
                             <div class="col-sm-10">
-                                <?php $campo = 'fk_acto_administrativo'; ?>
-                                <select id="<?= $campo; ?>" name="<?= $campo; ?>" class="buscar-tramite-ajax col-sm-12">
-                                    <?php if (isset($hr_madre)) { ?>
-                                        <option value="<?= $hr_madre['id']; ?>"><?= $hr_madre['hr']; ?></option>
+                                <?php $campo = 'fk_hoja_ruta'; ?>
+                                <select id="<?= $campo; ?>" name="<?= $campo; ?>" class="buscar-hoja-ruta-ajax col-sm-12">
+                                    <?php if (isset($hr_minilegal)) { ?>
+                                        <option value="<?= $hr_minilegal['id']; ?>"><?= $hr_minilegal['correlativo'].' - '.$hr_minilegal['fecha_hoja_ruta'].' - '.$tipos_denuncias[$hr_minilegal['fk_tipo_denuncia']]; ?></option>
                                     <?php } else { ?>
-                                        <option value="">Escriba la Hoja de Ruta Madre o el Código Único del Área Minera</option>
+                                        <option value="">Escriba la Hoja de Ruta Minería Ilegal</option>
                                     <?php } ?>
                                 </select>
                                 <span class="messages"></span>
@@ -33,91 +33,158 @@
                                 <?php } ?>
                             </div>
                         </div>
-                        <h5 class="sub-title">Datos del Área Minera</h5>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">Código Único:</label>
-                            <div class="col-sm-3">
-                                <?php
-                                $campo = 'codigo_unico';
-                                echo form_input(array(
-                                    'name' => $campo,
-                                    'id' => $campo,
-                                    'class' => 'form-control form-control-uppercase',
-                                    'readonly' => true,
-                                    'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
-                                ));
-                                ?>
+                        <h5 class="sub-title">Información de la Denuncia</h5>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12">
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">Fecha Hoja de Ruta : </label>
+                                    <div class="col-sm-6">
+                                        <?php
+                                            $campo = 'fecha_hr';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'class' => 'form-control form-control-uppercase',
+                                                'readonly' => 'true',
+                                                'value' => set_value($campo,'')
+                                            ));
+                                        ?>
+                                        <span class="messages"></span>
+                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                        <?php }?>
+                                    </div>
+                                </div>
                             </div>
-                            <label class="col-sm-2 col-form-label">Denominación:</label>
-                            <div class="col-sm-5">
-                                <?php
-                                $campo = 'denominacion';
-                                echo form_input(array(
-                                    'name' => $campo,
-                                    'id' => $campo,
-                                    'class' => 'form-control form-control-uppercase',
-                                    'readonly' => true,
-                                    'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
-                                ));
-                                ?>
+                            <div class="col-md-6 col-sm-12">
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">Tipo de Minería Ilegal : </label>
+                                    <div class="col-sm-7">
+                                        <?php
+                                            $campo = 'tipo_denuncia';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'readonly' => 'true',
+                                                'class' => 'form-control form-control-uppercase',
+                                                'value' => set_value($campo,'')
+                                            ));
+                                        ?>
+                                        <span class="messages"></span>
+                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                        <?php }?>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">Represenante Legal:</label>
-                            <div class="col-sm-6">
-                                <?php
-                                $campo = 'representante_legal';
-                                echo form_input(array(
-                                    'name' => $campo,
-                                    'id' => $campo,
-                                    'class' => 'form-control form-control-uppercase',
-                                    'readonly' => true,
-                                    'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
-                                ));
-                                ?>
+                            <div class="col-md-6 col-sm-12">
+                                <div class="form-group row">
+                                    <label class="col-sm-5 col-form-label">Correlativo Formulario de Minería Ilegal : </label>
+                                    <div class="col-sm-7">
+                                        <?php
+                                            $campo = 'correlativo_denuncia';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'readonly' => 'true',
+                                                'class' => 'form-control form-control-uppercase',
+                                                'value' => set_value($campo,'')
+                                            ));
+                                        ?>
+                                        <span class="messages"></span>
+                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                        <?php }?>
+                                    </div>
+                                </div>
                             </div>
-                            <label class="col-sm-2 col-form-label">Nacionalidad:</label>
-                            <div class="col-sm-2">
-                                <?php
-                                $campo = 'nacionalidad';
-                                echo form_input(array(
-                                    'name' => $campo,
-                                    'id' => $campo,
-                                    'class' => 'form-control form-control-uppercase',
-                                    'readonly' => true,
-                                    'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
-                                ));
-                                ?>
+                            <div class="col-md-6 col-sm-12">
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Fecha : </label>
+                                    <div class="col-sm-5">
+                                        <?php
+                                            $campo = 'fecha_denuncia';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'class' => 'form-control form-control-uppercase',
+                                                'readonly' => 'true',
+                                                'value' => set_value($campo,'')
+                                            ));
+                                        ?>
+                                        <span class="messages"></span>
+                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                        <?php }?>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">Solicitante:</label>
-                            <div class="col-sm-6">
-                                <?php
-                                $campo = 'titular';
-                                echo form_input(array(
-                                    'name' => $campo,
-                                    'id' => $campo,
-                                    'class' => 'form-control form-control-uppercase',
-                                    'readonly' => true,
-                                    'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
-                                ));
-                                ?>
+                        </div>                        
+                        <div class="row">
+                            <div class="col-md-4 col-sm-12">
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">Departamento : </label>
+                                    <div class="col-sm-7">
+                                        <?php
+                                            $campo = 'departamento';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'class' => 'form-control form-control-uppercase',
+                                                'readonly' => 'true',
+                                                'value' => set_value($campo,'')
+                                            ));
+                                        ?>
+                                        <span class="messages"></span>
+                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                        <?php }?>
+                                    </div>
+                                </div>
                             </div>
-                            <label class="col-sm-2 col-form-label">Clasificación del APM:</label>
-                            <div class="col-sm-2">
-                                <?php
-                                $campo = 'clasificacion';
-                                echo form_input(array(
-                                    'name' => $campo,
-                                    'id' => $campo,
-                                    'class' => 'form-control form-control-uppercase',
-                                    'readonly' => true,
-                                    'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
-                                ));
-                                ?>
+                            <div class="col-md-4 col-sm-12">
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">Provincia : </label>
+                                    <div class="col-sm-7">
+                                        <?php
+                                            $campo = 'provincia';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'readonly' => 'true',
+                                                'class' => 'form-control form-control-uppercase',
+                                                'value' => set_value($campo,'')
+                                            ));
+                                        ?>
+                                        <span class="messages"></span>
+                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                        <?php }?>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                            <div class="col-md-4 col-sm-12">
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">Municipio : </label>
+                                    <div class="col-sm-7">
+                                        <?php
+                                            $campo = 'municipio';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'readonly' => 'true',
+                                                'class' => 'form-control form-control-uppercase',
+                                                'value' => set_value($campo,'')
+                                            ));
+                                        ?>
+                                        <span class="messages"></span>
+                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                        <?php }?>
+                                    </div>
+                                </div>
+                            </div>                            
+                        </div>                        
                         <h5 class="sub-title">ULTIMA DERIVACIÓN</h5>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">Remitente:</label>
@@ -129,7 +196,7 @@
                                     'id' => $campo,
                                     'class' => 'form-control form-control-uppercase',
                                     'readonly' => true,
-                                    'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
+                                    'value' => set_value($campo,'')
                                 ));
                                 ?>
                             </div>
@@ -144,7 +211,7 @@
                                     'id' => $campo,
                                     'class' => 'form-control form-control-uppercase',
                                     'readonly' => true,
-                                    'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
+                                    'value' => set_value($campo,'')
                                 ));
                                 ?>
                             </div>
@@ -159,7 +226,7 @@
                                     'id' => $campo,
                                     'class' => 'form-control form-control-uppercase',
                                     'readonly' => true,
-                                    'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
+                                    'value' => set_value($campo,'')
                                 ));
                                 ?>
                             </div>

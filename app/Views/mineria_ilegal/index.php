@@ -87,6 +87,10 @@
                                                     <?php echo anchor($controlador.'formulario_denuncia_pdf/'.$fila['id_denuncia'], 'Imprimir Formulario Denuncia',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
                                                 </div>
                                             </div>
+                                            <?php if($fila['n_correspondencia_externa'] > 0){?>
+                                                <br>
+                                                <?= anchor($controlador.'correspondencia_externa/'.$fila['id_hoja_ruta'], 'Correspondencia Externa <span class="badge">'.$fila['n_correspondencia_externa'].'</span>',array('class' =>'btn btn-sm btn-primary mt-1'));?>
+                                            <?php }?>
                                         </td>
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>
                                         <td class="text-center" >

@@ -262,16 +262,20 @@
                             </table>
                         </div>
                         <?php }?>
-                        <div class="row mt-4 mb-4">
+                        <div id="tabla_datos" class="row mb-1">
                             <div class="col-md-12">
-                                <h4 class="sub-title mt-2 mb-2">Seguimiento de la Hoja de Ruta</h4>
+                                <ul class="nav nav-tabs md-tabs " role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" href="#tabla_datos" ><strong>SEGUIMIENTO TRÁMITE</strong></a>
+                                        <div class="slide"></div>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="<?= $url_externa;?>#tabla_datos"><strong>CORRESPONDENCIA EXTERNA</strong></a>
+                                        <div class="slide"></div>
+                                    </li>                                    
+                                </ul>
                             </div>
-                            <!--
-                            <div class="col-md-2 text-center">
-                                <button class="btn btn-success"><i class="fa fa fa-download"></i> Descargar (Excel)</button>
-                            </div>
-                            -->
-                        </div>
+                        </div>                        
                         <div class="table-responsive">
                             <table class="table table-bordered">
                                 <thead>
