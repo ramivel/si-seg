@@ -2148,14 +2148,20 @@ class Cam extends BaseController
                 $contenido['validation'] = $this->validator;
             }else{
                 $campos_listar=array(
-                    ' ', 'Fecha Derivación/Devolución', 'H.R. Madre','Fecha Mecanizada','Código Único','Denominación','Extensión','Departamento(s)','Provincia(s)','Municipio(s)','Área Protegida','Estado Trámite'
+                    ' ', 'Fecha Derivación/Devolución', 'H.R. Madre','Fecha Mecanizada','Código Único','Denominación','Extensión','Departamento(s)','Provincia(s)','Municipio(s)','Área Protegida',
+                    'Estado Trámite', 'Documentos'
                 );
                 $campos_reales=array(
-                    'ultimo_estado','ultimo_fecha_derivacion','correlativo','fecha_mecanizada','codigo_unico','denominacion','extension','departamentos','provincias','municipios','area_protegida','estado_tramite'
+                    'ultimo_estado','ultimo_fecha_derivacion','correlativo','fecha_mecanizada','codigo_unico','denominacion','extension','departamentos','provincias','municipios','area_protegida',
+                    'estado_tramite', 'documentos'
                 );
-                $campos = array('ac.id', 'ac.ultimo_estado', 'ac.correlativo', "to_char(ac.fecha_mecanizada, 'DD/MM/YYYY') as fecha_mecanizada", 'dam.codigo_unico', 'dam.denominacion', 'dam.extension', 'dam.departamentos', 'dam.provincias', 'dam.municipios', 'dam.area_protegida',
-                "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
-                "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion");
+                $campos = array(
+                    'ac.id', 'ac.ultimo_estado', 'ac.correlativo', "to_char(ac.fecha_mecanizada, 'DD/MM/YYYY') as fecha_mecanizada",
+                    'dam.codigo_unico', 'dam.denominacion', 'dam.extension', 'dam.departamentos', 'dam.provincias', 'dam.municipios', 'dam.area_protegida',
+                    "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
+                    "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'\n',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite_excel",
+                    "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion"
+                );
                 $where = array(
                     'ac.deleted_at' => NULL,
                     'ac.fk_usuario_actual' => $this->request->getPost('id_usuario'),
@@ -2166,14 +2172,23 @@ class Cam extends BaseController
                 ->join('estado_tramite as etp', 'ac.ultimo_fk_estado_tramite_padre = etp.id', 'left')
                 ->join('estado_tramite as eth', 'ac.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
                 ->where($where)
-                ->orderBY('ac.ultimo_fecha_derivacion', 'ASC');
+                ->orderBY('ac.fecha_mecanizada', 'ASC');
                 $datos = $builder->get()->getResultArray();
+                $datos = $this->obtenerDocumentosResponsable($datos, $this->request->getPost('id_usuario'));
                 $contenido['datos'] = $datos;
                 $contenido['campos_listar'] = $campos_listar;
                 $contenido['campos_reales'] = $campos_reales;
 
                 if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
-                    $this->exportarReporteUsuarios($campos_listar, $campos_reales, $datos,$arrayUsuarios[$this->request->getPost('id_usuario')]);
+                    $campos_listar_excel=array(
+                        ' ', 'Fecha Derivación/Devolución', 'H.R. Madre','Fecha Mecanizada','Código Único','Denominación','Extensión','Departamento(s)','Provincia(s)','Municipio(s)','Área Protegida',
+                        'Estado Trámite', 'Documentos'
+                    );
+                    $campos_reales_excel=array(
+                        'ultimo_estado','ultimo_fecha_derivacion','correlativo','fecha_mecanizada','codigo_unico','denominacion','extension','departamentos','provincias','municipios','area_protegida',
+                        'estado_tramite_excel', 'documentos_excel'
+                    );
+                    $this->exportarReporteUsuarios($campos_listar_excel, $campos_reales_excel, $datos,$arrayUsuarios[$this->request->getPost('id_usuario')]);
                 }
 
             }
@@ -2193,9 +2208,46 @@ class Cam extends BaseController
         $data['alertas'] = $this->alertasTramites();
         echo view('templates/template', $data);
     }
+    private function obtenerDocumentosResponsable($datos, $id_usuario){
+        if($datos && count($datos)>0){
+            $db = \Config\Database::connect();
+            foreach($datos as $i=>$row){
+                $documentos = '';
+                $documentos_excel = '';
+                $campos = array(
+                    "doc.id", "tdoc.nombre as tipo_documento", "doc.correlativo", "to_char(doc.fecha, 'DD/MM/YYYY') as fecha_documento", "doc.estado as estado_documento"
+                );
+                $where = array(
+                    'doc.fk_tramite' => $this->idTramite,
+                    'doc.deleted_at' => NULL,
+                    'doc.fk_usuario_creador' => $id_usuario,
+                    'doc.fk_acto_administrativo' => $row['id'],
+                );
+                $builder = $db->table('public.documentos as doc')
+                ->select($campos)
+                ->join('public.tipo_documento as tdoc', 'doc.fk_tipo_documento = tdoc.id', 'left')
+                ->where($where)
+                ->whereIn('doc.estado',array('SUELTO', 'ANEXADO'))
+                ->orderBY('doc.id', 'DESC');
+                if($tmpDocumentos = $builder->get()->getResultArray()){
+                    foreach($tmpDocumentos as $documento){
+                        $documentos .= $documento['fecha_documento'].' - '.$documento['tipo_documento'].' - '.$documento['correlativo'].'<br>';
+                        $documentos_excel .= $documento['fecha_documento'].' - '.$documento['tipo_documento'].' - '.$documento['correlativo'].PHP_EOL;
+                    }
+
+                }
+                $datos[$i]['documentos'] = $documentos;
+                $datos[$i]['documentos_excel'] = $documentos_excel;
+            }
+        }
+        return $datos;
+    }
 
     public function exportarReporteUsuarios($campos_listar, $campos_reales, $datos, $usuario){
-        $file_name = 'reporte_usuarios-'.date('YmdHis').'.xlsx';
+        $tmpNombre = explode("(", $usuario);
+        helper('security');
+        $file_name = sanitize_filename(mb_strtolower($tmpNombre[0])).'-'.date('YmdHis').'.xlsx';
+        //$file_name = 'reporte-'.$usu.'-'.date('YmdHis').'.xlsx';
         $spreadsheet = new Spreadsheet();
         $activeWorksheet = $spreadsheet->getActiveSheet();
         $activeWorksheet->setTitle("Reporte Tramites");
@@ -2233,8 +2285,8 @@ class Cam extends BaseController
         );
         $nColumnas = 1;
         $activeWorksheet->setCellValue('A'.$nColumnas, $usuario);
-        $activeWorksheet->mergeCells('A1:L1');
-        $activeWorksheet->getStyle('A1:L1')->applyFromArray($styleHeader);
+        $activeWorksheet->mergeCells('A1:M1');
+        $activeWorksheet->getStyle('A1:M1')->applyFromArray($styleHeader);        
 
         $nColumnas++;
         $activeWorksheet->fromArray($campos_listar,NULL,'A'.$nColumnas);
@@ -2247,6 +2299,8 @@ class Cam extends BaseController
                     $data[] = str_replace('<br><b>',' - ', str_replace('</b>','',$fila[$row]));
                 $activeWorksheet->fromArray($data,NULL,'A'.$nColumnas);
                 $activeWorksheet->getStyle('A'.$nColumnas.':'.$activeWorksheet->getHighestColumn().$nColumnas)->applyFromArray($styleBody);
+                $activeWorksheet->getStyle('L'.$nColumnas)->getAlignment()->setWrapText(true);
+                $activeWorksheet->getStyle('M'.$nColumnas)->getAlignment()->setWrapText(true);
                 $nColumnas++;
             }
         }

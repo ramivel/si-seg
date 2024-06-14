@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\LibroRegistroPdf;
 use App\Models\ActoAdministrativoModel;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Style\Font;
@@ -58,6 +59,7 @@ class Documentos extends BaseController
         2 => 'CONTRATO MINERO NACIONAL',
         3 => 'CONTRATO MINERO COMIBOL',
     );
+    protected $fontPDF = 'helvetica';
 
     public function index($idTramite)
     {
@@ -900,7 +902,7 @@ class Documentos extends BaseController
             session()->setFlashdata('success', 'Se actualizo correctamente la Información.');
         }else{
             session()->setFlashdata('fail', 'No se anexo la hoja de ruta.');
-        }        
+        }
         return redirect()->to($this->controlador.'buscador_sincobol');
     }
 
@@ -1519,6 +1521,182 @@ class Documentos extends BaseController
 		readfile($file_name);
         @unlink($file_name);
 		exit;
+    }
+
+    public function libroRegistro(){
+
+        $tramitesModel = new TramitesModel();
+        $tmpTramites = $tramitesModel->findAll();
+        $tramites = array();
+        foreach($tmpTramites as $row)
+            $tramites[$row['id']] = $row['nombre'];
+        $hojas_ruta = array(
+            '' => 'Escriba el correlativo de la hoja de ruta'
+        );
+
+        $cabera['titulo'] = 'Hojas de Ruta';
+        $cabera['navegador'] = true;
+        $cabera['subtitulo'] = 'Libro de Registros';
+        $contenido['title'] = view('templates/title',$cabera);
+        $contenido['subtitulo'] = 'Libro de Registros';
+        $contenido['tramites'] = $tramites;
+        $contenido['hojas_ruta'] = $hojas_ruta;
+        $contenido['controlador'] = $this->controlador;
+        $contenido['accion'] = 'imprimir_libro_registro';
+        $data['content'] = view($this->carpeta.'libro_registro', $contenido);
+        $data['menu_actual'] = 'libro_registro';
+        $data['tramites_menu'] = $this->tramitesMenu();
+        $data['alertas'] = $this->alertasTramites();
+        echo view('templates/template', $data);
+    }
+    public function imprimirLibroRegistro(){
+        if ($this->request->getPost() && count($this->request->getPost('id_hojas_rutas'))>0) {
+            $tramitesModel = new TramitesModel();
+            $tmpTramites = $tramitesModel->findAll();
+            $tramites = array();
+            foreach($tmpTramites as $row)
+                $tramites[$row['id']] = $row['nombre'];
+
+            $id_hojas_rutas = $this->request->getPost('id_hojas_rutas');
+            $id_tramites = $this->request->getPost('id_tramites');
+            $datos = array();
+            foreach($id_hojas_rutas as $i=>$id_hoja_ruta){
+                switch($id_tramites[$i]){
+                    case 1:
+                        $actoAdministrativoModel = new ActoAdministrativoModel();
+                        $campos = array('id', 'correlativo', "to_char(fecha_mecanizada, 'DD/MM/YYYY') as fecha");
+                        $hoja_ruta = $actoAdministrativoModel->select($campos)->find($id_hoja_ruta);
+                        break;
+                    case 2:
+                        $hojaRutaMineriaIlegalModel = new HojaRutaMineriaIlegalModel();
+                        $campos = array('id', 'correlativo', "to_char(fecha_hoja_ruta, 'DD/MM/YYYY') as fecha");
+                        $hoja_ruta = $hojaRutaMineriaIlegalModel->select($campos)->find($id_hoja_ruta);
+                        break;
+                }
+                $datos[] = array_merge($hoja_ruta, array('tipo_tramite' => $tramites[$id_tramites[$i]]));
+            }
+
+            $file_name = 'libro_registros.pdf';
+            $pdf = new LibroRegistroPdf('L', 'mm', 'Letter', true, 'UTF-8', false);
+
+            // Firma del Documento
+            $pdf->SetCreator('GARNET');
+            $pdf->SetAuthor('Desarrollo de UTIC');
+            $pdf->SetTitle('Libro de Registros');
+            $pdf->SetKeywords('Hoja, Ruta, Libro, Registro');
+
+            //establecer margenes
+            $pdf->SetMargins(10, 23, 0);
+            $pdf->SetAutoPageBreak(true, 0); //Margin botton
+            $pdf->setFontSubsetting(false);
+
+            $pdf->SetFont($this->fontPDF, '', 8);
+            $tmp_index = 1;
+            foreach($datos as $dato){
+                if($tmp_index == 5)
+                    $tmp_index = 1;
+                if($tmp_index == 1)
+                    $pdf->AddPage();
+                $fila = $this->fila_libro_registro($dato);
+                $pdf->writeHTML($fila, true, false, false, false, '');
+                $tmp_index++;
+            }
+
+            $pdf->Output($file_name);
+            exit();
+        }else{
+            session()->setFlashdata('fail', 'No ha seleccionado ninguna hoja de ruta.');
+            return redirect()->to('libro_registro');
+        }
+    }
+    private function fila_libro_registro($fila){
+        $columna = array(
+            array('tamanio' => 90,'campo' => 'correlativo'),
+            array('tamanio' => 95,'campo' => 'tipo_tramite'),
+            array('tamanio' => 55,'campo' => 'fecha'),
+            array('tamanio' => 75,'campo' => 'destinatario'),
+            array('tamanio' => 95,'campo' => 'proveido'),
+            array('tamanio' => 125,'campo' => 'derivado'),
+            array('tamanio' => 125,'campo' => 'derivado'),
+            array('tamanio' => 125,'campo' => 'derivado'),
+        );
+        $html = '<table border="1" cellpadding="3" cellspacing="0"><tr>';
+        foreach($columna as $row)
+            $html .= '<th align="center" width="'.$row['tamanio'].'" height="118">&nbsp;<br><br><br><br>'. (isset($fila[$row['campo']])?$fila[$row['campo']]:'') .'</th>';
+        $html .= '</tr></table>';
+        return $html;
+
+    }
+    public function ajaxBuscarHojaRuta(){
+        $tramitesModel = new TramitesModel();
+        $cadena = mb_strtoupper($this->request->getPost('texto'));
+        $id_tramite = $this->request->getPost('id_tramite');
+        $tramite = $tramitesModel->find($id_tramite);
+        if(!empty($cadena) && session()->get('registroUser') && $tramite){
+            $data = array();
+            $campos = array('id', 'correlativo');
+            $where = array(
+                'deleted_at' => NULL,
+            );
+            switch($tramite['id']){
+                case 1:
+                    $actoAdministrativoModel = new ActoAdministrativoModel();
+                    $datos = $actoAdministrativoModel->select($campos)->where($where)->like('correlativo', $cadena)->findAll(10);
+                    break;
+                case 2:
+                    $hojaRutaMineriaIlegalModel = new HojaRutaMineriaIlegalModel();
+                    $datos = $hojaRutaMineriaIlegalModel->select($campos)->where($where)->like('correlativo', $cadena)->findAll(10);
+                    break;
+            }
+            if($datos){
+                foreach($datos as $row){
+                    $data[] = array(
+                        'id' => $row['id'],
+                        'text' => $row['correlativo'],
+                    );
+                }
+            }else{
+                $data[] = array(
+                    'id' => 0,
+                    'text' => 'No se encuentra la hoja de ruta que busca'
+                );
+            }
+            echo json_encode($data);
+        }
+    }
+    public function ajaxTrHr(){
+        $tramitesModel = new TramitesModel();
+        $id_tramite = $this->request->getPost('id_tramite');
+        $id_hoja_ruta = $this->request->getPost('id_hoja_ruta');
+        if($tramite = $tramitesModel->find($id_tramite)){
+            switch($tramite['id']){
+                case 1:
+                    $actoAdministrativoModel = new ActoAdministrativoModel();
+                    $campos = array('id', 'correlativo', "to_char(fecha_mecanizada, 'DD/MM/YYYY') as fecha");
+                    $hoja_ruta = $actoAdministrativoModel->select($campos)->find($id_hoja_ruta);
+                    break;
+                case 2:
+                    $hojaRutaMineriaIlegalModel = new HojaRutaMineriaIlegalModel();
+                    $campos = array('id', 'correlativo', "to_char(fecha_hoja_ruta, 'DD/MM/YYYY') as fecha");
+                    $hoja_ruta = $hojaRutaMineriaIlegalModel->select($campos)->find($id_hoja_ruta);
+                    break;
+            }
+            $html = '<tr class="rowClass">
+                <td class="text-center">
+                    <input type="hidden" name="id_hojas_rutas[]" value="'.$hoja_ruta['id'].'"/>
+                    <input type="hidden" name="id_tramites[]" value="'.$tramite['id'].'"/>
+                    '.$hoja_ruta['correlativo'].'
+                </td>
+                <td class="text-center">'.$tramite['nombre'].'</td>
+                <td class="text-center">'.$hoja_ruta['fecha'].'</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-inverse subir-hr" title="Subir Hoja de Ruta"><span class="fa fa-arrow-up"></span></button>
+                    <button type="button" class="btn btn-sm btn-inverse bajar-hr" title="Bajar Hoja de Ruta"><span class="fa fa-arrow-down"></span></button>
+                    <button type="button" class="btn btn-sm btn-danger eliminar-hr" title="Quitar Hoja de Ruta"><span class="fa fa-trash"></span></button>
+                </td>
+            </tr>';
+            echo $html;
+        }
     }
 
 }

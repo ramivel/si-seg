@@ -334,6 +334,16 @@
             <?php }?>
         <?php } ?>
 
+        <div class="pcoded-navigatio-lavel">Hojas de Ruta</div>
+        <ul class="pcoded-item pcoded-left-item">
+            <li class="<?= (isset($menu_actual) && $menu_actual === 'libro_registro') ? 'active' : '';?>">
+                <a href="<?= base_url('libro_registro');?>">
+                    <span class="pcoded-micon"><i class="feather icon-printer"></i></span>
+                    <span class="pcoded-mtext">Imprimir Libro de Registro</span>
+                </a>
+            </li>
+        </ul>
+
         <div class="pcoded-navigatio-lavel">Documentación Sistema</div>
         <ul class="pcoded-item pcoded-left-item">
             <li class="<?= (isset($menu_actual) && $menu_actual === 'video_tutorial') ? 'active' : '';?>">

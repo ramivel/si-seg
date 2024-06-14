@@ -817,6 +817,59 @@ $(document).ready(function () {
   });
   /* FIN MINERIA ILEGAL AREAS MINERAS */
 
+  /* LIBRO DE REGISTRO */
+  $(".libro-registro-ajax").select2({
+    language: "es",
+    placeholder: "Escriba el correlativo de la hoja de ruta",
+    minimumInputLength: 1,
+    ajax: {
+      url: baseUrl + "ajax_buscar_hoja_ruta",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+          id_tramite: $("#id_tramite").val(),
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+  $(".agregar-hr").click(function () {
+    var id_hoja_ruta = $("#id_hoja_ruta").val();
+    if (id_hoja_ruta.length > 0) {
+      $.ajax({
+        url: baseUrl + "ajax_tr_hr",
+        type: "POST",
+        data: {
+          id_tramite: $("#id_tramite").val(),
+          id_hoja_ruta: id_hoja_ruta,
+        },
+        success: function (result) {
+          $("#tabla-libro-registro tbody").append(result);
+          $(".libro-registro-ajax").val('').trigger('change');
+        },
+      });
+    }    
+  });
+  $('#tabla-libro-registro tbody').on('click', '.eliminar-hr', function () {
+    $(this).parent('td.text-center').parent('tr.rowClass').remove();
+  });
+  $('#tabla-libro-registro tbody').on('click', '.subir-hr,.bajar-hr', function () {
+    var row = $(this).parent('td.text-center').parent('tr.rowClass');
+    if ($(this).is(".subir-hr"))
+      row.insertBefore(row.prev());
+    else if($(this).is(".bajar-hr"))
+      row.insertAfter(row.next());
+  });
+  /* FIN LIBRO DE REGISTRO */
+
   /* ORIGEN CAMBIAR */
 
   verificarOrigen();

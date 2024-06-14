@@ -63,19 +63,19 @@
                                                     $style = '';
                                                     switch($fila[$campos_reales[$i]]){
                                                         case 'MIGRADO':
-                                                            $style = 'btn btn-sm btn-inverse btn-round';
+                                                            $style = 'btn btn-sm btn-danger btn-round';
                                                             break;
                                                         case 'ATENDIDO':
                                                             $style = 'btn btn-sm btn-success btn-round';
                                                             break;
-                                                        case 'DERIVADO':
+                                                        case 'RECIBIDO':
                                                             $style = 'btn btn-sm btn-primary btn-round';
                                                             break;
                                                         case 'DEVUELTO':
                                                             $style = 'btn btn-sm btn-warning btn-round';
                                                             break;
-                                                        case 'FINALIZADO':
-                                                            $style = 'btn btn-sm btn-danger btn-round';
+                                                        case 'DERIVADO':
+                                                            $style = 'btn btn-sm btn-inverse btn-round';
                                                             break;
                                                         case 'EN ESPERA':
                                                             $style = 'btn btn-sm btn-info btn-round';

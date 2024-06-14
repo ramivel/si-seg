@@ -55,6 +55,10 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
     // Agregar todas las rutas que necesitan proteccion
     $routes->get('dashboard', 'Dashboard::index');
     $routes->get('video_tutorial', 'Dashboard::VideoTutorial');
+    $routes->get('libro_registro', 'Documentos::libroRegistro');
+    $routes->post('imprimir_libro_registro', 'Documentos::imprimirLibroRegistro');
+    $routes->add('ajax_buscar_hoja_ruta', 'Documentos::ajaxBuscarHojaRuta');
+    $routes->add('ajax_tr_hr', 'Documentos::ajaxTrHr');
 
     $routes->group('oficinas', function($routes){
         $routes->add('/', 'Oficinas::index');
@@ -172,7 +176,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('reporte_responsable', 'Cam::reporteResponsable');
         $routes->add('reporte_mis_tramites', 'Cam::reporteMisTramites');
 
-        //$routes->add('actualizar_poligono_area_minera', 'Cam::actualizarPoligonoAreaMinera');        
+        //$routes->add('actualizar_poligono_area_minera', 'Cam::actualizarPoligonoAreaMinera');
 
     });
 
@@ -190,14 +194,14 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('editar/(:num)', 'CorrespondenciaExterna::editar/$1');
         $routes->post('guardar_editar', 'CorrespondenciaExterna::guardarEditar');
         $routes->add('ajax_recibir', 'CorrespondenciaExterna::recibirAjax');
-        
+
         $routes->add('mis_ingresos_minilegal', 'CorrespondenciaExterna::misIngresosMinilegal');
         $routes->add('agregar_minilegal', 'CorrespondenciaExterna::agregarMinilegal');
         $routes->add('editar_minilegal/(:num)', 'CorrespondenciaExterna::editarMinilegal/$1');
         $routes->post('guardar_editar_minilegal', 'CorrespondenciaExterna::guardarEditarMinilegal');
-        
+
         //$routes->add('actualizar_path', 'CorrespondenciaExterna::actualizarPath');
-        
+
     });
 
     $routes->group('persona_externa', function($routes){
@@ -301,7 +305,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('desanexar/(:num)', 'Documentos::desanexar/$1');
         $routes->add('buscador_sincobol', 'Documentos::buscadorSincobol');
         $routes->add('desanexar_sincobol/(:num)/(:num)/(:num)/(:num)', 'Documentos::desanexarSincobol/$1/$2/$3/$4');
-        
+
     });
 });
 $routes->group('', ['filter'=>'AlreadyLogged'], function($routes){
