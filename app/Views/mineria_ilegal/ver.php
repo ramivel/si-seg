@@ -6,6 +6,9 @@
                 <a href="<?= $url_atras;?>" class="btn btn-success"><i class="feather icon-arrow-left"></i> ATRAS</a>
                 <a href="<?= base_url($controlador.'hoja_ruta_pdf/'.$hoja_ruta['id']);?>" target="_blank" class="btn btn-warning"><i class="fa fa-print"></i> IMPRIMIR H.R.</a>
                 <a href="<?= base_url($controlador.'formulario_denuncia_pdf/'.$denuncia['id']);?>" target="_blank" class="btn btn-primary"><i class="fa fa-print"></i> IMPRIMIR F.M.I</a>
+                <?php if(isset($denuncia_web) && $denuncia_web['id']){?>
+                    <a href="<?= base_url('pdf_formulario_denuncia/'.$denuncia_web['id']);?>" target="_blank" class="btn btn-info"><i class="fa fa-print"></i> IMPRIMIR F.D.W.</a>
+                <?php }?>                
             </div>
         </div>
         <div class="row">

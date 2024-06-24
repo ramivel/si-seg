@@ -79,10 +79,7 @@ $(document).ready(function () {
             presence: {
                 message: "^Debe seleccionar el Destinatario."
             },
-        },
-        instruccion: {
-            presence: true,
-        },
+        },        
     };
 
     // Hook up the form so we can prevent it from being posted

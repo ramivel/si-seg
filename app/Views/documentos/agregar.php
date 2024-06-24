@@ -1,5 +1,21 @@
 <div class="page-wrapper">
     <?= $title?>
+    <?php if(!empty(session()->getFlashdata('fail'))){?>
+        <div class="alert alert-danger background-danger">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <i class="icofont icofont-close-line-circled text-white"></i>
+            </button>
+            <?= session()->getFlashdata('fail');?>
+        </div>
+    <?php }?>
+    <?php if(!empty(session()->getFlashdata('success'))){?>
+    <div class="alert alert-success background-success">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <i class="icofont icofont-close-line-circled text-white"></i>
+        </button>
+        <?= session()->getFlashdata('success');?>
+    </div>
+    <?php }?>
     <div class="page-body">
         <div class="row">
             <div class="col-sm-12">
@@ -135,7 +151,7 @@
                                         echo form_input(array(
                                             'name' => $campo,
                                             'id' => $campo,
-                                            'class' => 'form-control form-control-uppercase',
+                                            'class' => 'form-control',
                                             'value' => set_value($campo)
                                         ));
                                     ?>

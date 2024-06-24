@@ -42,7 +42,7 @@
 <body class="bg-body-tertiary">
     <div class="container">
         <main>
-            <div class="py-2 text-center">
+            <div class="text-center mt-2">
                 <img src="<?= base_url('assets/images/mineria_ilegal/banner.png');?>" class="img-fluid" alt="DENUNCIA MINERIA ILEGAL">
             </div>
 
@@ -598,7 +598,7 @@
         </main>
 
         <footer class="my-5 pt-5 text-body-secondary text-center text-small">
-            <p class="mb-1">Copyright &copy; 2023 | AJAM, Reservados todos los derechos.</p>
+            <p class="mb-1">Copyright &copy; 2024 | AJAM, Reservados todos los derechos.</p>
         </footer>
     </div>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>

@@ -27,12 +27,13 @@
                     <div class="card-block">
                         <?= form_open($accion);?>
                         <div class="form-group row">
-                            <div class="col-sm-4">
+                            <div class="col-sm-3">
                                 <?php
                                     $campo = 'texto';
                                     echo form_input(array(
                                         'name' => $campo,
                                         'id' => $campo,
+                                        'type' => (isset($campo_buscar) && $campo_buscar == 'fecha_hoja_ruta') ? 'date':'text',
                                         'placeholder' => 'Escriba el Correlativo',
                                         'class' => 'form-control form-control-uppercase',
                                         'value' => set_value($campo,'',false)
@@ -42,10 +43,10 @@
                                     <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
                                 <?php }?>
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-3">
                                 <?php
                                     $campo = 'campo';
-                                    echo form_dropdown($campo, $campos_buscar, set_value($campo), array('class' => 'form-control'));
+                                    echo form_dropdown($campo, $campos_buscar, set_value($campo), array('id' => 'filtro-buscador', 'class' => 'form-control'));
                                 ?>
                             </div>
                             <!--
@@ -87,7 +88,7 @@
                                                         switch($fila[$campos_reales[$i]]){
                                                             case 'REGULARIZACIÓN':
                                                                 $style = 'btn btn-sm btn-danger btn-round';
-                                                                break;                                                            
+                                                                break;
                                                             case 'RECIBIDO':
                                                                 $style = 'btn btn-sm btn-primary btn-round';
                                                                 break;
@@ -102,8 +103,8 @@
                                                                 break;
                                                         }
                                                         echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';
-                                                    }elseif($campos_reales[$i]=='fk_tipo_denuncia'){
-                                                        echo $tipos_denuncias[$fila[$campos_reales[$i]]];
+                                                    }elseif($campos_reales[$i]=='denunciante' || $campos_reales[$i]=='remitente' || $campos_reales[$i]=='destinatario' || $campos_reales[$i]=='responsable'){
+                                                        echo str_replace(' || ', '<br>', $fila[$campos_reales[$i]]);
                                                     }else{
                                                         echo $fila[$campos_reales[$i]];
                                                     }

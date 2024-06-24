@@ -20,7 +20,7 @@ class Publico extends BaseController
     protected $controlador = 'publico/';
     protected $carpeta = 'publico/';
     protected $tipoDenuncias = array(
-        1 => 'PAGINA WEB',        
+        1 => 'PAGINA WEB',
     );
     protected $fontPDF = 'helvetica';
     protected $expedidos = array(
@@ -37,21 +37,10 @@ class Publico extends BaseController
         'PD' => 'PANDO',
     );
 
-    public function seguimiento()
-    {
-        $tramitesModel = new TramitesModel();
-        $array_tramites = array('' => 'ELIJA UNA OPCIÓN');
-        if($tramites = $tramitesModel->where('activo = true')->findAll()){
-            foreach($tramites as $tramite){
-                $array_tramites[$tramite['id']] = mb_strtoupper($tramite['nombre']);
-            }
-        }
+    public function seguimientoCAM(){
 
         if ($this->request->getPost()) {
             $validation = $this->validate([
-                'tramite' => [
-                    'rules' => 'required',
-                ],
                 'hr_madre' => [
                     'rules' => 'required',
                 ],
@@ -66,54 +55,103 @@ class Publico extends BaseController
                 $data['validation'] = $this->validator;
             }else{
                 $db = \Config\Database::connect();
-                switch($this->request->getPost('tramite')){
-                    case 1:
-                        $campos = array('ac.id','dam.codigo_unico', 'dam.denominacion', "TO_CHAR(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as fecha",
-                        "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as usuario_actual", 'ac.ultimo_fk_documentos', 'ac.estado_tramite_apm', 'ac.documentos_apm',
-						'ac.ultimo_recurso_jerarquico', 'ac.ultimo_recurso_revocatoria', 'ac.ultimo_oposicion', 'ua.atencion');
-                        $where = array(
-                            'ac.deleted_at' => NULL,
-                            'ac.correlativo' => trim(mb_strtoupper($this->request->getPost('hr_madre'))),
-                            'dam.codigo_unico' => trim($this->request->getPost('codigo_unico')),
-                            'ac.codigo_seguimiento' => trim($this->request->getPost('codigo_seguimiento')),
-                        );
-                        $builder = $db->table('public.acto_administrativo as ac')
-                        ->select($campos)
-                        ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
-                        ->join('usuarios as ua', 'ac.fk_usuario_actual = ua.id', 'left')
-                        ->join('perfiles as pa', 'ua.fk_perfil = pa.id', 'left')
-                        ->where($where);
-                        if($tramite = $builder->get()->getRowArray()){
-							$observaciones = '';
+                $campos = array('ac.id','dam.codigo_unico', 'dam.denominacion', "TO_CHAR(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as fecha",
+                "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as usuario_actual", 'ac.ultimo_fk_documentos', 'ac.estado_tramite_apm', 'ac.documentos_apm',
+                'ac.ultimo_recurso_jerarquico', 'ac.ultimo_recurso_revocatoria', 'ac.ultimo_oposicion', 'ua.atencion');
+                $where = array(
+                    'ac.deleted_at' => NULL,
+                    'ac.correlativo' => trim(mb_strtoupper($this->request->getPost('hr_madre'))),
+                    'dam.codigo_unico' => trim($this->request->getPost('codigo_unico')),
+                    'ac.codigo_seguimiento' => trim($this->request->getPost('codigo_seguimiento')),
+                );
+                $builder = $db->table('public.acto_administrativo as ac')
+                ->select($campos)
+                ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+                ->join('usuarios as ua', 'ac.fk_usuario_actual = ua.id', 'left')
+                ->join('perfiles as pa', 'ua.fk_perfil = pa.id', 'left')
+                ->where($where);
+                if($tramite = $builder->get()->getRowArray()){
+                    $observaciones = '';
 
-							if($tramite['ultimo_recurso_jerarquico'] == 't')
-								$observaciones .= 'RECURSO JERÁRQUICO <br>';
-							if($tramite['ultimo_recurso_revocatoria'] == 't')
-								$observaciones .= 'RECURSO DE REVOCATORIA <br>';
-							if($tramite['ultimo_oposicion'] == 't')
-								$observaciones .= 'OPOSICIÓN';
+                    if($tramite['ultimo_recurso_jerarquico'] == 't')
+                        $observaciones .= 'RECURSO JERÁRQUICO <br>';
+                    if($tramite['ultimo_recurso_revocatoria'] == 't')
+                        $observaciones .= 'RECURSO DE REVOCATORIA <br>';
+                    if($tramite['ultimo_oposicion'] == 't')
+                        $observaciones .= 'OPOSICIÓN';
 
-							$data['style'] = 'alert-success';
-                            $data['titulo'] = 'SE ENCONTRO EL TRÁMITE';
-                            $data['fecha'] = $tramite['fecha'];
-							$data['estado_actual'] = $tramite['estado_tramite_apm'];
-							$data['observaciones'] = $observaciones;
-							$data['documentos'] = $tramite['documentos_apm'];
-							$data['usuario_actual'] = $tramite['usuario_actual'];
-							$data['atencion'] = $tramite['atencion'];
-                        }else{
-                            $data['style'] = 'alert-danger';
-                            $data['titulo'] = 'NO SE ENCONTRO EL TRÁMITE O EL CÓDIGO DE SEGUIMIENTO ES ERRÓNEO';
-                            $data['contenido'] = 'Lamentablemente no se tuvo un resultado con los datos proporcionados, puede aproximarse a la Oficina Nacional, Dirección y/o Regional que le corresponda para averiguar.';
-                        }
-                        $data['response'] = true;
-                        break;
+                    $data['style'] = 'alert-success';
+                    $data['titulo'] = 'SE ENCONTRO EL TRÁMITE';
+                    $data['fecha'] = $tramite['fecha'];
+                    $data['estado_actual'] = $tramite['estado_tramite_apm'];
+                    $data['observaciones'] = $observaciones;
+                    $data['documentos'] = $tramite['documentos_apm'];
+                    $data['usuario_actual'] = $tramite['usuario_actual'];
+                    $data['atencion'] = $tramite['atencion'];
+                }else{
+                    $data['style'] = 'alert-danger';
+                    $data['titulo'] = 'NO SE ENCONTRO EL TRÁMITE O EL CÓDIGO DE SEGUIMIENTO ES ERRÓNEO';
+                    $data['contenido'] = 'Lamentablemente no se tuvo un resultado con los datos proporcionados, puede aproximarse a la Oficina Nacional, Dirección y/o Regional que le corresponda para averiguar.';
                 }
+                $data['response'] = true;
             }
         }
 
-        $data['tramites'] = $array_tramites;
-        return view($this->carpeta.'seguimiento', $data);
+        $data['accion'] = 'seguimiento_cam';
+        $data['enlaces'] = view($this->carpeta.'enlaces');
+        return view($this->carpeta.'seguimiento_cam', $data);
+    }
+    public function seguimientoMineriaIlegal(){
+
+        if ($this->request->getPost()) {
+            $validation = $this->validate([
+                'correlativo' => [
+                    'rules' => 'required',
+                ],
+                'codigo_seguimiento' => [
+                    'rules' => 'required',
+                ],
+            ]);
+            if(!$validation){
+                $data['validation'] = $this->validator;
+            }else{
+                $db = \Config\Database::connect();
+                $campos = array(
+                    "dw.estado", "TO_CHAR(hr.ultimo_fecha_derivacion, 'DD/MM/YYYY') as fecha",
+                    "CASE WHEN hr.id > 0 THEN CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') ELSE '' END as usuario_actual",
+                    "ua.atencion",
+                );
+                $where = array(
+                    'dw.deleted_at' => NULL,
+                    'dw.correlativo' => trim(mb_strtoupper($this->request->getPost('correlativo'))),
+                    'dw.codigo_seguimiento' => trim($this->request->getPost('codigo_seguimiento')),
+                );
+                $builder = $db->table('mineria_ilegal.denuncias_web as dw')
+                ->select($campos)
+                ->join('mineria_ilegal.denuncias as d', 'dw.fk_denuncia = d.id', 'left')
+                ->join('mineria_ilegal.hoja_ruta as hr', 'd.id = hr.fk_denuncia', 'left')
+                ->join('usuarios as ua', 'hr.fk_usuario_actual = ua.id', 'left')
+                ->join('perfiles as pa', 'ua.fk_perfil = pa.id', 'left')
+                ->where($where);
+                if($tramite = $builder->get()->getRowArray()){
+                    $data['style'] = 'alert-success';
+                    $data['titulo'] = 'SE ENCONTRO EL TRÁMITE';
+                    $data['estado'] = $tramite['estado'];
+                    $data['fecha'] = $tramite['fecha'];
+                    $data['usuario_actual'] = $tramite['usuario_actual'];
+                    $data['atencion'] = $tramite['atencion'];
+                }else{
+                    $data['style'] = 'alert-danger';
+                    $data['titulo'] = 'NO SE ENCONTRO EL FORMULARIO DE DENUNCIA O EL CÓDIGO DE SEGUIMIENTO ES ERRÓNEO';
+                    $data['contenido'] = 'Lamentablemente no se tuvo un resultado con los datos proporcionados, puede aproximarse a la Oficina Nacional, Dirección y/o Regional que le corresponda para averiguar.';
+                }
+                $data['response'] = true;
+            }
+        }
+
+        $data['accion'] = 'seguimiento_mineria_ilegal';
+        $data['enlaces'] = view($this->carpeta.'enlaces');
+        return view($this->carpeta.'seguimiento_mineria_ilegal', $data);
     }
 
     public function denunciaMineriaIlegal(){
@@ -171,7 +209,7 @@ class Publico extends BaseController
                 $provincias = $this->obtenerProvincias($this->request->getPost('departamento'));
                 $municipios = $this->obtenerMunicipios($this->request->getPost('departamento'), $this->request->getPost('provincia'));
                 $data['validation'] = $this->validator;
-            }else{                
+            }else{
                 $informacion = $this->informacionAgente();
                 $rutaArchivoDenunciante = 'archivos/mineria_ilegal/denunciante/';
                 $rutaArchivo = 'archivos/mineria_ilegal/web/';
@@ -258,7 +296,7 @@ class Publico extends BaseController
         $data['municipios'] = (array(''=>'SELECCIONE EL MUNICIPIO') + $municipios);
         $data['enlaces'] = view($this->carpeta.'enlaces');
         return view($this->carpeta.'denuncia_mineria_ilegal', $data);
-    }    
+    }
 
     public function pdfFormularioDenuncia($id_denuncia){
         $denunciasWebMineriaIlegalModel = new DenunciasWebMineriaIlegalModel();
@@ -275,8 +313,8 @@ class Publico extends BaseController
             $contenido['ubicacion'] = $municipiosModel->find($denuncia['fk_municipio']);
             $contenido['tipo_denuncias'] = $this->tipoDenuncias;
             $contenido['color'] = '#F7CECE';
-            $html = view($this->carpeta.'pdf_formulario_denuncia', $contenido);            
-            $html_adjuntos = view($this->carpeta.'pdf_adjuntos', $contenido);  
+            $html = view($this->carpeta.'pdf_formulario_denuncia', $contenido);
+            $html_adjuntos = view($this->carpeta.'pdf_adjuntos', $contenido);
 
             $file_name = str_replace('/','-',$denuncia['correlativo']).'.pdf';
             $pdf = new DenunciaPdf('P', 'mm', 'Letter', true, 'UTF-8', false);
@@ -370,9 +408,9 @@ class Publico extends BaseController
         );
 
         if($correlativoActual = $correlativosMineriaIlegalModel->where($where)->first())
-            $correlativo = $sigla.str_pad(($correlativoActual['correlativo_actual']+1), 3, "0", STR_PAD_LEFT).'/'.date('Y');
+            $correlativo = $sigla.($correlativoActual['correlativo_actual']+1).'/'.date('Y');
         else
-            $correlativo = $sigla.str_pad('1', 3, "0", STR_PAD_LEFT).'/'.date('Y');
+            $correlativo = $sigla.'1'.'/'.date('Y');
 
         return $correlativo;
     }

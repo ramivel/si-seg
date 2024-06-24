@@ -58,6 +58,7 @@
                                 <table id="tabla-buscador" class="table table-striped table-bordered nowrap" style="font-size: small;">
                                     <thead>
                                         <tr>
+                                            <th class="nosort"></th>
                                             <?php for($i=0;$i<count($campos_listar);$i++){?>
                                             <th class="text-center"><?php echo $campos_listar[$i];?></th>
                                             <?php }?>                                            
@@ -67,6 +68,9 @@
                                     <?php if(!empty($datos) && count($datos)>0){?>
                                         <?php foreach ($datos as $fila){?>
                                         <tr>
+                                            <td class="text-center">                                            
+                                                <a href="<?= $sincobol."correspondencia/hoja_ruta/hr_pdf/".$fila['fk_hoja_ruta'];?>" target="_blank" class="btn btn-sm btn-warning"><i class="fa fa-print"></i> IMPRIMIR H.R.</a>
+                                            </td>
                                             <?php for($i=0;$i<count($campos_reales);$i++){?>
                                             <td class="text-center">
                                             <?php

@@ -92,7 +92,7 @@
                                 <span class="pcoded-mtext">Mis Ingresos</span>
                             </a>
                         </li>
-                        <li class="<?= (isset($menu_actual) && $menu_actual === 'cam/generar_codigo_seguimiento') ? 'active' : '';?>">
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/generar_codigo_seguimiento') ? 'active' : '';?>">
                             <a href="<?= base_url('cam/generar_codigo_seguimiento');?>">
                                 <span class="pcoded-mtext">Código de Seguimiento</span>
                             </a>

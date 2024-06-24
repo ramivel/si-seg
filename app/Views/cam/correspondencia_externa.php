@@ -106,12 +106,12 @@
                                     <?php foreach ($datos as $row){?>
                                     <tr id="corre<?= $row['id']; ?>">
                                         <td>
-                                            <button type="button" class="btn btn-success recibir_correspondencia" data-direccion="<?= base_url($accion)?>" data-idext="<?=$row['id'];?>" data-docext="<?=$row['documento_externo'];?>">Recibir Correspondencia</button>
+                                            <button type="button" class="btn btn-success recibir_correspondencia" data-direccion="<?= base_url($accion)?>" data-idext="<?=$row['id'];?>" data-docext='<?=$row['documento_externo'];?>'>Recibir Correspondencia</button>
                                         </td>
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>
                                             <?php if($campos_reales[$i]=='doc_digital'){ ?>
                                                 <td>
-                                                    <a href="<?= base_url($ruta_archivos.$fila['fk_area_minera'].'/externo/'.$row[$campos_reales[$i]]);?>" target="_blank" title="Ver Documento"><i class="feather icon-file"></i> Ver Documento</a>
+                                                    <a href="<?= base_url($row[$campos_reales[$i]]);?>" target="_blank" title="Ver Documento"><i class="feather icon-file"></i> Ver Documento</a>
                                                 </td>
                                             <?php }else{?>
                                                 <td><?= $row[$campos_reales[$i]];?></td>

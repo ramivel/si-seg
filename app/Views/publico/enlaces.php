@@ -1,5 +1,5 @@
-<div class="col-md-12">
-    <div class="row mb-2">
+<div class="col-md-12 my-2">
+    <div class="row">
         <div class="col-ms-12 col-md-3">
             <a href="https://www.autoridadminera.gob.bo" title="Página WEB">
                 <img src="<?= base_url('assets/images/home.jpg');?>" class="img-fluid" alt="PAGINA WEB">

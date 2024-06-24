@@ -55,15 +55,12 @@
                                         ?>
                                     <tr class="<?=$style?>">
                                         <td class="text-center">
-                                            <?php if($fila['estado'] == 'PRESENTADO'){?>
-                                                <div class="dropdown-info dropdown open">
-                                                    <button class="btn btn-sm btn-info dropdown-toggle waves-effect waves-light " type="button" id="dropdown-4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Acciones</button>
-                                                    <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                        <?php echo anchor('pdf_formulario_denuncia/'.$fila['id'], 'Imprimir Formulario',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
-                                                        <?php echo anchor($controlador.'atender_denuncia_web/'.$fila['id'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));?>
-                                                    </div>
-                                                </div>
-                                            <?php }?>
+                                            <?php
+                                            if($fila['estado'] == 'PRESENTADO'){
+                                                echo anchor($controlador.'atender_denuncia_web/'.$fila['id'], '<i class="fa fa-edit"></i> Atender',array('class' =>'btn btn-sm btn-info mb-2')).'<br>';
+                                            }
+                                            ?>
+                                            <?php echo anchor('pdf_formulario_denuncia/'.$fila['id'], '<i class="fa fa-print"></i> Imprimir Formulario Web',array('class' =>'btn btn-sm btn-inverse', 'target'=>'_blank'));?>
                                         </td>
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>
                                         <td class="text-center" >

@@ -33,8 +33,10 @@ $routes->setAutoRoute(true);
 // route since we don't have to scan directories.
 $routes->get('/', 'Autenticacion::index');
 
-$routes->get('seguimiento', 'Publico::seguimiento');
-$routes->post('seguimiento', 'Publico::seguimiento');
+$routes->get('seguimiento_cam', 'Publico::seguimientoCAM');
+$routes->post('seguimiento_cam', 'Publico::seguimientoCAM');
+$routes->get('seguimiento_mineria_ilegal', 'Publico::seguimientoMineriaIlegal');
+$routes->post('seguimiento_mineria_ilegal', 'Publico::seguimientoMineriaIlegal');
 
 $routes->get('denuncia_mineria_ilegal', 'Publico::denunciaMineriaIlegal');
 $routes->post('denuncia_mineria_ilegal', 'Publico::denunciaMineriaIlegal');

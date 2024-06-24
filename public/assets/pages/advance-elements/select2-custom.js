@@ -908,6 +908,16 @@ $(document).ready(function () {
   });
   /* Fin Reporte Administracion Usuarios */
 
+  /* Filtros Buscador */
+  $("#filtro-buscador").on("change", function () {
+    $('#texto').val('');
+    if($(this).val()=='fecha_hoja_ruta')
+      $('#texto').attr('type', 'date');
+    else
+      $('#texto').attr('type', 'text');    
+  });
+  /* Filtros Buscador */
+
 });
 function desanexar_documento(idDocumento) {
   var row = document.getElementById(idDocumento);

@@ -40,7 +40,24 @@ class ValidarMineriaIlegal {
             return false;
 
         return true;
+    }
 
+    public function existe_correlativo_fmi_historico($value):bool
+    {
+        $request = \Config\Services::request();
+        $municipiosModel = new MunicipiosModel();
+        $oficinaModel = new OficinasModel();
+        $denunciasMineriaIlegalModel = new DenunciasMineriaIlegalModel();
+        $ubicacion = $municipiosModel->find($request->getPost('fk_municipio'));
+        $oficina = $oficinaModel->where(array('departamento' => $ubicacion['regional'], 'desconcentrado' => 'true'))->first();
+        $fechaDenuncia = $request->getPost('fecha_denuncia');
+        $tmpAnio = explode('-',$fechaDenuncia);
+        if($oficina && $tmpAnio[0]>0){
+            $correlativoDenuncia = $oficina['correlativo'].'FMI/'.$value.'/'.$tmpAnio[0];
+            if($denunciasMineriaIlegalModel->where(array('correlativo' => $correlativoDenuncia))->first())
+                return false;
+        }
+        return true;
     }
 
 }

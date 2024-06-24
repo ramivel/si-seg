@@ -2036,7 +2036,7 @@ class Cam extends BaseController
                 $validate = true;
                 $db = \Config\Database::connect();
                 $logsBuscadoresModel = new LogsBuscadoresModel();
-                $campos = array('ac.id', 'ac.ultimo_estado', 'ac.correlativo', 'dam.codigo_unico', 'dam.denominacion', 'dam.representante_legal', 'dam.nacionalidad', 'dam.titular', 'dam.clasificacion_titular',
+                $campos = array('ac.id', 'ac.fk_hoja_ruta', 'ac.ultimo_estado', 'ac.correlativo', 'dam.codigo_unico', 'dam.denominacion', 'dam.representante_legal', 'dam.nacionalidad', 'dam.titular', 'dam.clasificacion_titular',
                 "CONCAT(ur.nombre_completo, '<br><b>',pr.nombre,'</b>') as remitente", "CONCAT(ud.nombre_completo, '<br><b>',pd.nombre,'</b>') as destinatario",
                 'ac.ultimo_instruccion', "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
                 "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion", "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as responsable");
@@ -2105,6 +2105,7 @@ class Cam extends BaseController
         $contenido['subtitulo'] = 'Buscador de Contratos Administrativos Mineros';
         $contenido['accion'] = $this->controlador.'buscador_ventanilla';
         $contenido['controlador'] = $this->controlador;
+        $contenido['sincobol'] = $this->urlSincobol;
         $data['content'] = view($this->carpeta.'buscador_ventanilla', $contenido);
         $data['menu_actual'] = 'correspondencia_externa/buscador_tramites_cam';
         $data['tramites_menu'] = $this->tramitesMenu();
@@ -2148,18 +2149,19 @@ class Cam extends BaseController
                 $contenido['validation'] = $this->validator;
             }else{
                 $campos_listar=array(
-                    ' ', 'Fecha Derivación/Devolución', 'H.R. Madre','Fecha Mecanizada','Código Único','Denominación','Extensión','Departamento(s)','Provincia(s)','Municipio(s)','Área Protegida',
+                    ' ', 'Fecha Derivación/Devolución', 'H.R. Madre','Fecha Mecanizada','Código Único','Denominación','Representante Legal','Solicitante','Extensión','Departamento(s)','Provincia(s)','Municipio(s)','Área Protegida',
                     'Estado Trámite', 'Documentos'
                 );
                 $campos_reales=array(
-                    'ultimo_estado','ultimo_fecha_derivacion','correlativo','fecha_mecanizada','codigo_unico','denominacion','extension','departamentos','provincias','municipios','area_protegida',
+                    'ultimo_estado','ultimo_fecha_derivacion','correlativo','fecha_mecanizada','codigo_unico','denominacion','representante_legal','titular','extension','departamentos','provincias','municipios','area_protegida',
                     'estado_tramite', 'documentos'
                 );
                 $campos = array(
                     'ac.id', 'ac.ultimo_estado', 'ac.correlativo', "to_char(ac.fecha_mecanizada, 'DD/MM/YYYY') as fecha_mecanizada",
-                    'dam.codigo_unico', 'dam.denominacion', 'dam.extension', 'dam.departamentos', 'dam.provincias', 'dam.municipios', 'dam.area_protegida',
+                    'dam.codigo_unico', 'dam.denominacion', 'dam.representante_legal','dam.titular','dam.extension', 'dam.departamentos', 'dam.provincias', 'dam.municipios', 'dam.area_protegida',
                     "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
-                    "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'\n',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite_excel",
+                    "CONCAT(etp.orden,'. ',etp.nombre) as estado_tramite_excel",
+                    "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE '' END as sub_estado_tramite_excel",
                     "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion"
                 );
                 $where = array(
@@ -2181,12 +2183,12 @@ class Cam extends BaseController
 
                 if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
                     $campos_listar_excel=array(
-                        ' ', 'Fecha Derivación/Devolución', 'H.R. Madre','Fecha Mecanizada','Código Único','Denominación','Extensión','Departamento(s)','Provincia(s)','Municipio(s)','Área Protegida',
-                        'Estado Trámite', 'Documentos'
+                        ' ', 'Fecha Derivación/Devolución', 'H.R. Madre','Fecha Mecanizada','Código Único','Denominación','Representante Legal','Solicitante','Extensión','Departamento(s)','Provincia(s)','Municipio(s)','Área Protegida',
+                        'Estado Trámite', 'Sub Estado Trámite', 'Documentos'
                     );
                     $campos_reales_excel=array(
-                        'ultimo_estado','ultimo_fecha_derivacion','correlativo','fecha_mecanizada','codigo_unico','denominacion','extension','departamentos','provincias','municipios','area_protegida',
-                        'estado_tramite_excel', 'documentos_excel'
+                        'ultimo_estado','ultimo_fecha_derivacion','correlativo','fecha_mecanizada','codigo_unico','denominacion','representante_legal','titular','extension','departamentos','provincias','municipios','area_protegida',
+                        'estado_tramite_excel', 'sub_estado_tramite_excel', 'documentos_excel'
                     );
                     $this->exportarReporteUsuarios($campos_listar_excel, $campos_reales_excel, $datos,$arrayUsuarios[$this->request->getPost('id_usuario')]);
                 }
@@ -2286,7 +2288,7 @@ class Cam extends BaseController
         $nColumnas = 1;
         $activeWorksheet->setCellValue('A'.$nColumnas, $usuario);
         $activeWorksheet->mergeCells('A1:M1');
-        $activeWorksheet->getStyle('A1:M1')->applyFromArray($styleHeader);        
+        $activeWorksheet->getStyle('A1:M1')->applyFromArray($styleHeader);
 
         $nColumnas++;
         $activeWorksheet->fromArray($campos_listar,NULL,'A'.$nColumnas);
@@ -3238,8 +3240,6 @@ class Cam extends BaseController
             $contenido['subtitulo'] = 'Correspondencia Externa';
             $contenido['controlador'] = $this->controlador;
             $contenido['url_atras'] = base_url($this->controlador.'mis_tramites');
-            $contenido['sincobol'] = $this->urlSincobol;
-            $contenido['ruta_archivos'] = $this->rutaArchivos;
             $contenido['tipos_documentos_externos'] = $this->obtenerTiposDocumentosExternos();
             $contenido['accion'] = 'correspondencia_externa/recibir';
             $data['content'] = view($this->carpeta.'correspondencia_externa', $contenido);
@@ -3436,7 +3436,7 @@ class Cam extends BaseController
         ->orderBy('id', 'DESC');
         if($poligono = $builder->get()->getRowArray())
             return $poligono['the_geom'];
-        return '';
+        return NULL;
     }
 
     public function obtenerUsuarioDestinatario($id){
@@ -4058,9 +4058,6 @@ class Cam extends BaseController
             $actoAdministrativoModel = new ActoAdministrativoModel();
             $codigoSeguimientoModel = new CodigoSeguimientoModel();
             $validation = $this->validate([
-                'fk_tramite' => [
-                    'rules' => 'required',
-                ],
                 'fk_acto_administrativo' => [
                     'rules' => 'required',
                 ],
@@ -4111,9 +4108,8 @@ class Cam extends BaseController
         $contenido['accion'] = $this->controlador.'generar_codigo_seguimiento';
         $contenido['validation'] = $this->validator;
         $contenido['controlador'] = $this->controlador;
-        $contenido['tramites'] = $this->obtenerTramites();
         $data['content'] = view($this->carpeta.'generar_codigo_seguimiento', $contenido);
-        $data['menu_actual'] = $this->menuActual.'generar_codigo_seguimiento';
+        $data['menu_actual'] = 'correspondencia_externa/generar_codigo_seguimiento';
         $data['tramites_menu'] = $this->tramitesMenu();
         $data['validacion_js'] = 'generar_codigo_seguimiento-validation.js';
         echo view('templates/template', $data);

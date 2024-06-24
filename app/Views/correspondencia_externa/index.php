@@ -43,11 +43,12 @@
                                     <?php foreach ($datos as $fila){?>
                                     <tr>
                                         <td class="text-center">
-                                            <?php 
+                                            <?php
                                             if($fila['editar'] == 't' && $fila['estado'] == 'INGRESADO'){
-                                                echo anchor($controlador.'editar/'.$fila['id'], '<i class="fa fa-edit"></i> Editar',array('class' =>'btn btn-sm btn-info'));
-                                            }                                            
+                                                echo anchor($controlador.'editar/'.$fila['id'], '<i class="fa fa-edit"></i> Editar',array('class' =>'btn btn-sm btn-info mb-2')).'<br>';
+                                            }
                                             ?>
+                                            <a href="<?= $sincobol."correspondencia/hoja_ruta/hr_pdf/".$fila['fk_hoja_ruta'];?>" target="_blank" class="btn btn-sm btn-warning"><i class="fa fa-print"></i> IMPRIMIR H.R.</a>
                                         </td>
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>
                                         <td>

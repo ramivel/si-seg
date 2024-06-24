@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="AJAM">
-    <title><?= TITLE_PAGE;?></title>
+    <title>Seguimiento Minería Ilegal</title>
     <link rel="icon" href="<?= base_url('assets/images/ajam.ico');?>" type="image/x-icon">
 
     <link href="<?= base_url('assets/seguimiento/css/bootstrap.min.css');?>" rel="stylesheet">
@@ -22,36 +22,13 @@
 <body class="bg-body-tertiary">
     <div class="container">
         <main>
-            <div class="py-4 text-center">
+            <div class="text-center mt-2">
                 <img src="<?= base_url('assets/seguimiento/img/banner.png');?>" class="img-fluid" alt="SEGUIMIENTO DE TRAMITES">
             </div>
 
             <div class="row">
 
-                <div class="col-md-12">
-                    <div class="row mb-2">
-                        <div class="col-ms-12 col-md-3">
-                            <a href="https://www.autoridadminera.gob.bo" title="Página WEB">
-                                <img src="<?= base_url('assets/images/home.jpg');?>" class="img-fluid" alt="PAGINA WEB">
-                            </a>                            
-                        </div>
-                        <div class="col-ms-12 col-md-3">
-                            <a href="https://www.facebook.com/AJAMBOLIVIA" title="FACEBOOK" target="_blank">
-                                <img src="<?= base_url('assets/images/facebook.jpg');?>" class="img-fluid" alt="PAGINA WEB">
-                            </a>
-                        </div>
-                        <div class="col-ms-12 col-md-3">
-                            <a href="https://www.youtube.com/channel/UCDxI3S6YO0D5defyc8Cn6FQ" title="YOUTUBE" target="_blank">
-                                <img src="<?= base_url('assets/images/youtube.jpg');?>" class="img-fluid" alt="PAGINA WEB">
-                            </a>
-                        </div>
-                        <div class="col-ms-12 col-md-3">
-                            <a href="https://twitter.com/AJAMBolivia" title="TWITTER" target="_blank">
-                                <img src="<?= base_url('assets/images/twitter.jpg');?>" class="img-fluid" alt="PAGINA WEB">
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                <?= $enlaces;?>                
 
                 <?php if(isset($response)){?>
                     <div class="col-md-12">
@@ -63,28 +40,16 @@
                                     <table class="table table-sm table-bordered table-hover">
                                         <thead>
                                             <tr>
-                                                <th class="table-info text-center">Fecha Actualización</th>
-                                                <th class="table-info text-center">Estado Actual</th>
-                                                <?php if(isset($observaciones) && $observaciones){?>
-                                                    <th class="table-info text-center">Observaciones</th>
-                                                <?php }?>
-                                                <?php if(isset($documentos) && $documentos){?>
-                                                    <th class="table-info text-center">Documento Generado</th>
-                                                <?php }?>
+                                                <th class="table-info text-center">Estado</th>
+                                                <th class="table-info text-center">Fecha Actualización</th>                                                                                                
                                                 <th class="table-info text-center">Funcionario Actual</th>
                                                 <th class="table-info text-center">Horarios de Atención</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td class="text-center"><?= $fecha?></td>
-                                                <td class="text-center"><?= $estado_actual?></td>
-                                                <?php if($observaciones){?>
-                                                    <td class="text-center"><?= $observaciones;?></td>
-                                                <?php }?>
-                                                <?php if($documentos){?>
-                                                    <td class="text-center"><?= $documentos;?></td>
-                                                <?php }?>
+                                                <td class="text-center"><?= $estado?></td>
+                                                <td class="text-center"><?= $fecha?></td>                                                                                                
                                                 <td class="text-center"><?= $usuario_actual;?></td>
                                                 <td class="text-center"><?= $atencion;?></td>
                                             </tr>
@@ -99,29 +64,19 @@
                     </div>
                 <?php }?>
 
-                <div class="col-md-9">
+                <div class="col-md-12">
                     <div class="card text-bg-light mb-3">
                         <div class="card-header text-center">
-                            <strong>CONSULTA EL ESTADO DE TU TRÁMITE</strong><br>
+                            <h3>Minería Ilegal</h3>
                             <small>Verifica el estado de tu Trámite en la AJAM</small>
                         </div>
                         <div class="card-body">
-                            <?= form_open('seguimiento', ['class'=>'needs-validation', 'novalidate'=>'']);?>
-                                <div class="row g-3">
+                            <?= form_open($accion, ['class'=>'needs-validation', 'novalidate'=>'']);?>
+                                <div class="row g-3">                                    
                                     <div class="col-sm-12">
                                         <div class="form-floating">
                                             <?php
-                                                $campo = 'tramite';
-                                                echo form_dropdown($campo, $tramites, '', array('id'=>$campo, 'class'=>'form-select', 'aria-label'=>"Tipo Trámite", 'required'=>'true'));
-                                            ?>
-                                            <label for="<?= $campo?>">Tipo Trámite:</label>
-                                            <div class="invalid-feedback">Debe seleccionar una opción.</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-12">
-                                        <div class="form-floating">
-                                            <?php
-                                                $campo = 'hr_madre';
+                                                $campo = 'correlativo';
                                                 echo form_input(array(
                                                     'name' => $campo,
                                                     'id' => $campo,
@@ -131,28 +86,10 @@
                                                     'autocomplete' => "off"
                                                 ));
                                             ?>
-                                            <label for="<?= $campo?>">N° de Trámite:</label>
+                                            <label for="<?= $campo?>">N° de Formulario de Denuncia:</label>
                                             <div class="invalid-feedback">Debe ingresar correctamente el N° de Trámite (Solo se permite letras, números y "/")</div>
                                         </div>
-                                    </div>
-                                    <div class="col-sm-12">
-                                        <div class="form-floating">
-                                            <?php
-                                                $campo = 'codigo_unico';
-                                                echo form_input(array(
-                                                    'name' => $campo,
-                                                    'id' => $campo,
-                                                    'class' => 'form-control',
-                                                    'placeholder' => 'Código Único',
-                                                    'required' => 'true',
-                                                    'pattern' => "[0-9]+",
-                                                    'autocomplete' => "off"
-                                                ));
-                                            ?>
-                                            <label for="<?= $campo?>">Código Único:</label>
-                                            <div class="invalid-feedback">Debe ingresar correctamente el Código Único (Solo se permite números).</div>
-                                        </div>
-                                    </div>
+                                    </div>                                    
                                     <div class="col-sm-12">
                                         <div class="form-floating">
                                             <?php
@@ -201,18 +138,13 @@
                             <?= form_close();?>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3 text-left">
-                    <button class="btn btn-info shadow col-md-12 mb-2"><i class="fa-solid fa-house"></i> PÁGINA WEB</button>
-                    <button class="btn btn-primary shadow col-md-12 mb-2"><i class="fa-brands fa-facebook"></i> FACEBOOK</button>
-                    <button class="btn btn-danger shadow col-md-12 mb-2"><i class="fa-brands fa-youtube"></i> YOUTUBE</button>
-                </div>
+                </div>                
 
             </div>
         </main>
 
         <footer class="my-5 pt-5 text-body-secondary text-center text-small">
-            <p class="mb-1">Copyright &copy; 2023 | AJAM, Reservados todos los derechos.</p>
+            <p class="mb-1">Copyright &copy; 2024 | AJAM, Reservados todos los derechos.</p>
         </footer>
     </div>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>

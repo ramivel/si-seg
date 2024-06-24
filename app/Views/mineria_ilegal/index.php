@@ -83,8 +83,14 @@
                                                             break;
                                                     }
                                                     ?>
-                                                    <?php echo anchor($controlador.'hoja_ruta_pdf/'.$fila['id_hoja_ruta'], 'Imprimir H.R.',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
-                                                    <?php echo anchor($controlador.'formulario_denuncia_pdf/'.$fila['id_denuncia'], 'Imprimir Formulario Denuncia',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
+                                                    <?php 
+                                                    if($fila['id_denuncia_web']){
+                                                        echo anchor('pdf_formulario_denuncia/'.$fila['id_denuncia_web'], 'Imprimir Formulario de Denuncia Web',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));
+                                                    }                                                    
+                                                    ?>
+                                                    <?php echo anchor($controlador.'formulario_denuncia_pdf/'.$fila['id_denuncia'], 'Imprimir Formulario de Minería Ilegal',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
+                                                    <?php echo anchor($controlador.'hoja_ruta_pdf/'.$fila['id_hoja_ruta'], 'Imprimir Hoja de Ruta',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
+                                                    
                                                 </div>
                                             </div>
                                             <?php if($fila['n_correspondencia_externa'] > 0){?>

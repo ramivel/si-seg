@@ -302,6 +302,7 @@ class Documentos extends BaseController
 
         if($tramite = $this->tramitesMenu($idTramite)){
             $db = \Config\Database::connect();
+            $datosUsuario = $this->obtenerDatosUsuario(session()->get('registroUser'));
             switch($tramite['controlador']){
                 case 'cam/':
                     $where = array(
@@ -311,63 +312,6 @@ class Documentos extends BaseController
                     $builder = $db->table('public.acto_administrativo as ac')
                     ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
                     ->where($where);
-                    if($fila = $builder->get()->getRowArray()){
-                        $datosUsuario = $this->obtenerDatosUsuario(session()->get('registroUser'));
-                        if ($this->request->getPost()) {
-                            $reglas_validacion = array(
-                                'fk_tipo_documento' => array(
-                                    'rules' => 'required',
-                                    'errors' => array(
-                                        'required' => 'Debe seleccionar el Tipo de Documento.'
-                                    ),
-                                ),
-                            );
-                            $validation = $this->validate($reglas_validacion);
-                            if(!$validation){
-                                $contenido['validation'] = $this->validator;
-                            }else{
-                                $fk_tipo_documento = $this->request->getPost('fk_tipo_documento');
-                                $documentosModel = new DocumentosModel();
-                                $correlativo = $this->generarCorrelativo($fk_tipo_documento, $datosUsuario, $idTramite);
-                                $data = array(
-                                    'fk_tramite' => $idTramite,
-                                    'fk_acto_administrativo' => $id,
-                                    'correlativo' => $correlativo,
-                                    'ciudad' => ucwords(strtolower($datosUsuario['departamento'])),
-                                    'fecha' => date('Y-m-d'),
-                                    'fk_tipo_documento' => $fk_tipo_documento,
-                                    'referencia' => mb_strtoupper($this->request->getPost('referencia')),
-                                    'fk_usuario_creador' => session()->get('registroUser'),
-                                );
-                                if($documentosModel->insert($data) === false){
-                                    session()->setFlashdata('fail', $documentosModel->errors());
-                                }else{
-                                    $id = $documentosModel->getInsertID();
-                                    session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información. <code><a href="'.base_url($this->controlador.'descargar/'.$id).'" target="_blank">Descargar Documento '.$correlativo.'</a></code>');
-                                }
-                                return redirect()->to($tramite['controlador'].'mis_tramites');
-                            }
-                        }
-                    }
-                    $this->menuActual = $tramite['controlador'].'documento/listado';
-                    $cabera['titulo'] = $this->titulo;
-                    $cabera['navegador'] = true;
-                    $cabera['subtitulo'] = 'Nuevo Documento';
-                    $contenido['title'] = view('templates/title',$cabera);
-                    $contenido['datosUsuario'] = $datosUsuario;
-                    $contenido['fila'] = $fila;
-                    $contenido['tiposDocumentos'] = $this->obtenerTipoDocumentos($idTramite, $datosUsuario['fk_perfil']);
-                    $contenido['tipo_tramite'] = $tramite['controlador'];
-                    $contenido['subtitulo'] = 'Nuevo Documento';
-                    $contenido['accion'] = $this->controlador.'agregar/'.$idTramite.'/'.$id;
-                    $contenido['retorno'] = $tramite['controlador'].'mis_tramites';
-                    $data['content'] = view($this->carpeta.'agregar', $contenido);
-                    $data['editor_ck'] = false;
-                    $data['validacion_js'] = 'documentos-validation.js';
-                    $data['menu_actual'] = $this->menuActual;
-                    $data['tramites_menu'] = $this->tramitesMenu();
-                    $data['alertas'] = $this->alertasTramites();
-                    echo view('templates/template', $data);
                     break;
                 case 'mineria_ilegal/':
                     $where = array(
@@ -378,65 +322,71 @@ class Documentos extends BaseController
                     ->select("*, hr.id as id_hoja_ruta, hr.correlativo as correlativo, d.correlativo as correlativo_formulario, to_char(d.created_at, 'DD/MM/YYYY HH24:MI') as fecha_denuncia")
                     ->join('mineria_ilegal.denuncias as d', 'hr.fk_denuncia = d.id', 'left')
                     ->where($where);
-                    if($fila = $builder->get()->getRowArray()){
-                        $datosUsuario = $this->obtenerDatosUsuario(session()->get('registroUser'));
-                        if ($this->request->getPost()) {
-                            $reglas_validacion = array(
-                                'fk_tipo_documento' => array(
-                                    'rules' => 'required',
-                                    'errors' => array(
-                                        'required' => 'Debe seleccionar el Tipo de Documento.'
-                                    ),
-                                ),
-                            );
-                            $validation = $this->validate($reglas_validacion);
-                            if(!$validation){
-                                $contenido['validation'] = $this->validator;
-                            }else{
-                                $fk_tipo_documento = $this->request->getPost('fk_tipo_documento');
-                                $documentosModel = new DocumentosModel();
-                                $correlativo = $this->generarCorrelativo($fk_tipo_documento, $datosUsuario, $idTramite);
-                                $data = array(
-                                    'fk_tramite' => $idTramite,
-                                    'fk_hoja_ruta' => $id,
-                                    'correlativo' => $correlativo,
-                                    'ciudad' => ucwords(strtolower($datosUsuario['departamento'])),
-                                    'fecha' => date('Y-m-d'),
-                                    'fk_tipo_documento' => $fk_tipo_documento,
-                                    'referencia' => mb_strtoupper($this->request->getPost('referencia')),
-                                    'fk_usuario_creador' => session()->get('registroUser'),
-                                );
-                                if($documentosModel->insert($data) === false){
-                                    session()->setFlashdata('fail', $documentosModel->errors());
-                                }else{
-                                    $id = $documentosModel->getInsertID();
-                                    session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información. <code><a href="'.base_url($this->controlador.'descargar/'.$id).'" target="_blank">Descargar Documento '.$correlativo.'</a></code>');
-                                }
-                                return redirect()->to($tramite['controlador'].'mis_tramites');
-                            }
-                        }
-                    }
-                    $this->menuActual = $tramite['controlador'].'documento/listado';
-                    $cabera['titulo'] = $this->titulo;
-                    $cabera['navegador'] = true;
-                    $cabera['subtitulo'] = 'Nuevo Documento';
-                    $contenido['title'] = view('templates/title',$cabera);
-                    $contenido['datosUsuario'] = $datosUsuario;
-                    $contenido['fila'] = $fila;
-                    $contenido['tiposDocumentos'] = $this->obtenerTipoDocumentos($idTramite, $datosUsuario['fk_perfil']);
-                    $contenido['tipo_tramite'] = $tramite['controlador'];
-                    $contenido['subtitulo'] = 'Nuevo Documento';
-                    $contenido['accion'] = $this->controlador.'agregar/'.$idTramite.'/'.$id;
-                    $contenido['retorno'] = $tramite['controlador'].'mis_tramites';
-                    $data['content'] = view($this->carpeta.'agregar', $contenido);
-                    $data['editor_ck'] = false;
-                    $data['validacion_js'] = 'documentos-validation.js';
-                    $data['menu_actual'] = $this->menuActual;
-                    $data['tramites_menu'] = $this->tramitesMenu();
-                    $data['alertas'] = $this->alertasTramites();
-                    echo view('templates/template', $data);
                     break;
             }
+            if($fila = $builder->get()->getRowArray()){
+
+                if ($this->request->getPost()) {
+                    $reglas_validacion = array(
+                        'fk_tipo_documento' => array(
+                            'rules' => 'required',
+                            'errors' => array(
+                                'required' => 'Debe seleccionar el Tipo de Documento.'
+                            ),
+                        ),
+                    );
+                    $validation = $this->validate($reglas_validacion);
+                    if(!$validation){
+                        $contenido['validation'] = $this->validator;
+                    }else{
+                        $documentosModel = new DocumentosModel();
+                        $fk_tipo_documento = $this->request->getPost('fk_tipo_documento');
+                        $correlativo = $this->generarCorrelativo($fk_tipo_documento, $datosUsuario, $idTramite);
+                        $data = array(
+                            'fk_tramite' => $idTramite,
+                            'correlativo' => $correlativo,
+                            'ciudad' => ucwords(strtolower($datosUsuario['departamento'])),
+                            'fecha' => date('Y-m-d'),
+                            'fk_tipo_documento' => $fk_tipo_documento,
+                            'referencia' => $this->request->getPost('referencia'),
+                            'fk_usuario_creador' => session()->get('registroUser'),
+                        );
+                        if($tramite['controlador'] == 'cam/')
+                            $data['fk_acto_administrativo'] = $id;
+                        elseif($tramite['controlador'] == 'mineria_ilegal/')
+                            $data['fk_hoja_ruta'] = $id;
+
+                        if($documentosModel->insert($data) === false){
+                            session()->setFlashdata('fail', $documentosModel->errors());
+                        }else{
+                            $idDocumento = $documentosModel->getInsertID();
+                            session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información. <code><a href="'.base_url($this->controlador.'descargar/'.$idDocumento).'" target="_blank">Descargar Documento '.$correlativo.'</a></code>');
+                        }
+                        return redirect()->to($this->controlador.'agregar/'.$tramite['id'].'/'.$id);
+                    }
+                }
+
+                $this->menuActual = $tramite['controlador'].'documento/listado';
+                $cabera['titulo'] = $this->titulo;
+                $cabera['navegador'] = true;
+                $cabera['subtitulo'] = 'Nuevo Documento';
+                $contenido['title'] = view('templates/title',$cabera);
+                $contenido['datosUsuario'] = $datosUsuario;
+                $contenido['fila'] = $fila;
+                $contenido['tiposDocumentos'] = $this->obtenerTipoDocumentos($idTramite, $datosUsuario['fk_perfil']);
+                $contenido['tipo_tramite'] = $tramite['controlador'];
+                $contenido['subtitulo'] = 'Nuevo Documento';
+                $contenido['accion'] = $this->controlador.'agregar/'.$idTramite.'/'.$id;
+                $contenido['retorno'] = $tramite['controlador'].'mis_tramites';
+                $data['content'] = view($this->carpeta.'agregar', $contenido);
+                $data['editor_ck'] = false;
+                $data['validacion_js'] = 'documentos-validation.js';
+                $data['menu_actual'] = $this->menuActual;
+                $data['tramites_menu'] = $this->tramitesMenu();
+                $data['alertas'] = $this->alertasTramites();
+                echo view('templates/template', $data);
+            }
+
         }
     }
 
@@ -939,22 +889,22 @@ class Documentos extends BaseController
                     ->select($campos)
                     ->join('public.datos_area_minera as dam', 'cam.id = dam.fk_acto_administrativo', 'left')
                     ->where($where);
-                    if($fila = $builder->get()->getRowArray()){
+                    if($fila = $builder->get()->getRowArray()){                        
                         $file_name = str_replace('/','-',$documento['doc_correlativo']).'.docx';
                         $template = base_url('archivos/tipo_documento/'.$documento['plantilla']);
                         $plantillaWord = new TemplateProcessor($template);
                         $plantillaWord->setImageValue('qr', array('path' => $this->generarQRCam($documento,$fila), 'width' => '2cm', 'height' => '2cm', 'ratio' => true));
                         $plantillaWord->setValue('correlativo', $documento['doc_correlativo']);
                         $plantillaWord->setValue('fecha', $documento['doc_ciudad'].', '. $this->formatoFecha($documento['doc_fecha']));
-                        $plantillaWord->setValue('referencia', $documento['doc_referencia']);
+                        $plantillaWord->setValue('referencia', htmlspecialchars($documento['doc_referencia']));
                         $plantillaWord->setValue('fecha_mecanizada', $this->formatoFecha($fila['fecha_mecanizada']));
                         $plantillaWord->setValue('codigo_unico', $fila['codigo_unico']);
-                        $plantillaWord->setValue('denominacion', $fila['denominacion']);
+                        $plantillaWord->setValue('denominacion', htmlspecialchars($fila['denominacion']));
                         $plantillaWord->setValue('extension', $fila['extension']);
-                        $plantillaWord->setValue('departamentos', $fila['departamentos']);
-                        $plantillaWord->setValue('provincias', $fila['provincias']);
-                        $plantillaWord->setValue('municipios', $fila['municipios']);
-                        $plantillaWord->setValue('titular', $fila['titular']);
+                        $plantillaWord->setValue('departamentos', htmlspecialchars($fila['departamentos']));
+                        $plantillaWord->setValue('provincias', htmlspecialchars($fila['provincias']));
+                        $plantillaWord->setValue('municipios', htmlspecialchars($fila['municipios']));
+                        $plantillaWord->setValue('titular', htmlspecialchars($fila['titular']));
                         $plantillaWord->setValue('hr_madre', $fila['hr_madre']);
                         $plantillaWord->setValue('iniciales', $this->getIniciales($documento['usuario']));
                         switch($fila['fk_tipo_hoja_ruta']){
@@ -991,7 +941,7 @@ class Documentos extends BaseController
                         $plantillaWord->setImageValue('qr', array('path' => $this->generarQRMineriaIlegal($documento, $fila), 'width' => '2cm', 'height' => '2cm', 'ratio' => true));
                         $plantillaWord->setValue('correlativo', $documento['doc_correlativo']);
                         $plantillaWord->setValue('fecha', $documento['doc_ciudad'].', '. $this->formatoFecha($documento['doc_fecha']));
-                        $plantillaWord->setValue('referencia', $documento['doc_referencia']);
+                        $plantillaWord->setValue('referencia', htmlspecialchars($documento['doc_referencia']));
                         $plantillaWord->setValue('iniciales', $this->getIniciales($documento['usuario']));
                         $temp_file = tempnam(sys_get_temp_dir(), 'PHPWord');
                         $plantillaWord->saveAs($temp_file);
