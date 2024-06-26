@@ -304,7 +304,7 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">Doc. Digital (.pdf) (Max. 20MB)* <span class="mytooltip tooltip-effect-5">
+                            <label class="col-sm-2 col-form-label">Doc. Digital (.pdf) (Max. 35MB)* <span class="mytooltip tooltip-effect-5">
                                     <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
                                     <span class="tooltip-content clearfix">
                                         <span class="tooltip-text">Debe subir al menos la nota externa.</span>

@@ -105,14 +105,24 @@ class CorrespondenciaExterna extends BaseController
                 'doc_digital' => [
                     'uploaded[doc_digital]',
                     'mime_in[doc_digital,application/pdf]',
-                    'max_size[doc_digital,20000]',
+                    'max_size[doc_digital,35000]',
                 ],
             ]);
             if(!$validation){
                 $personaExternaModel = new PersonaExternaModel();
-                $campos = array('id', "CONCAT(correlativo,' (',codigo_unico,' - ',denominacion,')') as hr");
-                $contenido['hr_madre'] = $actoAdministrativoModel->select($campos)->find($this->request->getPost('fk_acto_administrativo'));
-                $campos = array('id', "CONCAT(documento_identidad, ' - ', nombre_completo, ' (', institucion, ' - ',cargo,')') as nombre");
+                $db = \Config\Database::connect();
+                $campos = array('ac.id', "CONCAT(ac.correlativo,' (',dam.codigo_unico,' - ',dam.denominacion,')') as hr");
+                $where = array(
+                    'ac.deleted_at' => NULL,
+                    'ac.id' => $this->request->getPost('fk_acto_administrativo'),
+                );
+                $builder = $db->table('public.acto_administrativo as ac')
+                ->select($campos)
+                ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+                ->where($where);
+                $hr_madre = $builder->get()->getRowArray();
+                $contenido['hr_madre'] = $hr_madre;
+                $campos = array('id', "CONCAT(documento_identidad, ' ', expedido, ' - ', nombres, ' ', apellidos, ' (', institucion, ' - ',cargo,')') as nombre");
                 $contenido['persona_externa'] = $personaExternaModel->select($campos)->find($this->request->getPost('fk_persona_externa'));
                 $contenido['validation'] = $this->validator;
             }else{
@@ -239,7 +249,7 @@ class CorrespondenciaExterna extends BaseController
                 ],
                 'doc_digital' => [
                     'mime_in[doc_digital,application/pdf]',
-                    'max_size[doc_digital,20000]',
+                    'max_size[doc_digital,35000]',
                 ],
             ]);
             if(!$validation){
@@ -373,7 +383,7 @@ class CorrespondenciaExterna extends BaseController
                 'doc_digital' => [
                     'uploaded[doc_digital]',
                     'mime_in[doc_digital,application/pdf]',
-                    'max_size[doc_digital,20000]', //kilobytes
+                    'max_size[doc_digital,35000]', //kilobytes
                 ],
             ]);
             if(!$validation){
@@ -516,7 +526,7 @@ class CorrespondenciaExterna extends BaseController
                 ],
                 'doc_digital' => [
                     'mime_in[doc_digital,application/pdf]',
-                    'max_size[doc_digital,20000]',
+                    'max_size[doc_digital,35000]',
                 ],
             ]);
             if(!$validation){
@@ -582,11 +592,6 @@ class CorrespondenciaExterna extends BaseController
                 return redirect()->to($this->controlador.'mis_ingresos_minilegal');
             }
         }
-    }
-
-    private function obtenerTramites(){
-        $tramitesModel = new TramitesModel();
-        return $tramitesModel->where('activo = true')->orderBy('nombre', 'ASC')->findAll();
     }
 
     public function recibirAjax(){

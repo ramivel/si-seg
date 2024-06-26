@@ -177,6 +177,9 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
 
         $routes->add('reporte_responsable', 'Cam::reporteResponsable');
         $routes->add('reporte_mis_tramites', 'Cam::reporteMisTramites');
+        $routes->add('reporte_fecha_mecanizada', 'Cam::reporteFechaMecanizada');
+        
+        $routes->add('hoja_ruta_pdf/(:num)', 'Cam::hojaRutaPdf/$1');
 
         //$routes->add('actualizar_poligono_area_minera', 'Cam::actualizarPoligonoAreaMinera');
 

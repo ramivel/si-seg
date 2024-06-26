@@ -4,7 +4,7 @@
         <div class="row mb-3">
             <div class="col-sm-12 text-left">
                 <a href="<?= $url_atras;?>" class="btn btn-success"><i class="feather icon-arrow-left"></i> ATRAS</a>
-                <a href="<?= $sincobol."correspondencia/hoja_ruta/hr_pdf/".$fila['fk_hoja_ruta'];?>" target="_blank" class="btn btn-warning"><i class="fa fa-print"></i> IMPRIMIR H.R.</a>
+                <a href="<?= base_url($controlador.'hoja_ruta_pdf/'.$fila['id']);?>" target="_blank" class="btn btn-warning"><i class="fa fa-print"></i> IMPRIMIR H.R.</a>                
             </div>
         </div>
         <div class="row">

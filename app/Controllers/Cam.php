@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Libraries\CodigoSeguimientoPdf;
+use App\Libraries\HojaRutaPdf;
 use App\Models\EstadoTramiteModel;
 use App\Models\TipoSolicitudModel;
 use App\Models\ActoAdministrativoModel;
@@ -39,10 +40,24 @@ class Cam extends BaseController
     protected $rutaArchivos = 'archivos/cam/';
     protected $urlSincobol = 'https://sincobol.autoridadminera.gob.bo/sincobol/';
     protected $alpha = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
+    protected $fontPDF = 'helvetica';
     protected $tipo_hoja_ruta = array(
         1 => 'SOLICITUD CONTRATO ADMINISTRATIVO MINERO',
         2 => 'CONTRATO MINERO NACIONAL',
         3 => 'CONTRATO MINERO COMIBOL',
+    );
+    protected $acciones = array(
+        'Para su conocimiento y consideración',
+        'Analizar',
+        'Procesar conforme a normativa',
+        'Preparar respuesta',
+        'Atender lo solicitado',
+        'Preparar informe',
+        'Elaborar resolución',
+        'Elaborar contrato',
+        'Proceder conforme a reglamento',
+        'Proyectar providencia',
+        'Archivar',
     );
 
     public function misTramites()
@@ -1828,11 +1843,48 @@ class Cam extends BaseController
         echo view('templates/template', $data);
     }
 
-    public function exportarXLS($campos_listar, $campos_reales, $datos, $file_name)
+    public function exportarXLS($campos_listar, $campos_reales, $datos, $file_name, $titulo = '', $subtitulo='')
     {
+        $alpha = array('A','B','C','D','E','F','G','H','I','J','K', 'L','M','N','O','P','Q','R','S','T','U','V','W','X ','Y','Z');
         $spreadsheet = new Spreadsheet();
         $activeWorksheet = $spreadsheet->getActiveSheet();
         $activeWorksheet->setTitle("Mis Tramites");
+        $styleTitulo = array(
+            'borders' => array(
+                'allBorders' => array(
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => array('rgb' => '000000'),
+                ),
+            ),
+            'font'  => array(
+                'bold'  => true,
+                'color' => array('rgb' => '000000'),
+                'size'  => 12,
+                'name'  => 'Verdana'
+            ),
+            'alignment' => [
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+            ],
+        );
+        $styleSubTitulo = array(
+            'borders' => array(
+                'allBorders' => array(
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => array('rgb' => '000000'),
+                ),
+            ),
+            'font'  => array(
+                'bold'  => true,
+                'color' => array('rgb' => '000000'),
+                'size'  => 11,
+                'name'  => 'Verdana'
+            ),
+            'alignment' => [
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+            ],
+        );
         $styleHeader = array(
             'borders' => array(
                 'allBorders' => array(
@@ -1866,10 +1918,24 @@ class Cam extends BaseController
             )
         );
 
-        $activeWorksheet->fromArray($campos_listar);
-        $activeWorksheet->getStyle('A1:'.$activeWorksheet->getHighestColumn().'1')->applyFromArray($styleHeader);
+        $nColumnas = 1;
+        if($titulo){
+            $activeWorksheet->setCellValue('A'.$nColumnas, $titulo);
+            $activeWorksheet->mergeCells('A'.$nColumnas.':'.$alpha[count($campos_listar)-1].$nColumnas);
+            $activeWorksheet->getStyle('A'.$nColumnas.':'.$alpha[count($campos_listar)-1].$nColumnas)->applyFromArray($styleTitulo);
+            $nColumnas++;
+        }
+        if($subtitulo){
+            $activeWorksheet->setCellValue('A'.$nColumnas, $subtitulo);
+            $activeWorksheet->mergeCells('A'.$nColumnas.':'.$alpha[count($campos_listar)-1].$nColumnas);
+            $activeWorksheet->getStyle('A'.$nColumnas.':'.$alpha[count($campos_listar)-1].$nColumnas)->applyFromArray($styleSubTitulo);
+            $nColumnas++;
+        }
+
+        $activeWorksheet->fromArray($campos_listar, NULL, 'A'.$nColumnas);
+        $activeWorksheet->getStyle('A'.$nColumnas.':'.$activeWorksheet->getHighestColumn().$nColumnas)->applyFromArray($styleHeader);
+        $nColumnas++;
         if($datos){
-            $nColumnas = 2;
             foreach($datos as $fila){
                 $data = array();
                 foreach($campos_reales as $row)
@@ -2451,7 +2517,6 @@ class Cam extends BaseController
             $contenido['url_atras'] = $url_atras;
             $contenido['url_externa'] = $url_externa;
             $contenido['url_sincobol'] = $url_sincobol;
-            $contenido['sincobol'] = $this->urlSincobol;
             $contenido['ruta_archivos'] = $this->rutaArchivos;
             $data['content'] = view($this->carpeta.'ver', $contenido);
             $data['menu_actual'] = $menuActual;
@@ -4712,6 +4777,97 @@ class Cam extends BaseController
         $data['alertas'] = $this->alertasTramites();
         echo view('templates/template', $data);
     }
+    public function reporteFechaMecanizada()
+    {
+        $oficinaModel = new OficinasModel();
+        $tmpOficinas = $oficinaModel->where(array('desconcentrado' => 'true'))->findAll();
+        $oficinas = array('' => 'SELECCIONE UNA DIRECCIÓN');
+        foreach($tmpOficinas as $row)
+            $oficinas[$row['id']] = $row['nombre'];
+        $datos = array();
+        $campos_listar=array(
+            'Fecha Mecanizada','H.R. Madre','Estado Tramite','Fecha Derivación','Responsable Trámite','Remitente','Destinatario','Instrucción','Codigo Unico','Denominacion','Representante Legal','Solicitante','Departamentos',
+        );
+        $campos_reales=array(
+            'fecha_mecanizada','correlativo','estado_tramite','ultimo_fecha_derivacion','responsable','remitente','destinatario','ultimo_instruccion','codigo_unico','denominacion','representante_legal','titular','departamentos',
+        );
+
+        if ($this->request->getPost()) {
+            $oficina = $this->request->getPost('oficina');
+            $camposValidacion = array(
+                'oficina' => [
+                    'rules' => 'required',
+                ],
+                'fecha_inicio' => [
+                    'rules' => 'required|valid_date[Y-m-d]',
+                ],
+                'fecha_fin' => [
+                    'rules' => 'required|valid_date[Y-m-d]',
+                ],
+            );
+            if(!$this->validate($camposValidacion)){
+                $contenido['validation'] = $this->validator;
+            }else{
+                $db = \Config\Database::connect();
+                $campos = array('ac.id',
+                "to_char(ac.fecha_mecanizada, 'DD/MM/YYYY') as fecha_mecanizada", 'ac.correlativo', "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion",
+                "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as responsable", "CONCAT(ur.nombre_completo,'<br><b>',pr.nombre,'<b>') as remitente", "CONCAT(ud.nombre_completo,'<br><b>',pd.nombre,'<b>') as destinatario",
+                'ac.ultimo_instruccion', "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
+                'dam.codigo_unico', 'dam.denominacion', 'dam.representante_legal', 'dam.titular', 'dam.departamentos',
+                "CONCAT(etp.orden,'. ',etp.nombre) as estado_tramite_excel",
+                "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE '' END as sub_estado_tramite_excel",
+                "CONCAT(ua.nombre_completo,' - ',pa.nombre) as responsable_excel", "CONCAT(ur.nombre_completo,' - ',pr.nombre) as remitente_excel", "CONCAT(ud.nombre_completo,' - ',pd.nombre) as destinatario_excel",
+                );
+                $where = array(
+                    'ac.deleted_at' => NULL,
+                    'ac.fk_oficina' => $oficina,
+                    'ac.fecha_mecanizada >=' => $this->request->getPost('fecha_inicio'),
+                    'ac.fecha_mecanizada <=' => $this->request->getPost('fecha_fin'),
+                );
+                $builder = $db->table('public.acto_administrativo as ac')
+                ->select($campos)
+                ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+                ->join('usuarios as ur', 'ac.ultimo_fk_usuario_remitente = ur.id', 'left')
+                ->join('perfiles as pr', 'ur.fk_perfil = pr.id', 'left')
+                ->join('usuarios as ud', 'ac.ultimo_fk_usuario_destinatario = ud.id', 'left')
+                ->join('perfiles as pd', 'ud.fk_perfil = pd.id', 'left')
+                ->join('estado_tramite as etp', 'ac.ultimo_fk_estado_tramite_padre = etp.id', 'left')
+                ->join('estado_tramite as eth', 'ac.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
+                ->join('usuarios as ua', 'ac.ultimo_fk_usuario_responsable = ua.id', 'left')
+                ->join('perfiles as pa', 'ua.fk_perfil = pa.id', 'left')
+                ->where($where)
+                ->orderBY('ac.fecha_mecanizada', 'ASC');
+                $datos = $builder->get()->getResultArray();
+                if ($this->request->getPost('enviar')=='excel') {
+                    helper('security');
+                    $campos_listar_excel=array(
+                        'Fecha Mecanizada','H.R. Madre','Estado Tramite','Sub Estado Tramite','Fecha Derivación','Responsable Trámite','Remitente','Destinatario','Instrucción','Codigo Unico','Denominacion','Representante Legal','Solicitante','Departamentos',
+                    );
+                    $campos_reales_excel=array(
+                        'fecha_mecanizada','correlativo','estado_tramite_excel','sub_estado_tramite_excel','ultimo_fecha_derivacion','responsable_excel','remitente_excel','destinatario_excel','ultimo_instruccion','codigo_unico','denominacion','representante_legal','titular','departamentos',
+                    );
+                    $file_name = 'CAM_'.$this->request->getPost('fecha_inicio').'_'.$this->request->getPost('fecha_fin').'.xlsx';
+                    $this->exportarXLS($campos_listar_excel, $campos_reales_excel, $datos, $file_name, $oficinas[$oficina], 'DE : '.$this->request->getPost('fecha_inicio').' A :'.$this->request->getPost('fecha_fin'));
+                }
+            }
+        }
+        $cabera['titulo'] = $this->titulo;
+        $cabera['navegador'] = true;
+        $cabera['subtitulo'] = 'Reporte de Trámites por Fecha Mecanizada';
+        $contenido['title'] = view('templates/title',$cabera);
+        $contenido['oficinas'] = $oficinas;
+        $contenido['subtitulo'] = 'Reporte de Trámites por Fecha Mecanizada';
+        $contenido['datos'] = $datos;
+        $contenido['campos_listar'] = $campos_listar;
+        $contenido['campos_reales'] = $campos_reales;
+        $contenido['controlador'] = $this->controlador;
+        $contenido['accion'] = $this->controlador.'reporte_fecha_mecanizada';
+        $data['content'] = view($this->carpeta.'reporte_fecha_mecanizada', $contenido);
+        $data['menu_actual'] = $this->menuActual.'reporte_fecha_mecanizada';
+        $data['tramites_menu'] = $this->tramitesMenu();
+        $data['alertas'] = $this->alertasTramites();
+        echo view('templates/template', $data);
+    }
 
     private function obtenerUsuariosOficina($oficina){
         $db = \Config\Database::connect();
@@ -4731,6 +4887,147 @@ class Cam extends BaseController
                 $resultado[$row['id']] = $row['usuario'];
         }
         return $resultado;
+    }
+
+    public function hojaRutaPdf($id_acto_administrativo){
+        $db = \Config\Database::connect();
+        $campos = array(
+            "ac.fk_hoja_ruta","o.descripcion_oficina","ac.correlativo","dam.denominacion","dam.codigo_unico","dam.clasificacion_titular","dam.titular","dam.representante_legal",
+            "to_char(ac.fecha_mecanizada, 'DD-MM-YYYY') as fecha_mecanizada", "to_char(ac.fecha_mecanizada, 'HH24:MI') as hora_mecanizada"
+        );
+        $where = array(
+            'ac.deleted_at' => NULL,
+            'ac.id' => $id_acto_administrativo,
+        );
+        $builder = $db->table('public.acto_administrativo as ac')
+        ->select($campos)
+        ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+        ->join('public.oficinas as o', 'ac.fk_oficina = o.id', 'left')
+        ->where($where);
+        if($fila = $builder->get()->getRowArray()){
+            $dbSincobol = \Config\Database::connect('sincobol');
+            $builder = $dbSincobol->table('sincobol.hoja_ruta as hr')
+            ->select("hr.cantidad_fojas, CONCAT(p.nombres,' ',p.apellido_paterno,' ',p.apellido_materno,' (',c.nombre,')') as usuario_creador")
+            ->join('sincobol.asignacion_cargo as ac', 'hr.fk_asignacion_cargo_creador = ac.id', 'left')
+            ->join('sincobol.persona as p', 'ac.fk_persona = p.id', 'left')
+            ->join('sincobol.cargo as c', 'ac.fk_cargo = c.id', 'left')
+            ->where(array('hr.id' => $fila['fk_hoja_ruta']));
+            $otros = $builder->get()->getRowArray();
+                        
+            $file_name = str_replace('/','-',$fila['correlativo']).'.pdf';
+            $pdf = new HojaRutaPdf('P', 'mm', array(216, 279), true, 'UTF-8', false);
+
+            $pdf->SetCreator('GARNET');
+            $pdf->SetAuthor('Desarrollo de UTIC');
+            $pdf->SetTitle('Hoja de Ruta SOL CAM');
+            $pdf->SetKeywords('Hoja, Ruta, CAM');
+
+            //establecer margenes
+            $pdf->SetMargins(10, 8, 10);
+            $pdf->SetAutoPageBreak(true, 8); //Margin botton
+            $pdf->setFontSubsetting(false);
+
+            $pdf->AddPage();
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->setCellPaddings(0, 1, 0, 0);
+            $pdf->setCellMargins(0, 0, 0, 0);
+            $pdf->SetFillColor(128, 217, 255);
+
+            $pdf->setCellPadding(1);
+            $pdf->Image('assets/images/hoja_ruta/logo_ajam.png', 13, 9, 48, 0);
+            $pdf->MultiCell(55, 22, "", 1, 'C', 0, 0);
+            $pdf->SetFont($this->fontPDF, '', 8);
+            $pdf->MultiCell(140,6, $fila['descripcion_oficina'], 'TRL', 'C', true, 1);
+            $pdf->setx(65);
+            $pdf->MultiCell(140,6, 'SOLICITUD CONTRATO ADMINISTRATIVO MINERO', 'RL', 'C', true, 1);
+            $pdf->setx(65);
+            $pdf->SetFont($this->fontPDF, 'B', 14);
+            $pdf->MultiCell(140,10, $fila['correlativo'], 'LBR', 'C', true, 1, '', '', true, 0, false, true, 0, 'M');
+
+            // DIRECCION
+            $this->crearFila($pdf, 'DIRECCIÓN:', $fila['descripcion_oficina']);
+            $this->crearFila($pdf, 'TRÁMITE:', 'CONTRATO ADMINISTRATIVO MINERO');
+            $this->crearFila($pdf, 'ÁREA SOLICITADA:', $fila['denominacion']);
+            $this->crearFila($pdf, 'CÓDIGO ÚNICO:', $fila['codigo_unico']);
+            $this->crearFila($pdf, 'ACTOR PRODUCTIVO MINERO:', $fila['clasificacion_titular']);
+            $this->crearFila($pdf, 'DENOMINACIÓN O RAZON SOCIAL:', $fila['titular']);
+            $this->crearFila($pdf, 'REPRESENTANTE LEGAL:', $fila['representante_legal']);
+            $this->crearFila($pdf, 'N° DE HOJAS:', $otros['cantidad_fojas']);
+            $pdf->SetFont($this->fontPDF, 'B', 8);
+            $pdf->MultiCell(55, 5, 'FECHA MECANIZADA:', 1, 'R', true, 0);
+            $pdf->SetFont($this->fontPDF, '', 8);
+            $pdf->MultiCell(50, 5, $fila['fecha_mecanizada'], 1, 'L', false, 0);
+            $pdf->SetFont($this->fontPDF, 'B', 8);
+            $pdf->MultiCell(45, 5, 'HORA MECANIZADA:', 1, 'R', true, 0);
+            $pdf->SetFont($this->fontPDF, '', 8);
+            $pdf->MultiCell(45, 5, $fila['hora_mecanizada'], 1, 'L', false, 1);
+            $this->crearFila($pdf, 'USUARIO CREADOR:', $otros['usuario_creador']);
+
+            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
+            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
+            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
+
+            $pdf->AddPage();
+
+            $pdf->SetFont($this->fontPDF, 'B', 8);
+            $pdf->MultiCell(55, 8, 'HOJA DE RUTA:', 1, 'R', true, 0, '', '', true, 0, false, false, 5, 'M', true);
+            $pdf->MultiCell(140, 8, '', 1, 'L', false, 1, '', '', true, 0, false, false, 5, 'T', true);
+
+            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
+            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
+            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
+            $this->crearDerivacion($pdf, $this->fontPDF, $this->acciones);
+
+            $pdf->setPage(1, true);
+
+            $pdf->Output($file_name, 'I');
+            exit();
+        }else{
+            session()->setFlashdata('fail', 'No se ha encontrado la hoja de ruta');
+            return redirect()->to($this->controlador.'mis_tramites');
+        }
+    }
+
+    private function crearFila(&$pdf, $label, $texto){
+        $pdf->SetFont($this->fontPDF, 'B', 8);
+        $pdf->MultiCell(55, 5, $label, 1, 'R', true, 0);
+        $pdf->SetFont($this->fontPDF, '', 8);
+        $pdf->MultiCell(140, 5, $texto, 1, 'L', false, 1);
+    }
+
+    private function crearDerivacion(&$pdf, $tipo_letra, $acciones) {
+        $pdf->setCellPadding(1);
+        $pdf->ln(1);
+        // FILA 1
+        $pdf->SetFont($tipo_letra, 'B', 6);
+        $pdf->MultiCell(55, 0, 'ACCIÓN', 1, 'C', true, 0);
+        $pdf->MultiCell(40, 0, 'DESTINATARIO:', 1, 'R', true, 0);
+        $pdf->MultiCell(100, 0, '', 1, 'C', false, 1);
+
+        $count = 0;
+        foreach($acciones as $accion) {
+            //(w, h, txt, border = 0, align = 'J', fill = 0, ln = 1, x = '', y = '', reseth = true, stretch = 0, ishtml = false, autopadding = true, maxh = 0)
+            $pdf->MultiCell(50, 0, $accion, 1, 'L', true, 0);
+            $pdf->MultiCell(5, 0, ' ', 1, 'L', false, 0);
+            $pdf->MultiCell(69, 0, ' ', 'R', 'L', false, 0);
+            if(++$count == count($acciones) - 1) {
+                $pdf->MultiCell(31, 0, 'SELLO Y FIRMA', 1, 'C', true, 0);
+                $pdf->MultiCell(20, 0, 'FECHA', 1, 'C', true, 0);
+                $pdf->MultiCell(20, 0, 'HORA', 1, 'C', true, 1);
+            }
+            else if($count == count($acciones)) {
+                $pdf->MultiCell(31, 0, '', 'L', 'C', true, 0);
+                $pdf->MultiCell(20, 0, '', 1, 'C', false, 0);
+                $pdf->MultiCell(20, 0, '', 1, 'C', false, 1);
+            }
+            else {
+                $pdf->MultiCell(71, 0, '', 'R', 'C', false, 1);
+            }
+        }
+        $pdf->MultiCell(55, 0, 'COORDINAR CON:', 1, 'R', true, 0);
+        $pdf->MultiCell(44, 0, '', 1, 'L', false, 0);
+        $pdf->MultiCell(46, 0, 'CON COPIA A:', 1, 'R', true, 0);
+        $pdf->MultiCell(50, 0, '', 1, 'C', false, 1);
     }
 
     /*public function actualizarPoligonoAreaMinera(){
