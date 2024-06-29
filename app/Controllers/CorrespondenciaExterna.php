@@ -29,12 +29,11 @@ class CorrespondenciaExterna extends BaseController
         'BE' => 'BENI',
         'PD' => 'PANDO',
     );
-    protected $urlSincobol = 'https://sincobol.autoridadminera.gob.bo/sincobol/';
 
     public function misIngresos()
     {
         $db = \Config\Database::connect();
-        $campos = array('ce.id', 'ce.editar', 't.controlador', 'ac.fk_area_minera', 'ac.fk_hoja_ruta', 'ce.estado', 't.nombre as tipo_tramite', 'ac.correlativo', 'ce.cite', "to_char(ce.fecha_cite, 'DD/MM/YYYY') as fecha_cite",
+        $campos = array('ce.id', "ce.fk_acto_administrativo", 'ce.editar', 't.controlador', 'ac.fk_area_minera', 'ac.fk_hoja_ruta', 'ce.estado', 't.nombre as tipo_tramite', 'ac.correlativo', 'ce.cite', "to_char(ce.fecha_cite, 'DD/MM/YYYY') as fecha_cite",
         "CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')') as remitente", 'ce.referencia', 'ce.doc_digital',
         "CONCAT('CITE: ',ce.cite,'<br>Fecha: ',to_char(ce.fecha_cite, 'DD/MM/YYYY'),'<br>Remitente: ',CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')'),'<br>Referencia: ',ce.referencia) as documento_externo",
         'ce.editar', "to_char(ce.created_at, 'DD/MM/YYYY HH24:MI') as fecha_ingreso",
@@ -69,7 +68,6 @@ class CorrespondenciaExterna extends BaseController
         $contenido['campos_reales'] = $campos_reales;
         $contenido['subtitulo'] = 'Mis Ingresos';
         $contenido['controlador'] = $this->controlador;
-        $contenido['sincobol'] = $this->urlSincobol;
         $data['content'] = view($this->carpeta.'index', $contenido);
         $data['menu_actual'] = $this->menuActual.'mis_ingresos';
         $data['tramites_menu'] = $this->tramitesMenu();

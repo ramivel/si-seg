@@ -1,11 +1,16 @@
 <?php if(isset($adjuntos) && count($adjuntos)>0){ ?>
     <table border="1" cellpadding="3" cellspacing="0">
         <tr>
-            <td width="538" bgcolor="<?= $color;?>" align="center"><b>ADJUNTO(S)</b></td>
+            <td bgcolor="<?= $color;?>" align="center"><b>ADJUNTO(S)</b></td>
         </tr>
         <?php foreach($adjuntos as $adjunto){?>
             <?php if($adjunto['tipo'] == 'IMAGEN'){?>
-                <tr><td><img src="<?=base_url($adjunto['adjunto']);?>" alt="<?= $adjunto['nombre'];?>" /></td></tr>
+                <?php
+                list($width, $height) = getimagesize(base_url($adjunto['adjunto']));
+                if($height>490)
+                    $height = 490;
+                ?>
+                <tr><td align="center"><img src="<?=base_url($adjunto['adjunto']);?>" alt="<?= $adjunto['nombre'];?>" height="<?= $height.'px';?>"/></td></tr>
             <?php }else{?>
                 <tr><td><?= $adjunto['adjunto'];?></td></tr>
             <?php }?>

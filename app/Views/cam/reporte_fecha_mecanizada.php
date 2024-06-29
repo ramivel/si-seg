@@ -27,7 +27,7 @@
                     <div class="card-block">
                         <?= form_open($accion);?>
                             <div class="form-group row">
-                                <?php if(in_array(100, session()->get('registroPermisos'))){?>
+                                <?php if(in_array(100, session()->get('registroPermisos')) || in_array(17, session()->get('registroPermisos'))){?>
                                 <div class="col-sm-4">
                                     <label class="col-form-label">Oficina:</label>
                                     <?php

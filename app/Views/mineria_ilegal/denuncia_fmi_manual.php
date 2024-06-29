@@ -42,36 +42,10 @@
                                     <div class="tab-pane active" id="datos_hoja_ruta" role="tabpanel">
                                         <p><strong>Nota.</strong> El correlativo del Formulario de Minería Ilegal se lo estructura con el Departamento seleccionado en la sección de Descripción de la Actividad minera.</p>
                                         <p class="text-center"><strong>ESTE FORMULARIO ES PARA REGULARIZAR LAS DENUNCIAS ATENDIDAS ANTES DE LA GESTIÓN 2024.</strong></p>
-                                        <div class="row">
+                                        <div class="row">                                            
                                             <div class="col-md-6 col-sm-12">
                                                 <div class="form-group row">
-                                                    <label class="col-sm-7 col-form-label">Nº de Correlativo Formulario de Minería Ilegal <span class="mytooltip tooltip-effect-5">
-                                                        <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
-                                                        <span class="tooltip-content clearfix">
-                                                            <span class="tooltip-text">Debe escribir solo el NÚMERO de correlativo del Formulario de Minería Ilegal.</span>
-                                                        </span>
-                                                    </span> * : </label>
-                                                    <div class="col-sm-5">
-                                                        <?php
-                                                            $campo = 'n_correlativo_denuncia';
-                                                            echo form_input(array(
-                                                                'name' => $campo,
-                                                                'id' => $campo,
-                                                                'type' => 'number',
-                                                                'class' => 'form-control form-control-uppercase',
-                                                                'value' => set_value($campo, '')
-                                                            ));
-                                                        ?>
-                                                        <span class="messages"></span>
-                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                        <?php }?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-sm-12">
-                                                <div class="form-group row">
-                                                    <label class="col-sm-2 col-form-label">Fecha * : </label>
+                                                    <label class="col-sm-4 col-form-label">Fecha de Minería Ilegal * : </label>
                                                     <div class="col-sm-5">
                                                         <?php
                                                             $campo = 'fecha_denuncia';
@@ -90,20 +64,23 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Tipo de Minería Ilegal * :</label>
-                                            <div class="col-sm-6">
-                                                <?php
-                                                    $campo = 'fk_tipo_denuncia';
-                                                    echo form_dropdown($campo, $tipo_denuncias, set_value($campo, set_value($campo,(isset($denuncia[$campo]) ? $denuncia[$campo] : ''))), array('id' => $campo, 'class' => 'form-control'));
-                                                ?>
-                                                <span class="messages"></span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
+                                            <div class="col-md-6 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Tipo de Minería Ilegal * :</label>
+                                                    <div class="col-sm-6">
+                                                        <?php
+                                                            $campo = 'fk_tipo_denuncia';
+                                                            echo form_dropdown($campo, $tipo_denuncias, set_value($campo, set_value($campo,(isset($denuncia[$campo]) ? $denuncia[$campo] : ''))), array('id' => $campo, 'class' => 'form-control'));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
+                                        
                                         <div id="verificacion-oficio-manual">
                                             <div class="row form-group">
                                                 <label class="col-sm-2 col-form-label">Tipo de Origen * :</label>

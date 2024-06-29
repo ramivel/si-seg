@@ -1,7 +1,7 @@
 <table border="1" cellpadding="3" cellspacing="0">
     <tr>
-        <td width="148" bgcolor="<?= $color;?>" align="right"><b>Fecha y hora:</b></td>
-        <td width="390"><?= $denuncia['fecha_denuncia'];?></td>
+        <td width="150" bgcolor="<?= $color;?>" align="right"><b>Fecha y hora:</b></td>
+        <td width="405"><?= $denuncia['fecha_denuncia'];?></td>
     </tr>
     <tr>
         <td bgcolor="<?= $color;?>" align="right"><b>Tipo de Denuncia:</b></td>
@@ -15,8 +15,8 @@
         <td bgcolor="<?= $color;?>" colspan="2" align="center"><b>ORIGEN</b></td>
     </tr>
     <tr>
-        <td width="148" bgcolor="<?= $color;?>" align="rigth"><b>Hoja(s) de Ruta(s):</b></td>
-        <td width="390"><?= $hojas_ruta_sincobol;?></td>
+        <td width="150" bgcolor="<?= $color;?>" align="rigth"><b>Hoja(s) de Ruta(s):</b></td>
+        <td width="405"><?= $hojas_ruta_sincobol;?></td>
     </tr>
 </table>
 <br /><br />
@@ -26,8 +26,8 @@
         <td bgcolor="<?= $color;?>" colspan="2" align="center"><b>DATOS DEL DENUNCIANTE</b></td>
     </tr>
     <tr>
-        <td width="148" bgcolor="<?= $color;?>" align="rigth"><b>Nombre(s):</b></td>
-        <td width="390"><?= $denunciante['nombres'];?></td>
+        <td width="150" bgcolor="<?= $color;?>" align="rigth"><b>Nombre(s):</b></td>
+        <td width="405"><?= $denunciante['nombres'];?></td>
     </tr>
     <tr>
         <td bgcolor="<?= $color;?>" align="rigth"><b>Apellido(s):</b></td>
@@ -58,8 +58,8 @@
         <td bgcolor="<?= $color;?>" colspan="2" align="center"><b>DESCRIPCIÓN DE LA ACTIVIDAD MINERA</b></td>
     </tr>
     <tr>
-        <td width="148" bgcolor="<?= $color;?>" align="rigth"><b>Departamento:</b></td>
-        <td width="390"><?= $denuncia['departamento'];?></td>
+        <td width="150" bgcolor="<?= $color;?>" align="rigth"><b>Departamento:</b></td>
+        <td width="405"><?= $denuncia['departamento'];?></td>
     </tr>
     <tr>
         <td bgcolor="<?= $color;?>" align="rigth"><b>Provincia:</b></td>
@@ -144,8 +144,8 @@
         </tr>
         <tr>
             <td width="178" bgcolor="<?= $color;?>" align="center"><b>N°</b></td>
-            <td width="180" bgcolor="<?= $color;?>" align="center"><b>LONGITUD</b></td>
-            <td width="180" bgcolor="<?= $color;?>" align="center"><b>LATITUD</b></td>
+            <td width="189" bgcolor="<?= $color;?>" align="center"><b>LONGITUD</b></td>
+            <td width="189" bgcolor="<?= $color;?>" align="center"><b>LATITUD</b></td>
         </tr>
         <?php foreach($coordenadas as $n=>$coordenada){?>
             <tr>

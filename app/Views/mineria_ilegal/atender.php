@@ -48,7 +48,7 @@
                         </div>
                         <div class="form-group row d-none">
                             <div class="col-sm-10">
-                                <?= form_input(array('type'=>'hidden','name'=>'id_hojas_ruta_ant','id'=>'id_hojas_ruta_ant','value'=>set_value('id_hojas_ruta_ant', (isset($id_hojas_ruta_ant) ? $id_hojas_ruta_ant : ''), false)));?>
+                                <?= form_input(array('type'=>'hidden','name'=>'id_hojas_rutas_ant','id'=>'id_hojas_rutas_ant','value'=>set_value('id_hojas_rutas_ant', (isset($id_hojas_rutas_ant) ? $id_hojas_rutas_ant : ''), false)));?>
                                 <span class="messages"></span>
                             </div>
                         </div>

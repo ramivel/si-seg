@@ -162,7 +162,10 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('reporte_usuarios', 'Cam::reporteUsuarios');
         $routes->add('ver/(:num)/(:num)', 'Cam::ver/$1/$2');
         $routes->add('ver_correspondencia_externa/(:num)/(:num)', 'Cam::verCorrespondenciaExterna/$1/$2');
-        $routes->add('sincobol/(:num)/(:num)', 'Cam::sincobol/$1/$2');
+        $routes->add('ver_documentos_generados/(:num)/(:num)', 'Cam::verDocumentosGenerados/$1/$2');
+        $routes->add('ver_hojas_ruta_anexadas/(:num)/(:num)', 'Cam::verHojasRutaAnexadas/$1/$2');
+        $routes->add('ver_historico_sincobol/(:num)/(:num)', 'Cam::verHistoricoSincobol/$1/$2');
+        $routes->add('ver_seguimiento_historico_sincobol/(:num)/(:num)', 'Cam::verSeguimientoHistoricoSincobol/$1/$2');
         $routes->add('documentacion_digital', 'Cam::documentacionDigital');
         $routes->add('subir_documentos/(:num)', 'Cam::subirDocumentos/$1');
         $routes->add('ajax_subir_archivo', 'Cam::ajaxSubirArchivo');
@@ -178,7 +181,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('reporte_responsable', 'Cam::reporteResponsable');
         $routes->add('reporte_mis_tramites', 'Cam::reporteMisTramites');
         $routes->add('reporte_fecha_mecanizada', 'Cam::reporteFechaMecanizada');
-        
+
         $routes->add('hoja_ruta_pdf/(:num)', 'Cam::hojaRutaPdf/$1');
 
         //$routes->add('actualizar_poligono_area_minera', 'Cam::actualizarPoligonoAreaMinera');

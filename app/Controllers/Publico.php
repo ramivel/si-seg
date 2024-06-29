@@ -317,7 +317,7 @@ class Publico extends BaseController
             $html_adjuntos = view($this->carpeta.'pdf_adjuntos', $contenido);
 
             $file_name = str_replace('/','-',$denuncia['correlativo']).'.pdf';
-            $pdf = new DenunciaPdf('P', 'mm', 'Letter', true, 'UTF-8', false);
+            $pdf = new DenunciaPdf('P', 'mm', array(216, 279), true, 'UTF-8', false);
 
             $pdf->SetCreator('GARNET');
             $pdf->SetAuthor('Desarrollo de UTIC');
@@ -328,7 +328,7 @@ class Publico extends BaseController
             $pdf->SetMargins(10, 42, 10);
             $pdf->SetAutoPageBreak(true, 35); //Margin botto
 
-            $pdf->AddPage('P','Letter');
+            $pdf->AddPage();
             // Titulo de paginas
             $pdf->SetFont($this->fontPDF, 'B', 14);
             $pdf->Cell(0,0,$denuncia['correlativo'],0,0,'C');
@@ -339,7 +339,7 @@ class Publico extends BaseController
             $pdf->Ln(8);
             $pdf->writeHTML($html, true, false, false, false, '');
 
-            $pdf->AddPage('P','Letter');
+            $pdf->AddPage();
             $pdf->SetFont($this->fontPDF, 'B', 14);
             $pdf->Cell(0,0,$denuncia['correlativo'],0,0,'C');
             $pdf->SetFont($this->fontPDF, '', 8);

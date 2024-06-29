@@ -16,10 +16,7 @@ $(document).ready(function () {
     });
 
     // These are the constraints used to validate the form
-    var constraints = {        
-        n_correlativo_denuncia: {
-            presence: true,
-        },
+    var constraints = {
         fecha_denuncia: {
             presence: true,
         },

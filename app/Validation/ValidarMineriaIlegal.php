@@ -60,4 +60,12 @@ class ValidarMineriaIlegal {
         return true;
     }
 
+    public function validar_fecha_fmi($value):bool{
+        return (strtotime('2023-12-31') >= strtotime($value)) ? true : false;
+    }
+
+    public function validar_fecha_manual($value):bool{
+        return (strtotime($value) >= strtotime('2024-01-01') && strtotime($value) <= strtotime('2024-03-31')) ? true : false;
+    }
+
 }

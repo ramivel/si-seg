@@ -32,6 +32,7 @@ class Usuarios extends BaseController
             9 => 'Área(s) Protegida(s) Adicional(es)',
             10 => 'Encargado de Cargar Documentación Digital',
             16 => 'Reportes Administración',
+            17 => 'Reportes por fecha mecanizada a nivel nacional',
         ),
         'Minería Ilegal' => array(
             12 => 'Responsable Atender Denuncias Página Web',
