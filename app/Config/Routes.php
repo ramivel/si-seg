@@ -314,6 +314,8 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('buscador_sincobol', 'Documentos::buscadorSincobol');
         $routes->add('desanexar_sincobol/(:num)/(:num)/(:num)/(:num)', 'Documentos::desanexarSincobol/$1/$2/$3/$4');
 
+        $routes->add('actualizar_path', 'Documentos::actualizarPath');
+
     });
 });
 $routes->group('', ['filter'=>'AlreadyLogged'], function($routes){

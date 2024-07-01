@@ -124,8 +124,7 @@ class Documentos extends BaseController
             $contenido['campos_reales'] = $campos_reales;
             $contenido['subtitulo'] = 'Mis Documentos Generados';
             $contenido['controlador'] = $this->controlador;
-            $contenido['id_tramite'] = $idTramite;
-            $contenido['ruta_archivos'] = 'archivos/'.$tramite['controlador'];
+            $contenido['id_tramite'] = $idTramite;            
             $data['content'] = view($this->carpeta.'index', $contenido);
             $data['menu_actual'] = $this->menuActual;
             $data['tramites_menu'] = $this->tramitesMenu();
@@ -1646,6 +1645,35 @@ class Documentos extends BaseController
                 </td>
             </tr>';
             echo $html;
+        }
+    }
+
+    public function actualizarPath(){
+        $documentosModel = new DocumentosModel();        
+        $db = \Config\Database::connect();
+        $campos = array(
+            "doc.id", "ac.fk_area_minera", "doc.doc_digital"
+        );
+        $where = array(
+            'doc.fk_tramite' => 1,
+        );
+        $builder = $db->table('public.documentos as doc')
+        ->select($campos)
+        ->join('public.acto_administrativo as ac', 'doc.fk_acto_administrativo = ac.id', 'left')
+        ->where($where)
+        ->notLike('doc.doc_digital', '/')
+        ->orderBy('doc.id', 'ASC');
+        if($datos = $builder->get()->getResultArray()){            
+            foreach($datos as $row){
+                $dataDocumento = array(
+                    'id' => $row['id'],
+                    'doc_digital' => 'archivos/cam/'.$row['fk_area_minera'].'/'.$row['doc_digital'],
+                );                
+                if($documentosModel->save($dataDocumento) === false)
+                    echo "No se guardo el id: ".$row['id']."<br>";
+                else
+                    echo "Se guardo el id: ".$row['id']."<br>";
+            }
         }
     }
 

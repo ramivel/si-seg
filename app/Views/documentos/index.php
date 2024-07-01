@@ -43,7 +43,7 @@
                                     <?php foreach ($datos as $n=>$fila){?>
                                     <tr>
                                         <td class="text-center">
-                                            <?php if($fila['estado'] !== 'ANULADO' && $fila['estado'] !== 'ANEXADO'){?>
+                                            <?php if($fila['estado'] !== 'ANULADO' && $fila['estado'] !== 'SOLICITUD ANULACIÓN'){?>
                                                 <div class="dropdown-info dropdown open">
                                                     <button class="btn btn-sm btn-info dropdown-toggle waves-effect waves-light " type="button" id="dropdown-4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Acciones</button>
                                                     <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
@@ -61,7 +61,7 @@
                                             <?php
                                             if($campos_reales[$i] == 'doc_digital'){
                                                 if(isset($fila['doc_digital']) && $fila['doc_digital'])
-                                                    echo "<a href='".base_url($ruta_archivos.$fila['fk_area_minera'].'/'.$fila['doc_digital'])."' target='_blank' title='Ver Documento'><i class='feather icon-file'></i> Ver Documento</a>";
+                                                    echo "<a href='".base_url($fila['doc_digital'])."' target='_blank' title='Ver Documento'><i class='feather icon-file'></i> Ver Documento</a>";
                                                 else
                                                     echo "";
                                             }else{
