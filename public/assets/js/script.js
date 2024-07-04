@@ -546,6 +546,32 @@ $(document).ready(function() {
     });
     /* FIN MINERIA ILEGAL NUEVO DENUNCIANTE */
 
+    /* ATENDER CORRESPONDENCIA EXTERNA */
+    $(".atender-correspondencia-externa").on('click', function() {
+        $("#id_documento").val($(this).data('id'));
+        $("#hoja_ruta").html($(this).data('hr'));
+        $("#documento_externo").html($(this).data('de'));
+        $("#fecha_ingreso").html($(this).data('fecha'));
+        $("#dias_pasados").html($(this).data('dias'));        
+        $("#observacion_atencion").val('SIN OBSERVACIONES');
+        $('#atender-correspondencia-externa-modal').modal('toggle');
+    });
+    $(".guardar-atender-correspondencia-externa").on('click', function() {
+        var validate = true;
+        var observacion_atencion = $("#observacion_atencion").val();
+        var msj_error = '<p class="text-danger error">Este campo es obligatorio.</p>';
+        if(!observacion_atencion){
+            validate = false;
+            $("#error_observacion_atencion").html(msj_error);
+        }else{
+            $("#error_observacion_atencion").html('');
+        }
+        if(validate){
+            $("#formulario-correspondencia-externa").submit();
+        }
+    });
+    /* FIN ATENDER CORRESPONDENCIA EXTERNA */
+
     /* SELECCIONAR TODOS */
     $("#seleccionar-todo").click(function () {
       if (this.checked) {

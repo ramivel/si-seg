@@ -17,31 +17,12 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
-        fk_acto_administrativo: {
-            presence: {
-                message: "^Debe seleccionar el Correlativo de H.R. Madre"
-            },
-        },
-        cite: {
+        id:{
             presence: true,
         },
-        fecha_cite: {
+        id_tramite: {
             presence: true,
-        },
-        fk_persona_externa: {
-            presence: {
-                message: "^Debe seleccionar el Remitente"
-            },
-        },
-        referencia: {
-            presence: true,
-        },
-        fojas: {
-            presence: true,
-        },
-        adjuntos: {
-            presence: true,
-        },
+        },        
         doc_digital: {
             presence: true,
         },
@@ -81,7 +62,7 @@ $(document).ready(function () {
     // Updates the inputs with the validation errors
     function showErrors(form, errors) {
         // We loop through all the inputs and show the errors for that input
-        _.each(form.querySelectorAll("input[name], select[name], textarea[name]"), function (input) {
+        _.each(form.querySelectorAll("input[name], select[name]"), function (input) {
             // Since the errors can be null if no errors were found we need to handle
             // that
             showErrorsForInput(input, errors && errors[input.name]);
@@ -165,22 +146,4 @@ $(document).ready(function () {
             }
         });
     }
-
-    function errorDocumento(){
-        var anexar_documentos = $('#anexar_documentos').val();
-        var fk_estado_tramite_padre = $('#fk_estado_tramite').val();
-        var ultimo_fk_estado_tramite_padre = $('#ultimo_fk_estado_tramite_padre').val();
-        var fk_estado_tramite_hijo = $('#fk_estado_tramite_hijo').val();
-        var ultimo_fk_estado_tramite_hijo = $('#ultimo_fk_estado_tramite_hijo').val();
-        if(ultimo_fk_estado_tramite_padre == fk_estado_tramite_padre && ultimo_fk_estado_tramite_hijo == fk_estado_tramite_hijo){
-            return false;
-        }else if(ultimo_fk_estado_tramite_padre == fk_estado_tramite_padre){
-            return false;
-        }else if (anexar_documentos == 'NO'){
-            return false;
-        }
-
-        return true;
-    }
-
 });

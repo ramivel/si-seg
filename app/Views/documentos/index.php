@@ -49,8 +49,11 @@
                                                     <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                         <?php echo anchor('documentos/descargar/'.$fila['id'], 'Descargar Word',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                         <?php if($fila['estado'] == 'SUELTO'){?>
-                                                        <?php echo anchor('documentos/editar/'.$id_tramite.'/'.$fila['id'], 'Editar',array('class' =>'dropdown-item waves-light waves-effect'));?>
-                                                        <?php echo anchor('documentos/anular/'.$id_tramite.'/'.$fila['id'], 'Solicitar Anulación',array('class' =>'dropdown-item waves-light waves-effect'));?>
+                                                            <?php echo anchor('documentos/editar/'.$id_tramite.'/'.$fila['id'], 'Editar',array('class' =>'dropdown-item waves-light waves-effect'));?>
+                                                            <?php echo anchor('documentos/anular/'.$id_tramite.'/'.$fila['id'], 'Solicitar Anulación',array('class' =>'dropdown-item waves-light waves-effect'));?>
+                                                        <?php }?>
+                                                        <?php if(!$fila['doc_digital']){?>
+                                                            <?php echo anchor('documentos/subir/'.$id_tramite.'/'.$fila['id'], 'Subir Documento',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                         <?php }?>
                                                     </div>
                                                 </div>

@@ -73,6 +73,111 @@ class CorrespondenciaExterna extends BaseController
         $data['tramites_menu'] = $this->tramitesMenu();
         echo view('templates/template', $data);
     }
+    public function misRecepciones($id_tramite)
+    {
+        $tramitesModel = new TramitesModel();
+        if($tramite = $tramitesModel->find($id_tramite)){
+            $db = \Config\Database::connect();
+            switch($tramite['controlador']){
+                case 'cam/':
+                    $campos_listar=array(
+                        'Estado','Fecha Ingreso','Días Pasados','Hoja de Ruta','Documento Externo','Doc. Digital','Obs. Recepción','Obs. Atención',
+                        'Ingresado Por','Recepcionado Por','Atendido Por','Fecha Recepción','Fecha Atención',
+                    );
+                    $campos_reales=array(
+                        'estado','fecha_ingreso','dias_pasados','correlativo','documento_externo','doc_digital','observacion_recepcion','observacion_atencion',
+                        'ingreso','recepcion','atencion','fecha_recepcion','fecha_atencion',
+                    );
+                    $campos = array(
+                        'ce.id','ce.estado',"to_char(ce.created_at, 'DD/MM/YYYY') as fecha_ingreso",
+                        "CASE WHEN ce.fecha_atencion IS NULL THEN (CURRENT_DATE - ce.created_at::date)::text ELSE '' END as dias_pasados",
+                        "to_char(ce.fecha_recepcion, 'DD/MM/YYYY') as fecha_recepcion", "to_char(ce.fecha_atencion, 'DD/MM/YYYY') as fecha_atencion",
+                        "CONCAT(ui.nombre_completo,'<br><b>',pi.nombre,'<b>') as ingreso", "CONCAT(ur.nombre_completo,'<br><b>',pr.nombre,'<b>') as recepcion",
+                        "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as atencion", 'ac.correlativo',
+                        "CONCAT('Tipo Documento: ',tde.nombre,'<br>CITE: ',ce.cite,'<br>Fecha: ',to_char(ce.fecha_cite, 'DD/MM/YYYY'),'<br>Remitente: ',CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')'),'<br>Referencia: ',ce.referencia) as documento_externo",
+                        'ce.doc_digital','tde.notificar','tde.dias_intermedio', 'tde.dias_limite','ce.observacion_recepcion','ce.observacion_atencion',
+                    );
+                    $where = array(
+                        'ce.fk_tramite' => $tramite['id'],
+                        'ce.deleted_at' => NULL,
+                        'ce.fk_usuario_recepcion' => session()->get('registroUser'),
+                        'ce.estado' => 'RECIBIDO',
+                    );
+                    $builder = $db->table('public.correspondencia_externa AS ce')
+                    ->join('public.acto_administrativo AS ac', 'ce.fk_acto_administrativo = ac.id', 'left')
+                    ->join('public.persona_externa AS pe', 'ce.fk_persona_externa = pe.id', 'left')
+                    ->join('public.tipo_documento_externo AS tde', 'ce.fk_tipo_documento_externo = tde.id', 'left')
+                    ->join('public.usuarios AS ui', 'ce.fk_usuario_creador = ui.id', 'left')
+                    ->join('public.perfiles AS pi', 'ui.fk_perfil = pi.id', 'left')
+                    ->join('public.usuarios AS ur', 'ce.fk_usuario_recepcion = ur.id', 'left')
+                    ->join('public.perfiles AS pr', 'ur.fk_perfil = pr.id', 'left')
+                    ->join('public.usuarios AS ua', 'ce.fk_usuario_atencion = ua.id', 'left')
+                    ->join('public.perfiles AS pa', 'ua.fk_perfil = pa.id', 'left')
+                    ->select($campos)
+                    ->where($where)                    
+                    ->orderBy('ce.created_at ASC');
+                    $datos = $builder->get()->getResultArray();
+                    break;
+                case 'mineria_ilegal/':
+                    $campos_listar=array(
+                        'Estado','Fecha Ingreso','Días Pasados','Hoja de Ruta','Documento Externo','Doc. Digital','Obs. Recepción','Obs. Atención',
+                        'Ingresado Por','Recepcionado Por','Atendido Por','Fecha Recepción','Fecha Atención',
+                    );
+                    $campos_reales=array(
+                        'estado','fecha_ingreso','dias_pasados','correlativo','documento_externo','doc_digital','observacion_recepcion','observacion_atencion',
+                        'ingreso','recepcion','atencion','fecha_recepcion','fecha_atencion',
+                    );
+                    $campos = array(
+                        'ce.id','ce.estado',"to_char(ce.created_at, 'DD/MM/YYYY') as fecha_ingreso",
+                        "CASE WHEN ce.fecha_atencion IS NULL THEN (CURRENT_DATE - ce.created_at::date)::text ELSE '' END as dias_pasados",
+                        "to_char(ce.fecha_recepcion, 'DD/MM/YYYY') as fecha_recepcion", "to_char(ce.fecha_atencion, 'DD/MM/YYYY') as fecha_atencion",
+                        "CONCAT(ui.nombre_completo,'<br><b>',pi.nombre,'<b>') as ingreso", "CONCAT(ur.nombre_completo,'<br><b>',pr.nombre,'<b>') as recepcion",
+                        "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as atencion", 'hr.correlativo',
+                        "CONCAT('Tipo Documento: ',tde.nombre,'<br>CITE: ',ce.cite,'<br>Fecha: ',to_char(ce.fecha_cite, 'DD/MM/YYYY'),'<br>Remitente: ',CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')'),'<br>Referencia: ',ce.referencia) as documento_externo",
+                        'ce.doc_digital','tde.notificar','tde.dias_intermedio', 'tde.dias_limite','ce.observacion_recepcion','ce.observacion_atencion',
+                    );
+                    $where = array(
+                        'ce.fk_tramite' => $tramite['id'],
+                        'ce.deleted_at' => NULL,
+                        'ce.fk_usuario_recepcion' => session()->get('registroUser'),
+                        'ce.estado' => 'RECIBIDO',
+                    );
+                    $builder = $db->table('public.correspondencia_externa AS ce')
+                    ->join('mineria_ilegal.hoja_ruta AS hr', 'ce.fk_hoja_ruta = hr.id', 'left')
+                    ->join('mineria_ilegal.denuncias AS den', 'hr.fk_denuncia = den.id', 'left')
+                    ->join('public.acto_administrativo AS ac', 'ce.fk_acto_administrativo = ac.id', 'left')
+                    ->join('public.persona_externa AS pe', 'ce.fk_persona_externa = pe.id', 'left')
+                    ->join('public.tipo_documento_externo AS tde', 'ce.fk_tipo_documento_externo = tde.id', 'left')
+                    ->join('public.usuarios AS ui', 'ce.fk_usuario_creador = ui.id', 'left')
+                    ->join('public.perfiles AS pi', 'ui.fk_perfil = pi.id', 'left')
+                    ->join('public.usuarios AS ur', 'ce.fk_usuario_recepcion = ur.id', 'left')
+                    ->join('public.perfiles AS pr', 'ur.fk_perfil = pr.id', 'left')
+                    ->join('public.usuarios AS ua', 'ce.fk_usuario_atencion = ua.id', 'left')
+                    ->join('public.perfiles AS pa', 'ua.fk_perfil = pa.id', 'left')
+                    ->select($campos)
+                    ->where($where)                    
+                    ->orderBy('ce.created_at ASC');
+                    $datos = $builder->get()->getResultArray();
+                    break;
+            }
+            $cabera['titulo'] = $this->titulo;
+            $cabera['navegador'] = true;
+            $cabera['subtitulo'] = 'Mi Correspondencia Externa';
+            $contenido['title'] = view('templates/title',$cabera);
+            $contenido['datos'] = $datos;
+            $contenido['campos_listar'] = $campos_listar;
+            $contenido['campos_reales'] = $campos_reales;
+            $contenido['subtitulo'] = 'Mi Correspondencia Externa';
+            $contenido['controlador'] = $this->controlador;
+            $contenido['accion'] = $this->controlador.'guardar_atender';
+            $contenido['id_tramite'] = $tramite['id'];
+            $data['content'] = view($this->carpeta.'mi_correspondencia_externa', $contenido);
+            $data['menu_actual'] = $tramite['controlador'].'correspondencia_externa';
+            $data['tramites_menu'] = $this->tramitesMenu();
+            echo view('templates/template', $data);
+        }
+    }
+
     public function agregar(){
 
         if ($this->request->getPost()) {
@@ -214,7 +319,6 @@ class CorrespondenciaExterna extends BaseController
     }
 
     public function guardarEditar(){
-
         if ($this->request->getPost()) {
             $id = $this->request->getPost('id');
             $correspondenciaExternaModel = new CorrespondenciaExternaModel();
@@ -310,8 +414,35 @@ class CorrespondenciaExterna extends BaseController
         }
     }
 
-    public function misIngresosMinilegal(){
+    public function guardarAtender(){
+        $id_tramite = $this->request->getPost('id_tramite');
+        if ($this->request->getPost()) {
+            $id_documento = $this->request->getPost('id_documento');
+            if($id_documento > 0 && $id_tramite > 0){
+                $correspondenciaExternaModel = new CorrespondenciaExternaModel();
+                $data = array(
+                    'id' => $id_documento,
+                    'estado' => 'ATENDIDO',
+                    'fk_usuario_atencion' => session()->get('registroUser'),
+                    'fecha_atencion' => date('Y-m-d H:i:s'),
+                    'observacion_atencion' => mb_strtoupper($this->request->getPost('observacion_atencion')),
+                );
+                if($correspondenciaExternaModel->save($data) === false)
+                    session()->setFlashdata('fail', $correspondenciaExternaModel->errors());
+                else
+                    session()->setFlashdata('success', 'Se atendio correctamente la correspondencia externa.');
+                return redirect()->to($this->controlador.'mis_recepciones/'.$id_tramite);
+            }else{
+                session()->setFlashdata('fail', 'No existe el documento.');
+                return redirect()->to($this->controlador.'mis_recepciones/'.$id_tramite);
+            }
+        }else{
+            session()->setFlashdata('fail', 'No existe el documento.');
+            return redirect()->to($this->controlador.'mis_recepciones/'.$id_tramite);
+        }
+    }
 
+    public function misIngresosMinilegal(){
         $db = \Config\Database::connect();
         $campos = array('ce.id', 'ce.editar', 'ce.estado', "to_char(ce.created_at, 'DD/MM/YYYY HH24:MI') as fecha_ingreso",
         "to_char(ce.fecha_recepcion, 'DD/MM/YYYY HH24:MI') as fecha_recepcion", "CONCAT(ur.nombre_completo,'<br><b>',pr.nombre,'<b>') as recepcion", 'hr.correlativo',

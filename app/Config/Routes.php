@@ -208,6 +208,10 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('editar_minilegal/(:num)', 'CorrespondenciaExterna::editarMinilegal/$1');
         $routes->post('guardar_editar_minilegal', 'CorrespondenciaExterna::guardarEditarMinilegal');
 
+        $routes->add('mis_recepciones/(:num)', 'CorrespondenciaExterna::misRecepciones/$1');
+
+        $routes->post('guardar_atender', 'CorrespondenciaExterna::guardarAtender');
+
         //$routes->add('actualizar_path', 'CorrespondenciaExterna::actualizarPath');
 
     });
@@ -294,6 +298,8 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('agregar/(:num)/(:num)', 'Documentos::agregar/$1/$2');
         $routes->add('editar/(:num)/(:num)', 'Documentos::editar/$1/$2');
         $routes->post('guardar_editar', 'Documentos::guardarEditar');
+        $routes->add('subir/(:num)/(:num)', 'Documentos::subir/$1/$2');
+        $routes->post('guardar_subir', 'Documentos::guardarSubir');
         $routes->add('ajax_area_minera', 'Documentos::ajaxAreaMinera');
         $routes->add('listado/(:num)', 'Documentos::index/$1');
         $routes->add('listado_anulacion/(:num)', 'Documentos::listadoAnulacion/$1');
@@ -314,7 +320,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('buscador_sincobol', 'Documentos::buscadorSincobol');
         $routes->add('desanexar_sincobol/(:num)/(:num)/(:num)/(:num)', 'Documentos::desanexarSincobol/$1/$2/$3/$4');
 
-        $routes->add('actualizar_path', 'Documentos::actualizarPath');
+        //$routes->add('actualizar_path', 'Documentos::actualizarPath');
 
     });
 });

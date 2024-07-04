@@ -81,15 +81,15 @@ class Documentos extends BaseController
                     ->orderBY('doc.id', 'DESC');
                     $datos = $builder->get()->getResult('array');
                     $campos_listar=array(
-                        'Estado','Fecha','Correlativo', 'Tipo Documento', 'Referencia','Código Único','H.R. Madre', 'Documento Digital'
+                        'Estado','Fecha','Correlativo','Documento Digital','Tipo Documento', 'Referencia','Código Único','H.R. Madre',
                     );
                     $campos_reales=array(
-                        'estado','fecha','correlativo', 'tipo_documento', 'referencia','codigo_unico','hoja_ruta', 'doc_digital'
+                        'estado','fecha','correlativo','doc_digital','tipo_documento', 'referencia','codigo_unico','hoja_ruta',
                     );
                     break;
                 case 'mineria_ilegal/':
                     $campos = array(
-                        'doc.id', 'doc.correlativo', "to_char(doc.fecha, 'DD/MM/YYYY') as fecha", 'doc.referencia', 'hr.correlativo as hoja_ruta', 'doc.estado'
+                        'doc.id', 'doc.correlativo', "to_char(doc.fecha, 'DD/MM/YYYY') as fecha", 'doc.referencia', 'hr.correlativo as hoja_ruta', 'doc.estado', 'doc.doc_digital'
                     );
                     $where = array(
                         'doc.fk_tramite' => $idTramite,
@@ -106,10 +106,10 @@ class Documentos extends BaseController
                     ->orderBY('doc.id', 'DESC');
                     $datos = $builder->get()->getResult('array');
                     $campos_listar=array(
-                        'Fecha','Correlativo','Referencia','H.R. Madre','Estado'
+                        'Estado','Fecha','Correlativo','Referencia','H.R. Minería Ilegal','Documento Digital'
                     );
                     $campos_reales=array(
-                        'fecha','correlativo','referencia','hoja_ruta','estado'
+                        'estado','fecha','correlativo','referencia','hoja_ruta','doc_digital'
                     );
                     break;
             }
@@ -124,7 +124,7 @@ class Documentos extends BaseController
             $contenido['campos_reales'] = $campos_reales;
             $contenido['subtitulo'] = 'Mis Documentos Generados';
             $contenido['controlador'] = $this->controlador;
-            $contenido['id_tramite'] = $idTramite;            
+            $contenido['id_tramite'] = $idTramite;
             $data['content'] = view($this->carpeta.'index', $contenido);
             $data['menu_actual'] = $this->menuActual;
             $data['tramites_menu'] = $this->tramitesMenu();
@@ -391,7 +391,7 @@ class Documentos extends BaseController
 
     public function editar($idTramite, $id){
         $db = \Config\Database::connect();
-        $campos = array('doc.id', 'doc.correlativo', 'doc.fk_tipo_documento', 'adm.correlativo as hr', 'dam.codigo_unico', 'dam.denominacion', 'doc.ciudad', "TO_CHAR(doc.fecha , 'DD/MM/YYYY') as fecha", 'doc.referencia');
+        $campos = array('doc.id', 'doc.correlativo', 'doc.fk_tipo_documento', 'adm.id as id_acto_administrativo', 'dam.codigo_unico', 'dam.denominacion', 'doc.ciudad', "TO_CHAR(doc.fecha , 'DD/MM/YYYY') as fecha", 'doc.referencia');
         $where = array(
             'doc.id' => $id,
             'doc.fk_tramite' => $idTramite,
@@ -405,6 +405,18 @@ class Documentos extends BaseController
         ->where($where);
         if($fila = $builder->get()->getRowArray()){
             if($tramite = $this->tramitesMenu($idTramite)){
+
+                $campos = array('id', "CONCAT(correlativo,' (',codigo_unico,' - ',denominacion,')') as hr");
+                $where = array(
+                    'ac.deleted_at' => NULL,
+                    'ac.id' => $fila['id_acto_administrativo'],
+                );
+                $builder = $db->table('public.acto_administrativo as ac')
+                ->select($campos)
+                ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+                ->where($where);
+                $contenido['hr_madre'] = $builder->get()->getRowArray();
+
                 $datosUsuario = $this->obtenerDatosUsuario(session()->get('registroUser'));
                 $this->menuActual = $tramite['controlador'].'documento/listado';
                 $cabera['titulo'] = $this->titulo;
@@ -431,7 +443,6 @@ class Documentos extends BaseController
         }
     }
     public function guardarEditar(){
-
         if ($this->request->getPost()) {
             $idTramite = $this->request->getPost('id_tramite');
             $validation = $this->validate([
@@ -441,18 +452,48 @@ class Documentos extends BaseController
                 'id_tramite' => [
                     'rules' => 'required',
                 ],
+                'fk_acto_administrativo' => [
+                    'rules' => 'required',
+                ],
                 /*'referencia' => [
                     'rules' => 'required',
                 ]*/
             ]);
             if(!$validation){
                 if($tramite = $this->tramitesMenu($idTramite)){
+                    $db = \Config\Database::connect();
+                    $campos = array('id', "CONCAT(correlativo,' (',codigo_unico,' - ',denominacion,')') as hr");
+                    $where = array(
+                        'ac.deleted_at' => NULL,
+                        'ac.id' => $this->request->getPost('fk_acto_administrativo'),
+                    );
+                    $builder = $db->table('public.acto_administrativo as ac')
+                    ->select($campos)
+                    ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+                    ->where($where);
+                    $contenido['hr_madre'] = $builder->get()->getRowArray();
+
+                    $db = \Config\Database::connect();
+                    $campos = array('doc.id', 'doc.correlativo', 'doc.fk_tipo_documento', 'adm.id as id_acto_administrativo', "CONCAT(adm.correlativo,' (',dam.codigo_unico,' - ',dam.denominacion,')') as hr", 'dam.codigo_unico', 'dam.denominacion', 'doc.ciudad', "TO_CHAR(doc.fecha , 'DD/MM/YYYY') as fecha", 'doc.referencia');
+                    $where = array(
+                        'doc.id' => $this->request->getPost('id'),
+                        'doc.fk_tramite' => $idTramite,
+                        'doc.fk_usuario_creador' => session()->get('registroUser'),
+                        'doc.estado' => 'SUELTO'
+                    );
+                    $builder = $db->table('documentos as doc')
+                    ->select($campos)
+                    ->join('acto_administrativo as adm', 'doc.fk_acto_administrativo = adm.id', 'left')
+                    ->join('public.datos_area_minera as dam', 'adm.id = dam.fk_acto_administrativo', 'left')
+                    ->where($where);
+                    $fila = $builder->get()->getRowArray();
                     $datosUsuario = $this->obtenerDatosUsuario(session()->get('registroUser'));
                     $this->menuActual = $tramite['controlador'].'documento/listado';
                     $cabera['titulo'] = $this->titulo;
                     $cabera['navegador'] = true;
                     $cabera['subtitulo'] = 'Editar Documento';
                     $contenido['title'] = view('templates/title',$cabera);
+                    $contenido['fila'] = $fila;
                     $contenido['id_tramite'] = $idTramite;
                     $contenido['tiposDocumentos'] = $this->obtenerTipoDocumentos($idTramite, $datosUsuario['fk_perfil']);
                     $contenido['subtitulo'] = 'Editar Documento';
@@ -472,6 +513,7 @@ class Documentos extends BaseController
                 $documentosModel = new DocumentosModel();
                 $data = array(
                     'id' => $id,
+                    'fk_acto_administrativo' => $this->request->getPost('fk_acto_administrativo'),
                     'referencia' => mb_strtoupper($this->request->getPost('referencia')),
                     'fk_usuario_editor' => session()->get('registroUser'),
                 );
@@ -480,6 +522,145 @@ class Documentos extends BaseController
                 }else{
                     session()->setFlashdata('success', 'Se Actualizo Correctamente la Información. <code><a href="'.base_url($this->controlador.'descargar/'.$id).'" target="_blank">Descargar Documento '.$correlativo.'</a></code>');
                     return redirect()->to($this->controlador.'listado/'.$idTramite);
+                }
+            }
+        }
+    }
+    public function subir($idTramite, $id){
+        if($tramite = $this->tramitesMenu($idTramite)){
+            $db = \Config\Database::connect();
+            switch($tramite['controlador']){
+                case 'cam/':
+                    $campos = array(
+                        'doc.id', 'adm.id as id_acto_administrativo', 'doc.correlativo', 'tdoc.nombre as tipo_documento', 'adm.correlativo as hoja_ruta',
+                        'dam.codigo_unico', 'dam.denominacion', 'doc.ciudad', "TO_CHAR(doc.fecha , 'DD/MM/YYYY') as fecha", 'doc.referencia'
+                    );
+                    $where = array(
+                        'doc.id' => $id,
+                        'doc.fk_tramite' => $idTramite,
+                        'doc.fk_usuario_creador' => session()->get('registroUser'),
+                    );
+                    $builder = $db->table('documentos as doc')
+                    ->select($campos)
+                    ->join('public.tipo_documento AS tdoc', 'doc.fk_tipo_documento = tdoc.id', 'left')
+                    ->join('acto_administrativo as adm', 'doc.fk_acto_administrativo = adm.id', 'left')
+                    ->join('public.datos_area_minera as dam', 'adm.id = dam.fk_acto_administrativo', 'left')
+                    ->where($where)
+                    ->whereIn('doc.estado',array('SUELTO','ANEXADO'));
+                    break;
+                case 'mineria_ilegal/':
+                    $campos = array(
+                        'doc.id', 'doc.correlativo', 'tdoc.nombre as tipo_documento', 'hr.correlativo as hoja_ruta', 'd.correlativo as formulario_mineria_ilegal',
+                        "TO_CHAR(d.created_at , 'DD/MM/YYYY') as fecha_denuncia",'doc.ciudad', "TO_CHAR(doc.fecha , 'DD/MM/YYYY') as fecha", 'doc.referencia'
+                    );
+                    $where = array(
+                        'doc.id' => $id,
+                        'doc.fk_tramite' => $idTramite,
+                        'doc.fk_usuario_creador' => session()->get('registroUser'),
+                    );
+                    $builder = $db->table('documentos as doc')
+                    ->select($campos)
+                    ->join('public.tipo_documento AS tdoc', 'doc.fk_tipo_documento = tdoc.id', 'left')
+                    ->join('mineria_ilegal.hoja_ruta AS hr', 'doc.fk_hoja_ruta = hr.id', 'left')
+                    ->join('mineria_ilegal.denuncias as d', 'hr.fk_denuncia = d.id', 'left')
+                    ->where($where)
+                    ->whereIn('doc.estado',array('SUELTO','ANEXADO'));
+                    break;
+            }
+            if($fila = $builder->get()->getRowArray()){
+                $this->menuActual = $tramite['controlador'].'documento/listado';
+                $cabera['titulo'] = $this->titulo;
+                $cabera['navegador'] = true;
+                $cabera['subtitulo'] = 'Subir Documento';
+                $contenido['title'] = view('templates/title',$cabera);
+                $contenido['fila'] = $fila;
+                $contenido['correlativo'] = $fila['correlativo'];
+                $contenido['id_tramite'] = $idTramite;
+                $contenido['tipo_tramite'] = $tramite['controlador'];
+                $contenido['subtitulo'] = 'Subir Documento';
+                $contenido['accion'] = $this->controlador.'guardar_subir';
+                $contenido['retorno'] = $this->controlador.'listado/'.$idTramite;
+                $data['content'] = view($this->carpeta.'subir', $contenido);
+                $data['editor_ck'] = false;
+                $data['validacion_js'] = 'documentos-subir-validation.js';
+                $data['menu_actual'] = $this->menuActual;
+                $data['tramites_menu'] = $this->tramitesMenu();
+                $data['alertas'] = $this->alertasTramites();
+                echo view('templates/template', $data);
+            }else{
+                session()->setFlashdata('fail', 'El registro no existe o ya cambio de estado.');
+                return redirect()->to($this->controlador.'listado/'.$idTramite);
+            }
+        }else{
+            session()->setFlashdata('fail', 'El registro no existe o ya cambio de estado.');
+            return redirect()->to($this->controlador.'listado/'.$idTramite);
+        }
+    }
+    public function guardarSubir(){
+        if ($this->request->getPost()) {
+            $idTramite = $this->request->getPost('id_tramite');
+            if($tramite = $this->tramitesMenu($idTramite)){
+                $validation = $this->validate([
+                    'id' => [
+                        'rules' => 'required',
+                    ],
+                    'id_tramite' => [
+                        'rules' => 'required',
+                    ],
+                    'doc_digital' => [
+                        'uploaded[doc_digital]',
+                        'mime_in[doc_digital,application/pdf]',
+                        'max_size[doc_digital,35000]',
+                    ],
+                ]);
+                if(!$validation){
+                    $this->menuActual = $tramite['controlador'].'documento/listado';
+                    $cabera['titulo'] = $this->titulo;
+                    $cabera['navegador'] = true;
+                    $cabera['subtitulo'] = 'Subir Documento';
+                    $contenido['title'] = view('templates/title',$cabera);
+                    $contenido['correlativo'] = $this->request->getPost('correlativo');
+                    $contenido['id_tramite'] = $idTramite;
+                    $contenido['subtitulo'] = 'Subir Documento';
+                    $contenido['accion'] = $this->controlador.'guardar_subir';
+                    $contenido['retorno'] = $this->controlador.'listado/'.$idTramite;
+                    $contenido['validation'] = $this->validator;
+                    $data['content'] = view($this->carpeta.'subir', $contenido);
+                    $data['editor_ck'] = false;
+                    $data['validacion_js'] = 'documentos-subir-validation.js';
+                    $data['menu_actual'] = $this->menuActual;
+                    $data['tramites_menu'] = $this->tramitesMenu();
+                    $data['alertas'] = $this->alertasTramites();
+                    echo view('templates/template', $data);
+                }else{
+                    $documentosModel = new DocumentosModel();
+                    $docDigital = $this->request->getFile('doc_digital');
+                    $nombreAdjunto = $docDigital->getRandomName();
+                    switch($tramite['controlador']){
+                        case 'cam/':
+                            $actoAdministrativoModel = new ActoAdministrativoModel();
+                            $acto_administrativo = $actoAdministrativoModel->find($this->request->getPost('fk_acto_administrativo'));
+                            $path = 'archivos/cam/'.$acto_administrativo['fk_area_minera'].'/';
+                            if(!file_exists($path))
+                                mkdir($path,0777);
+                            break;
+                        case 'mineria_ilegal/':
+                            $path = 'archivos/mineria_ilegal/documentos/';
+                            break;
+                    }
+                    $docDigital->move($path,$nombreAdjunto);
+                    $data = array(
+                        'id' => $this->request->getPost('id'),
+                        'doc_digital' => $path.$nombreAdjunto,
+                        'fk_usuario_doc_digital' => session()->get('registroUser'),
+                        'fk_usuario_editor' => session()->get('registroUser'),
+                    );
+                    if($documentosModel->save($data) === false){
+                        session()->setFlashdata('fail', $documentosModel->errors());
+                    }else{
+                        session()->setFlashdata('success', 'Se Actualizo Correctamente la Información.');
+                        return redirect()->to($this->controlador.'listado/'.$idTramite);
+                    }
                 }
             }
         }
@@ -860,8 +1041,9 @@ class Documentos extends BaseController
 
         $db = \Config\Database::connect();
         $campos = array(
-            'tdoc.plantilla', 'tdoc.nombre as tipo_documento', 'doc.correlativo as doc_correlativo', 'doc.ciudad as doc_ciudad', "TO_CHAR(doc.fecha, 'DD/MM/YYYY') as doc_fecha", 'doc.referencia as doc_referencia',
-            'u.nombre_completo as usuario', 'p.nombre as cargo', 'doc.fk_tramite', 'doc.fk_acto_administrativo', 'doc.fk_hoja_ruta'
+            'tdoc.plantilla', 'tdoc.nombre as tipo_documento', 'doc.correlativo as doc_correlativo', 'doc.ciudad as doc_ciudad', "TO_CHAR(doc.fecha, 'DD/MM/YYYY') as doc_fecha",
+            "TO_CHAR(doc.fecha, 'MM') as doc_mes","TO_CHAR(doc.fecha, 'YYYY') as doc_anio",'doc.referencia as doc_referencia',
+            'u.nombre_completo as usuario', 'p.nombre as cargo', 'doc.fk_tramite', 'doc.fk_acto_administrativo', 'doc.fk_hoja_ruta', 'o.nombre as oficina'
         );
         $where = array(
             //'doc.fk_usuario_creador' => session()->get('registroUser'),
@@ -872,14 +1054,16 @@ class Documentos extends BaseController
         ->join('public.tipo_documento as tdoc', 'doc.fk_tipo_documento = tdoc.id', 'left')
         ->join('public.usuarios as u', 'doc.fk_usuario_creador = u.id', 'left')
         ->join('public.perfiles as p', 'u.fk_perfil = p.id', 'left')
+        ->join('public.oficinas as o', 'u.fk_oficina = o.id', 'left')
         ->where($where);
         if($documento = $builder->get()->getFirstRow('array')){
             $tramite = $this->tramitesMenu($documento['fk_tramite']);
             switch($tramite['controlador']){
                 case 'cam/':
                     $campos = array(
-                        'cam.fk_tipo_hoja_ruta','cam.fk_area_minera', 'cam.fk_hoja_ruta', 'cam.fk_solicitud_licencia_contrato', 'cam.correlativo as hr_madre', "TO_CHAR(cam.fecha_mecanizada, 'DD/MM/YYYY') AS fecha_mecanizada",
-                        'dam.codigo_unico', 'dam.denominacion', 'dam.extension', 'dam.titular', 'dam.clasificacion_titular', 'dam.regional', 'dam.departamentos', 'dam.provincias', 'dam.municipios',
+                        'cam.id','cam.fk_tipo_hoja_ruta','cam.fk_area_minera', 'cam.fk_hoja_ruta', 'cam.fk_solicitud_licencia_contrato', 'cam.correlativo as hr_madre', "TO_CHAR(cam.fecha_mecanizada, 'DD/MM/YYYY') AS fecha_mecanizada",
+                        'dam.codigo_unico', 'dam.denominacion', 'dam.extension', 'dam.titular', 'dam.clasificacion_titular', 'dam.representante_legal', 'dam.nacionalidad', 'dam.regional', 'dam.departamentos', 'dam.provincias', 'dam.municipios',
+                        'cam.ultimo_fk_documentos'
                     );
                     $where = array(
                         'cam.id' => $documento['fk_acto_administrativo'],
@@ -888,13 +1072,19 @@ class Documentos extends BaseController
                     ->select($campos)
                     ->join('public.datos_area_minera as dam', 'cam.id = dam.fk_acto_administrativo', 'left')
                     ->where($where);
-                    if($fila = $builder->get()->getRowArray()){                        
+                    if($fila = $builder->get()->getRowArray()){
+                        $ultimos_documentos = $this->obtenerUltimosDocumentos($fila['ultimo_fk_documentos']);
+                        $ultima_derivacion = $this->obtenerUltimaDerivacion($fila['id']);
                         $file_name = str_replace('/','-',$documento['doc_correlativo']).'.docx';
                         $template = base_url('archivos/tipo_documento/'.$documento['plantilla']);
                         $plantillaWord = new TemplateProcessor($template);
                         $plantillaWord->setImageValue('qr', array('path' => $this->generarQRCam($documento,$fila), 'width' => '2cm', 'height' => '2cm', 'ratio' => true));
+                        $plantillaWord->setValue('oficina', $documento['oficina']);
                         $plantillaWord->setValue('correlativo', $documento['doc_correlativo']);
                         $plantillaWord->setValue('fecha', $documento['doc_ciudad'].', '. $this->formatoFecha($documento['doc_fecha']));
+                        $plantillaWord->setValue('ciudad', $documento['doc_ciudad']);
+                        $plantillaWord->setValue('mes', $this->meses[(int)$documento['doc_mes']]);
+                        $plantillaWord->setValue('anio', $documento['doc_anio']);
                         $plantillaWord->setValue('referencia', htmlspecialchars($documento['doc_referencia']));
                         $plantillaWord->setValue('fecha_mecanizada', $this->formatoFecha($fila['fecha_mecanizada']));
                         $plantillaWord->setValue('codigo_unico', $fila['codigo_unico']);
@@ -904,7 +1094,16 @@ class Documentos extends BaseController
                         $plantillaWord->setValue('provincias', htmlspecialchars($fila['provincias']));
                         $plantillaWord->setValue('municipios', htmlspecialchars($fila['municipios']));
                         $plantillaWord->setValue('titular', htmlspecialchars($fila['titular']));
+                        $plantillaWord->setValue('tramite', $tramite['nombre']);
                         $plantillaWord->setValue('hr_madre', $fila['hr_madre']);
+
+                        $plantillaWord->setValue('representante_legal', htmlspecialchars($fila['representante_legal']));
+                        $plantillaWord->setValue('nacionalidad', htmlspecialchars($fila['nacionalidad']));
+                        $plantillaWord->setValue('ultimos_documentos', htmlspecialchars($ultimos_documentos));
+                        $plantillaWord->setValue('domicilio_legal', htmlspecialchars($ultima_derivacion['domicilio_legal']));
+                        $plantillaWord->setValue('domicilio_procesal', htmlspecialchars($ultima_derivacion['domicilio_procesal']));
+                        $plantillaWord->setValue('telefono_solicitante', htmlspecialchars($ultima_derivacion['telefono_solicitante']));
+
                         $plantillaWord->setValue('iniciales', $this->getIniciales($documento['usuario']));
                         switch($fila['fk_tipo_hoja_ruta']){
                             case 1:
@@ -952,6 +1151,34 @@ class Documentos extends BaseController
                     break;
             }
         }
+    }
+
+    private function obtenerUltimosDocumentos($documentos){
+        $correlativos = '';
+        if($documentos){
+            $documentosModel = new DocumentosModel();
+            $id_documentos = explode(',', $documentos);
+            if($result = $documentosModel->select(array('correlativo', "TO_CHAR(fecha, 'DD/MM/YYYY') as fecha"))->whereIn('id', $id_documentos)->findAll()){
+                $tmp_correlativo = array();
+                foreach($result as $doc)
+                    $tmp_correlativo[] = $doc['correlativo'].' de fecha '.$doc['fecha'];
+                $correlativos = implode(", ",$tmp_correlativo);
+            }
+        }
+        return $correlativos;
+    }
+    private function obtenerUltimaDerivacion($id_acto_administrativo){
+        $db = \Config\Database::connect();
+        $campos = array("domicilio_legal", "domicilio_procesal", "telefono_solicitante");
+        $where = array(
+            'deleted_at' => NULL,
+            'fk_acto_administrativo' => $id_acto_administrativo,
+        );
+        $builder = $db->table('public.derivacion')
+        ->select($campos)
+        ->where($where)
+        ->orderBy('id', 'DESC');
+        return $builder->get()->getRowArray();
     }
 
     private function generarQRCam($documento, $fila){
@@ -1649,7 +1876,7 @@ class Documentos extends BaseController
     }
 
     public function actualizarPath(){
-        $documentosModel = new DocumentosModel();        
+        $documentosModel = new DocumentosModel();
         $db = \Config\Database::connect();
         $campos = array(
             "doc.id", "ac.fk_area_minera", "doc.doc_digital"
@@ -1663,12 +1890,12 @@ class Documentos extends BaseController
         ->where($where)
         ->notLike('doc.doc_digital', '/')
         ->orderBy('doc.id', 'ASC');
-        if($datos = $builder->get()->getResultArray()){            
+        if($datos = $builder->get()->getResultArray()){
             foreach($datos as $row){
                 $dataDocumento = array(
                     'id' => $row['id'],
                     'doc_digital' => 'archivos/cam/'.$row['fk_area_minera'].'/'.$row['doc_digital'],
-                );                
+                );
                 if($documentosModel->save($dataDocumento) === false)
                     echo "No se guardo el id: ".$row['id']."<br>";
                 else

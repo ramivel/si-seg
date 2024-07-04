@@ -31,6 +31,9 @@ class CorrespondenciaExternaModel extends Model{
         'editar',
         'fk_tipo_documento_externo',
         'observacion_recepcion',
+        'fk_usuario_atencion',
+        'fecha_atencion',
+        'observacion_atencion',
     ];
 
     protected $useTimestamps = true;

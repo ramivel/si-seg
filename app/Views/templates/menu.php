@@ -186,6 +186,11 @@
                                         <span class="pcoded-mtext">Mis Trámites</span>
                                     </a>
                                 </li>
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'correspondencia_externa') ? 'active' : '';?>">
+                                <a href="<?= base_url('correspondencia_externa/mis_recepciones/'.$row['id']);?>">
+                                        <span class="pcoded-mtext">Mi Correspondencia Externa</span>
+                                    </a>
+                                </li>
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador_mis_tramites') ? 'active' : '';?>">
                                     <a href="<?= base_url($row['controlador'].'buscador_mis_tramites');?>">
                                         <span class="pcoded-mtext">Reporte de mis Trámites como Responsable</span>
@@ -325,6 +330,12 @@
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'mis_tramites') ? 'active' : '';?>">
                                 <a href="<?= base_url($row['controlador'].'mis_tramites');?>">
                                         <span class="pcoded-mtext">Mis Hojas de Ruta</span>
+                                    </a>
+                                </li>
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'correspondencia_externa') ? 'active' : '';?>">
+                                <a href="<?= base_url('correspondencia_externa/mis_recepciones/'.$row['id']);?>">
+                                        <span class="pcoded-mtext">Mi Correspondencia Externa</span>
                                     </a>
                                 </li>
 

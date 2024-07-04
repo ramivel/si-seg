@@ -12,19 +12,19 @@
                         <?= form_open($accion, ['id'=>'formulario']);?>
                             <div class="form-group row d-none">
                                 <div class="col-sm-10">
-                                    <?= form_hidden('id', set_value('id', $fila['id']));?>
+                                    <?= form_hidden('id', set_value('id', (isset($fila['id']) ? $fila['id'] : '') ));?>
                                     <span class="messages"></span>
                                 </div>
                             </div>
                             <div class="form-group row d-none">
                                 <div class="col-sm-10">
-                                    <?= form_hidden('id_tramite', set_value('id_tramite', $id_tramite));?>
+                                    <?= form_hidden('id_tramite', set_value('id_tramite', (isset($id_tramite) ? $id_tramite : '') ));?>
                                     <span class="messages"></span>
                                 </div>
                             </div>
                             <div class="form-group row d-none">
                                 <div class="col-sm-10">
-                                    <?= form_hidden('correlativo', set_value('correlativo', $fila['correlativo']));?>
+                                    <?= form_hidden('correlativo', set_value('correlativo', (isset($fila['correlativo']) ? $fila['correlativo'] : '') ));?>
                                     <span class="messages"></span>
                                 </div>
                             </div>
@@ -47,20 +47,18 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Hoja Ruta Madre:</label>
-                                <div class="col-sm-8">
-                                    <?php
-                                        $campo = 'hr';
-                                        echo form_input(array(
-                                            'name' => $campo,
-                                            'id' => $campo,
-                                            'class' => 'form-control',
-                                            'readonly' => 'true',
-                                            'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
-                                        ));
-                                    ?>
+                                <label class="col-sm-2 col-form-label">Correlativo H.R. Madre*:</label>
+                                <div class="col-sm-10">
+                                    <?php $campo = 'fk_acto_administrativo'; ?>
+                                    <select id="<?= $campo; ?>" name="<?= $campo; ?>" class="buscar-tramite-ajax col-sm-12">
+                                        <option value="<?= $hr_madre['id']; ?>"><?= $hr_madre['hr']; ?></option>
+                                    </select>
+                                    <span class="messages"></span>
+                                    <?php if (isset($validation) && $validation->hasError($campo)) { ?>
+                                        <span class="form-bar text-danger"><?= $validation->getError($campo); ?></span>
+                                    <?php } ?>
                                 </div>
-                            </div>
+                            </div>                            
                             <div class="form-group row">
                                 <label class="col-sm-2 col-form-label">Código Único:</label>
                                 <div class="col-sm-3">
@@ -127,7 +125,7 @@
                                             'name' => $campo,
                                             'id' => $campo,
                                             'class' => 'form-control form-control-uppercase',
-                                            'value' => set_value($campo, $fila[$campo])
+                                            'value' => set_value($campo, $fila[$campo], false)
                                         ));
                                     ?>
                                     <span class="messages"></span>
