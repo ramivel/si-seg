@@ -38,6 +38,7 @@ class DenunciasMineriaIlegalModel extends Model{
         'estado_manual',
         'n_correlativo_hoja_ruta',
         'n_correlativo_denuncia',
+        'historico',
     ];
 
     protected $useTimestamps = true;

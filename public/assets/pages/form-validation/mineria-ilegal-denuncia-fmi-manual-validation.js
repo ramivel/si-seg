@@ -17,6 +17,14 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
+        fk_oficina:{
+            presence: {
+                message: "^Debe seleccionar una opción."
+            },
+        },
+        fk_usuario_destino: {
+            presence: true,
+        },
         fecha_denuncia: {
             presence: true,
         },
@@ -44,14 +52,14 @@ $(document).ready(function () {
                 message: "^Debe anexar al menos una Hoja de Ruta."
             },
         },
-        denunciantes_anexados: {
+        /*denunciantes_anexados: {
             presence: function(){
                 if($("#fk_tipo_denuncia").val() == '3')
                     return false;
                 else
                     return true;
             }
-        },
+        },*/
         departamento:{
             presence: {
                 message: "^Debe seleccionar un Departamento."

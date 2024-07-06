@@ -10,49 +10,51 @@
 </table>
 <br /><br />
 <?php if(isset($hojas_ruta_sincobol)){?>
-<table border="1" cellpadding="3" cellspacing="0">
-    <tr>
-        <td bgcolor="<?= $color;?>" colspan="2" align="center"><b>ORIGEN</b></td>
-    </tr>
-    <tr>
-        <td width="150" bgcolor="<?= $color;?>" align="rigth"><b>Hoja(s) de Ruta(s):</b></td>
-        <td width="405"><?= $hojas_ruta_sincobol;?></td>
-    </tr>
-</table>
-<br /><br />
-<?php }?>
-<table border="1" cellpadding="3" cellspacing="0">
-    <tr>
-        <td bgcolor="<?= $color;?>" colspan="2" align="center"><b>DATOS DEL DENUNCIANTE</b></td>
-    </tr>
-    <tr>
-        <td width="150" bgcolor="<?= $color;?>" align="rigth"><b>Nombre(s):</b></td>
-        <td width="405"><?= $denunciante['nombres'];?></td>
-    </tr>
-    <tr>
-        <td bgcolor="<?= $color;?>" align="rigth"><b>Apellido(s):</b></td>
-        <td><?= $denunciante['apellidos'];?></td>
-    </tr>
-    <tr>
-        <td bgcolor="<?= $color;?>" align="rigth"><b>Documento de Identidad:</b></td>
-        <td><?= $denunciante['documento_identidad'].' '.$denunciante['expedido'];?></td>
-    </tr>
-    <tr>
-        <td bgcolor="<?= $color;?>" align="rigth"><b>Celular:</b></td>
-        <td><?= $denunciante['telefonos'];?></td>
-    </tr>
-    <?php if($denunciante['email']){?>
+    <table border="1" cellpadding="3" cellspacing="0">
         <tr>
-            <td bgcolor="<?= $color;?>" align="rigth"><b>E-Mail:</b></td>
-            <td><?= $denunciante['email'];?></td>
+            <td bgcolor="<?= $color;?>" colspan="2" align="center"><b>ORIGEN</b></td>
         </tr>
-    <?php }?>
-    <tr>
-        <td bgcolor="<?= $color;?>" align="rigth"><b>Dirección:</b></td>
-        <td><?= $denunciante['direccion'];?></td>
-    </tr>
-</table>
-<br /><br />
+        <tr>
+            <td width="150" bgcolor="<?= $color;?>" align="rigth"><b>Hoja(s) de Ruta(s):</b></td>
+            <td width="405"><?= $hojas_ruta_sincobol;?></td>
+        </tr>
+    </table>
+    <br /><br />
+<?php }?>
+<?php if(isset($denunciante)){?>
+    <table border="1" cellpadding="3" cellspacing="0">
+        <tr>
+            <td bgcolor="<?= $color;?>" colspan="2" align="center"><b>DATOS DEL DENUNCIANTE</b></td>
+        </tr>
+        <tr>
+            <td width="150" bgcolor="<?= $color;?>" align="rigth"><b>Nombre(s):</b></td>
+            <td width="405"><?= $denunciante['nombres'];?></td>
+        </tr>
+        <tr>
+            <td bgcolor="<?= $color;?>" align="rigth"><b>Apellido(s):</b></td>
+            <td><?= $denunciante['apellidos'];?></td>
+        </tr>
+        <tr>
+            <td bgcolor="<?= $color;?>" align="rigth"><b>Documento de Identidad:</b></td>
+            <td><?= $denunciante['documento_identidad'].' '.$denunciante['expedido'];?></td>
+        </tr>
+        <tr>
+            <td bgcolor="<?= $color;?>" align="rigth"><b>Celular:</b></td>
+            <td><?= $denunciante['telefonos'];?></td>
+        </tr>
+        <?php if($denunciante['email']){?>
+            <tr>
+                <td bgcolor="<?= $color;?>" align="rigth"><b>E-Mail:</b></td>
+                <td><?= $denunciante['email'];?></td>
+            </tr>
+        <?php }?>
+        <tr>
+            <td bgcolor="<?= $color;?>" align="rigth"><b>Dirección:</b></td>
+            <td><?= $denunciante['direccion'];?></td>
+        </tr>
+    </table>
+    <br /><br />
+<?php }?>
 <table border="1" cellpadding="3" cellspacing="0">
     <tr>
         <td bgcolor="<?= $color;?>" colspan="2" align="center"><b>DESCRIPCIÓN DE LA ACTIVIDAD MINERA</b></td>

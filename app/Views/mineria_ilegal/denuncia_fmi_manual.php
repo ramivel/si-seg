@@ -4,9 +4,10 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header pb-1">
                         <h5>Formulario</h5>
                         <span>Los campos con <code>*</code> son obligatorios.</span>
+                        <p class="text-center mb-0"><strong>ESTE FORMULARIO ES PARA REGULARIZAR LAS DENUNCIAS ANTES DE LA GESTIÓN 2024.</strong></p>
                     </div>
                     <div class="card-block">
                         <?= form_open_multipart($accion, ['id'=>'formulario']);?>
@@ -39,10 +40,65 @@
                                 </ul>
                                 <!-- Tab panes -->
                                 <div class="tab-content tabs card-block">
-                                    <div class="tab-pane active" id="datos_hoja_ruta" role="tabpanel">
+                                    <div class="tab-pane active" id="datos_hoja_ruta" role="tabpanel">                                        
+                                        <h4 class="sub-title mt-2 mb-2">HOJA DE RUTA</h4>
+                                        <p><strong>Nota.</strong> El correlativo de la Hoja de Ruta se lo realiza con la Dirección Departamental o Regional seleccionada.</p>
+                                        <?php if(in_array(13, session()->get('registroPermisos'))){?>
+                                            <div class="form-group row">
+                                                <label class="col-sm-2 col-form-label">Dirección Departamental o Regional * :</label>
+                                                <div class="col-sm-10">
+                                                    <?php
+                                                        $campo = 'fk_oficina';
+                                                        echo form_dropdown($campo, $oficinas, set_value($campo, set_value($campo,(isset($denuncia[$campo]) ? $denuncia[$campo] : ''))), array('id' => $campo, 'class' => 'form-control'));
+                                                    ?>
+                                                    <span class="messages"></span>
+                                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                    <?php }?>
+                                                </div>
+                                            </div>
+                                        <?php }else{?>
+                                            <div class="form-group row">
+                                                <label class="col-sm-2 col-form-label">Dirección Departamental o Regional :</label>
+                                                <div class="col-sm-10">
+                                                    <?php
+                                                        $campo = 'fk_oficina';
+                                                        echo form_input(array(
+                                                            'name' => $campo,
+                                                            'id' => $campo,
+                                                            'class' => 'form-control',
+                                                            'readonly' => 'true',
+                                                            'value' => set_value($campo, $oficinas[session()->get('registroOficina')])
+                                                        ));
+                                                    ?>
+                                                    <span class="messages"></span>
+                                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                    <?php }?>
+                                                </div>
+                                            </div>
+                                        <?php }?>
+                                        <p><strong>Nota.</strong> Debe seleccionar al usuario destino que aparecera en la Hoja de Ruta.</p>
+                                        <div class="form-group row">
+                                            <label class="col-sm-2 col-form-label">Usuario Destino * : </label>
+                                            <div class="col-sm-10">
+                                                <?php $campo = 'fk_usuario_destino';?>
+                                                <select id="<?= $campo;?>" name="<?= $campo;?>" class="analista-destinatario-mineria-ilegal-ajax col-sm-12">
+                                                    <?php if(isset($usu_destinatario)){ ?>
+                                                        <option value="<?= $usu_destinatario['id'];?>"><?= $usu_destinatario['nombre'];?></option>
+                                                    <?php }else{ ?>
+                                                        <option value="">Escriba el Nombre o Cargo...</option>
+                                                    <?php } ?>
+                                                </select>
+                                                <span class="messages"></span>
+                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                <?php }?>
+                                            </div>
+                                        </div>
+                                        <h4 class="sub-title mt-2 mb-2">FORMULARIO DE MINERIA ILEGAL</h4>
                                         <p><strong>Nota.</strong> El correlativo del Formulario de Minería Ilegal se lo estructura con el Departamento seleccionado en la sección de Descripción de la Actividad minera.</p>
-                                        <p class="text-center"><strong>ESTE FORMULARIO ES PARA REGULARIZAR LAS DENUNCIAS ATENDIDAS ANTES DE LA GESTIÓN 2024.</strong></p>
-                                        <div class="row">                                            
+                                        <div class="row">
                                             <div class="col-md-6 col-sm-12">
                                                 <div class="form-group row">
                                                     <label class="col-sm-4 col-form-label">Fecha de Minería Ilegal * : </label>
@@ -80,7 +136,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        
                                         <div id="verificacion-oficio-manual">
                                             <div class="row form-group">
                                                 <label class="col-sm-2 col-form-label">Tipo de Origen * :</label>
