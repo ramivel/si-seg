@@ -114,7 +114,7 @@
                                         <a class="nav-link " data-toggle="tab" href="#adjuntos" role="tab"><strong>Adjunto(s)</strong></a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link " data-toggle="tab" href="#estado_mineria_ilegal" role="tab"><strong>Estado</strong></a>
+                                        <a class="nav-link " data-toggle="tab" href="#estado_mineria_ilegal" role="tab"><strong>Estado y Documento(s) Generado(s)</strong></a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" data-toggle="tab" href="#derivacion" role="tab"><strong>Derivación</strong></a>
@@ -904,71 +904,6 @@
                                                 <?php }?>
                                             </div>
                                         </div>
-                                        <?php if(count($documentos)>0){?>
-                                            <div class="form-group row">
-                                                <label class="col-sm-12 col-form-label">Documento(s) Generado(s) : </label>
-                                                <div class="col-sm-12">
-                                                    <table id="tabla_documentos" class="table table-bordered">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="text-center">N°</th>
-                                                                <th class="text-center">Correlativo</th>
-                                                                <th class="text-center">Fecha</th>
-                                                                <th class="text-center">Tipo Documento</th>
-                                                                <th class="text-center">Fecha Notificación</th>
-                                                                <th class="text-center">Archivo Digital</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <?php foreach($documentos as $n=>$row){?>
-                                                                <tr>
-                                                                    <td class="text-center"><?= ($n+1);?></td>
-                                                                    <td class="text-center"><?= $row['correlativo'];?></td>
-                                                                    <td class="text-center"><?= $row['fecha'];?></td>
-                                                                    <td class="text-center"><?= $row['tipo_documento'];?></td>
-                                                                    <td class="text-center form-group">
-                                                                        <?php
-                                                                        if($row['notificacion'] == 't'){
-                                                                            $campo = 'fecha_notificacion';
-                                                                            echo form_input(array(
-                                                                                'name' => $campo.$row['id'],
-                                                                                'id' => $campo.$row['id'],
-                                                                                'class' => 'form-control',
-                                                                                'type' => 'date',
-                                                                                'required' => 'true',
-                                                                                'value' => set_value($campo(isset($row[$campo]) ? $row[$campo] : ''))
-                                                                            ));
-                                                                            echo '<span class="messages"></span>';
-                                                                            if(isset($validation) && $validation->hasError($campo))
-                                                                                echo '<span class="form-bar text-danger">'.$validation->getError($campo).'</span>';
-                                                                        }
-                                                                        ?>
-                                                                    </td>
-                                                                    <td class="text-center form-group">
-                                                                        <?php if($row['doc_digital']){?>
-                                                                            <a href="<?=base_url($row['doc_digital']);?>" class='btn btn-sm btn-inverse' target='_blank' title='Ver Documento'><i class='fa fa-file-pdf-o'></i> Ver Documento</a>
-                                                                        <?php }?>
-                                                                        <?php
-                                                                            $campo = 'adjunto';
-                                                                            echo form_upload(array(
-                                                                                'name' => $campo.$row['id'],
-                                                                                'id' => $campo.$row['id'],
-                                                                                'class' => 'form-control',                                                                                
-                                                                                'accept' => 'application/pdf'
-                                                                            ));
-                                                                            echo '<span class="messages"></span>';
-                                                                            if(isset($validation) && $validation->hasError($campo.$row['id']))
-                                                                                echo '<span class="form-bar text-danger">'.$validation->getError($campo.$row['id']).'</span>';
-                                                                        ?>
-                                                                    </td>
-                                                                </tr>
-                                                            <?php }?>
-                                                        </tbody>
-                                                    </table>
-                                                    <p class="mb-1"><strong>Nota.</strong> Si selecciona otro archivo y se guarda el formulario este reemplazará al anterior archivo.</p>
-                                                </div>
-                                            </div>
-                                        <?php }?>
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Observaciones : </label>
                                             <div class="col-sm-10">
@@ -988,6 +923,70 @@
                                                 <?php }?>
                                             </div>
                                         </div>
+                                        <?php if(count($documentos)>0){?>
+                                            <div class="form-group row">
+                                                <label class="col-sm-12 col-form-label">Documento(s) Generado(s) : </label>
+                                                <div class="col-sm-12">
+                                                    <table id="tabla_documentos" class="table table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="text-center">N°</th>
+                                                                <th class="text-center">Correlativo</th>
+                                                                <th class="text-center">Fecha</th>
+                                                                <th class="text-center">Tipo Documento</th>
+                                                                <th class="text-center">Fecha Notificación *</th>
+                                                                <th class="text-center">Archivo Digital *</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <?php foreach($documentos as $n=>$row){?>
+                                                                <tr>
+                                                                    <td class="text-center"><?= ($n+1);?></td>
+                                                                    <td class="text-center"><?= $row['correlativo'];?></td>
+                                                                    <td class="text-center"><?= $row['fecha'];?></td>
+                                                                    <td class="text-center"><?= $row['tipo_documento'];?></td>
+                                                                    <td class="text-center form-group">
+                                                                        <?php
+                                                                        if($row['notificacion'] == 't'){
+                                                                            $campo = 'fecha_notificacion';
+                                                                            echo form_input(array(
+                                                                                'name' => $campo.$row['id'],
+                                                                                'id' => $campo.$row['id'],
+                                                                                'class' => 'form-control',
+                                                                                'type' => 'date',
+                                                                                'value' => set_value($campo(isset($row[$campo]) ? $row[$campo] : ''))
+                                                                            ));
+                                                                            echo '<span class="messages"></span>';
+                                                                            if(isset($validation) && $validation->hasError($campo))
+                                                                                echo '<span class="form-bar text-danger">'.$validation->getError($campo).'</span>';
+                                                                        }
+                                                                        ?>
+                                                                    </td>
+                                                                    <td class="text-center form-group">
+                                                                        <?php if($row['doc_digital']){?>
+                                                                            <a href="<?=base_url($row['doc_digital']);?>" class='btn btn-sm btn-inverse' target='_blank' title='Ver Documento'><i class='fa fa-file-pdf-o'></i> Ver Documento</a>
+                                                                        <?php }?>
+                                                                        <?php
+                                                                            $campo = 'adjunto';
+                                                                            echo form_upload(array(
+                                                                                'name' => $campo.$row['id'],
+                                                                                'id' => $campo.$row['id'],
+                                                                                'class' => 'form-control',
+                                                                                'accept' => 'application/pdf'
+                                                                            ));
+                                                                            echo '<span class="messages"></span>';
+                                                                            if(isset($validation) && $validation->hasError($campo.$row['id']))
+                                                                                echo '<span class="form-bar text-danger">'.$validation->getError($campo.$row['id']).'</span>';
+                                                                        ?>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php }?>
+                                                        </tbody>
+                                                    </table>
+                                                    <p class="mb-1"><strong>Nota.</strong> Si selecciona otro archivo y se guarda el formulario este reemplazará al anterior archivo.</p>
+                                                </div>
+                                            </div>
+                                        <?php }?>
                                     </div>
                                     <div class="tab-pane" id="derivacion" role="tabpanel">
                                         <div class="form-group row">

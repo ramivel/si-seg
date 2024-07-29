@@ -50,6 +50,7 @@
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/pages/pnotify/notify.css');?>">
     <!-- leaflet -->
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/pages/leaflet/leaflet.css');?>">
+    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/pages/leaflet/leaflet.legend.css');?>">
 
     <!-- Style.css -->
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/style.css');?>">
@@ -210,9 +211,9 @@
                         var chart = new google.visualization.PieChart(document.getElementById('<?= $grafica['id_mapa']?>'));
                         chart.draw(data, options);
                     });
-                <?php }?>                
+                <?php }?>
             });
-        </script>    
+        </script>
     <?php }?>
 
     <?php if(isset($charts_js)){ ?>
@@ -230,15 +231,27 @@
     <!-- leaflet -->
     <?php if(isset($mapas) && $mapas){ ?>
     <script type="text/javascript" src="<?= base_url('assets/pages/leaflet/leaflet.js');?>"></script>
+    <script type="text/javascript" src="<?= base_url('assets/pages/leaflet/leaflet.legend.js');?>"></script>
     <script type="text/javascript" src="<?= base_url('assets/js/maps.js');?>"></script>
-    <?php if(isset($puntos) && count($puntos)>0){?>
-        <script type="text/javascript">
-            <?php
-            foreach($puntos as $punto)
-                echo "L.marker([".$punto['latitud'].", ".$punto['longitud']."]).addTo(myMap);";
-            ?>
-        </script>
-    <?php }?>
+        <?php if(isset($puntos) && count($puntos)>0){?>
+            <script type="text/javascript">
+                <?php
+                foreach($puntos as $punto)
+                    echo "L.marker([".$punto['latitud'].", ".$punto['longitud']."]).addTo(myMap);";
+                ?>
+            </script>
+        <?php }?>
+        <?php if(isset($municipio_layer) && $municipio_layer){?>
+            <script type="text/javascript">
+                agregarPoligonoMunicipio(<?= $municipio_layer;?>);
+            </script>
+        <?php }?>
+        <?php if(isset($areas_mineras_layer) && $areas_mineras_layer){?>
+            <script type="text/javascript">
+                actualizarAreasMinerasLayer();
+            </script>
+        <?php }?>
+
     <?php }?>
 
     <script type="text/javascript" src="<?= base_url('assets/js/pcoded.min.js');?>"></script>

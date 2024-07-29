@@ -25,6 +25,9 @@
                         <span>Los campos con <code>*</code> son obligatorios.</span>
                     </div>
                     <div class="card-block">
+                        <div class="row mb-2">
+                            <div class="col-sm-12 h3 text-center"><strong>NOTA.</strong> La plantilla generada es únicamente referencial.</div>
+                        </div>
                         <?= form_open($accion, ['id'=>'formulario']);?>
                             <div class="form-group row">
                                 <label class="col-sm-2 col-form-label">Hoja Ruta Madre:</label>
@@ -160,12 +163,13 @@
                                         <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
                                     <?php }?>
                                 </div>
-                            </div>
+                            </div>                            
                             <div class="form-group row">
                                 <label class="col-sm-2"></label>
                                 <div class="col-sm-10">
                                     <?php echo form_submit('enviar', 'GUARDAR','class="btn btn-primary m-b-0"');?>
                                     <a href="<?= base_url($retorno);?>" class="btn btn-success m-b-0">CANCELAR</a>
+                                    <a href="<?= base_url($atender);?>" class="btn btn-inverse m-b-0">ATENDER TRAMITE</a>
                                 </div>
                             </div>
                         <?= form_close();?>

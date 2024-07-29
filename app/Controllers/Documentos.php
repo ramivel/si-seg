@@ -359,7 +359,7 @@ class Documentos extends BaseController
                             session()->setFlashdata('fail', $documentosModel->errors());
                         }else{
                             $idDocumento = $documentosModel->getInsertID();
-                            session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información. <code><a href="'.base_url($this->controlador.'descargar/'.$idDocumento).'" target="_blank">Descargar Documento '.$correlativo.'</a></code>');
+                            session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información. <b>La plantilla generada es únicamente referencial:</b> <code><a href="'.base_url($this->controlador.'descargar/'.$idDocumento).'" target="_blank">Descargar Documento '.$correlativo.'</a></code>');
                         }
                         return redirect()->to($this->controlador.'agregar/'.$tramite['id'].'/'.$id);
                     }
@@ -377,6 +377,7 @@ class Documentos extends BaseController
                 $contenido['subtitulo'] = 'Nuevo Documento';
                 $contenido['accion'] = $this->controlador.'agregar/'.$idTramite.'/'.$id;
                 $contenido['retorno'] = $tramite['controlador'].'mis_tramites';
+                $contenido['atender'] = $tramite['controlador'].'atender/'.$id;
                 $data['content'] = view($this->carpeta.'agregar', $contenido);
                 $data['editor_ck'] = false;
                 $data['validacion_js'] = 'documentos-validation.js';
@@ -520,7 +521,7 @@ class Documentos extends BaseController
                 if($documentosModel->save($data) === false){
                     session()->setFlashdata('fail', $documentosModel->errors());
                 }else{
-                    session()->setFlashdata('success', 'Se Actualizo Correctamente la Información. <code><a href="'.base_url($this->controlador.'descargar/'.$id).'" target="_blank">Descargar Documento '.$correlativo.'</a></code>');
+                    session()->setFlashdata('success', 'Se Actualizo Correctamente la Información. <b>La plantilla generada es únicamente referencial:</b> <code><a href="'.base_url($this->controlador.'descargar/'.$id).'" target="_blank">Descargar Documento '.$correlativo.'</a></code>');
                     return redirect()->to($this->controlador.'listado/'.$idTramite);
                 }
             }
@@ -1737,23 +1738,27 @@ class Documentos extends BaseController
             $id_tramites = $this->request->getPost('id_tramites');
             $datos = array();
             foreach($id_hojas_rutas as $i=>$id_hoja_ruta){
-                switch($id_tramites[$i]){
-                    case 1:
-                        $actoAdministrativoModel = new ActoAdministrativoModel();
-                        $campos = array('id', 'correlativo', "to_char(fecha_mecanizada, 'DD/MM/YYYY') as fecha");
-                        $hoja_ruta = $actoAdministrativoModel->select($campos)->find($id_hoja_ruta);
-                        break;
-                    case 2:
-                        $hojaRutaMineriaIlegalModel = new HojaRutaMineriaIlegalModel();
-                        $campos = array('id', 'correlativo', "to_char(fecha_hoja_ruta, 'DD/MM/YYYY') as fecha");
-                        $hoja_ruta = $hojaRutaMineriaIlegalModel->select($campos)->find($id_hoja_ruta);
-                        break;
+                if(is_numeric($id_hoja_ruta)){
+                    switch($id_tramites[$i]){
+                        case 1:
+                            $actoAdministrativoModel = new ActoAdministrativoModel();
+                            $campos = array('id', 'correlativo', "to_char(fecha_mecanizada, 'DD/MM/YYYY') as fecha");
+                            $hoja_ruta = $actoAdministrativoModel->select($campos)->find($id_hoja_ruta);
+                            break;
+                        case 2:
+                            $hojaRutaMineriaIlegalModel = new HojaRutaMineriaIlegalModel();
+                            $campos = array('id', 'correlativo', "to_char(fecha_hoja_ruta, 'DD/MM/YYYY') as fecha");
+                            $hoja_ruta = $hojaRutaMineriaIlegalModel->select($campos)->find($id_hoja_ruta);
+                            break;
+                    }
+                    $datos[] = array_merge($hoja_ruta, array('tipo_tramite' => $tramites[$id_tramites[$i]]));
+                }else{
+                    $datos[] = $id_hoja_ruta;
                 }
-                $datos[] = array_merge($hoja_ruta, array('tipo_tramite' => $tramites[$id_tramites[$i]]));
             }
 
             $file_name = 'libro_registros.pdf';
-            $pdf = new LibroRegistroPdf('L', 'mm', 'Letter', true, 'UTF-8', false);
+            $pdf = new LibroRegistroPdf('L', 'mm', array(216, 279), true, 'UTF-8', false);
 
             // Firma del Documento
             $pdf->SetCreator('GARNET');
@@ -1762,7 +1767,7 @@ class Documentos extends BaseController
             $pdf->SetKeywords('Hoja, Ruta, Libro, Registro');
 
             //establecer margenes
-            $pdf->SetMargins(10, 23, 0);
+            $pdf->SetMargins(5, 23, 0);
             $pdf->SetAutoPageBreak(true, 0); //Margin botton
             $pdf->setFontSubsetting(false);
 
@@ -1773,6 +1778,7 @@ class Documentos extends BaseController
                     $tmp_index = 1;
                 if($tmp_index == 1)
                     $pdf->AddPage();
+
                 $fila = $this->fila_libro_registro($dato);
                 $pdf->writeHTML($fila, true, false, false, false, '');
                 $tmp_index++;
@@ -1787,19 +1793,23 @@ class Documentos extends BaseController
     }
     private function fila_libro_registro($fila){
         $columna = array(
-            array('tamanio' => 90,'campo' => 'correlativo'),
+            array('tamanio' => 75,'campo' => 'correlativo'),
             array('tamanio' => 95,'campo' => 'tipo_tramite'),
             array('tamanio' => 55,'campo' => 'fecha'),
             array('tamanio' => 75,'campo' => 'destinatario'),
-            array('tamanio' => 95,'campo' => 'proveido'),
-            array('tamanio' => 125,'campo' => 'derivado'),
-            array('tamanio' => 125,'campo' => 'derivado'),
-            array('tamanio' => 125,'campo' => 'derivado'),
+            array('tamanio' => 90,'campo' => 'proveido'),
+            array('tamanio' => 124,'campo' => 'derivado'),
+            array('tamanio' => 124,'campo' => 'derivado'),
+            array('tamanio' => 124,'campo' => 'derivado'),
         );
-        $html = '<table border="1" cellpadding="3" cellspacing="0"><tr>';
-        foreach($columna as $row)
-            $html .= '<th align="center" width="'.$row['tamanio'].'" height="118">&nbsp;<br><br><br><br>'. (isset($fila[$row['campo']])?$fila[$row['campo']]:'') .'</th>';
-        $html .= '</tr></table>';
+        if($fila == 'SALTO'){
+            $html = '<table border="0" cellpadding="3" cellspacing="0"><tr><th align="center" height="118">&nbsp;<br></th></tr></table>';
+        }else{
+            $html = '<table border="1" cellpadding="3" cellspacing="0"><tr>';
+            foreach($columna as $row)
+                $html .= '<th align="center" width="'.$row['tamanio'].'" height="118">&nbsp;<br><br><br><br>'. (isset($fila[$row['campo']])?$fila[$row['campo']]:'') .'</th>';
+            $html .= '</tr></table>';
+        }
         return $html;
 
     }
@@ -1873,6 +1883,21 @@ class Documentos extends BaseController
             </tr>';
             echo $html;
         }
+    }
+    public function ajaxTrSaltoLinea(){
+        $html = '<tr class="rowClass">
+            <td class="text-center" colspan="3">
+                <input type="hidden" name="id_hojas_rutas[]" value="SALTO"/>
+                <input type="hidden" name="id_tramites[]" value="SALTO"/>
+                SALTO DE LÍNEA
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-sm btn-inverse subir-hr" title="Subir Salto"><span class="fa fa-arrow-up"></span></button>
+                <button type="button" class="btn btn-sm btn-inverse bajar-hr" title="Bajar Salto"><span class="fa fa-arrow-down"></span></button>
+                <button type="button" class="btn btn-sm btn-danger eliminar-hr" title="Quitar Salto"><span class="fa fa-trash"></span></button>
+            </td>
+        </tr>';
+        echo $html;
     }
 
     public function actualizarPath(){

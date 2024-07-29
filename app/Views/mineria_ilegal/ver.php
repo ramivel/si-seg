@@ -8,7 +8,7 @@
                 <a href="<?= base_url($controlador.'formulario_denuncia_pdf/'.$denuncia['id']);?>" target="_blank" class="btn btn-primary"><i class="fa fa-print"></i> IMPRIMIR F.M.I</a>
                 <?php if(isset($denuncia_web) && $denuncia_web['id']){?>
                     <a href="<?= base_url('pdf_formulario_denuncia/'.$denuncia_web['id']);?>" target="_blank" class="btn btn-info"><i class="fa fa-print"></i> IMPRIMIR F.D.W.</a>
-                <?php }?>                
+                <?php }?>
             </div>
         </div>
         <div class="row">
@@ -89,7 +89,7 @@
                                                     <td class="text-center"><?= $row['remitente'];?></td>
                                                     <td class="text-center"><?= $row['cite'];?></td>
                                                 </tr>
-                                            <?php }?>                                            
+                                            <?php }?>
                                         </tbody>
                                     </table>
                             <?php }?>
@@ -198,10 +198,10 @@
                                         <th class="text-nowrap text-center" scope="row">Municipio(s)</th>
                                     </tr>
                                 </thead>
-                                <tbody>                                
+                                <tbody>
                                     <?php foreach($areas_mineras as $row){?>
                                         <tr>
-                                            <td class="text-center"><?= $row['codigo_unico'];?></td>
+                                            <td class="text-center"><input type="hidden" name="id_areas_mineras[]" value="<?= $row['id'];?>" /><?= $row['codigo_unico'];?></td>
                                             <td class="text-center"><?= $row['area_minera'];?></td>
                                             <td class="text-center"><?= $row['tipo_area_minera'];?></td>
                                             <td class="text-center"><?= $row['extension'];?></td>
@@ -211,7 +211,7 @@
                                             <td class="text-center"><?= $row['provincias'];?></td>
                                             <td class="text-center"><?= $row['municipios'];?></td>
                                         </tr>
-                                    <?php }?>                                
+                                    <?php }?>
                                 </tbody>
                             </table>
                         </div>
@@ -251,7 +251,7 @@
                                         <th class="text-nowrap text-center" scope="row">Adjunto</th>
                                     </tr>
                                 </thead>
-                                <tbody>                                    
+                                <tbody>
                                     <?php foreach($adjuntos as $i=>$row){?>
                                         <tr>
                                             <td class="text-center"><?= $row['tipo'];?></td>
@@ -260,88 +260,17 @@
                                             <td class="text-center"><?= $row['fecha_cite'];?></td>
                                             <td class="text-center"><a href="<?= base_url($row['adjunto']);?>" class="btn btn-sm btn-inverse" target="_blank"><i class="icofont icofont-download-alt"></i> Ver Adjunto</a></td>
                                         </tr>
-                                    <?php }?>                                    
+                                    <?php }?>
                                 </tbody>
                             </table>
                         </div>
                         <?php }?>
-                        <div id="tabla_datos" class="row mb-1">
-                            <div class="col-md-12">
-                                <ul class="nav nav-tabs md-tabs " role="tablist">
-                                    <li class="nav-item">
-                                        <a class="nav-link active" href="#tabla_datos" ><strong>SEGUIMIENTO TRÁMITE</strong></a>
-                                        <div class="slide"></div>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="<?= $url_externa;?>#tabla_datos"><strong>CORRESPONDENCIA EXTERNA</strong></a>
-                                        <div class="slide"></div>
-                                    </li>                                    
-                                </ul>
-                            </div>
-                        </div>                        
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <?php for($i=0;$i<count($cabecera_derivacion);$i++){?>
-                                        <th class="text-center"><?php echo $cabecera_derivacion[$i];?></th>
-                                        <?php }?>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                <?php if(!empty($derivaciones) && count($derivaciones)>0){?>
-                                    <?php foreach ($derivaciones as $n=>$derivacion){?>
-                                    <tr class="<?= (count($derivaciones) == ($n+1) ? "table-warning" : "") ?>">
-                                        <?php for($i=0;$i<count($campos_derivacion);$i++){?>
-                                            <?php if($campos_derivacion[$i]=='adjunto_pdf'){ ?>
-                                                <?php if($derivacion[$campos_derivacion[$i]]){?>
-                                                    <td><a href="<?= base_url($ruta_archivos.$derivacion[$campos_derivacion[$i]]);?>" target="_blank" title="Ver Documento"><i class="feather icon-file"></i> Ver Documento</a></td>
-                                                <?php }else{?>
-                                                    <td></td>
-                                                <?php }?>
-                                            <?php }elseif($campos_derivacion[$i]=='estado'){?>
-                                                <td>
-                                                    <?php
-                                                    $style = '';
-                                                    switch($derivacion[$campos_derivacion[$i]]){
-                                                        case 'REGULARIZACIÓN':
-                                                            $style = 'btn btn-sm btn-danger btn-round';
-                                                            break;
-                                                        case 'ATENDIDO':
-                                                            $style = 'btn btn-sm btn-success btn-round';
-                                                            break;
-                                                        case 'RECIBIDO':
-                                                            $style = 'btn btn-sm btn-primary btn-round';
-                                                            break;
-                                                        case 'DERIVADO':
-                                                            $style = 'btn btn-sm btn-primary btn-round';
-                                                            break;
-                                                        case 'DEVUELTO':
-                                                            $style = 'btn btn-sm btn-warning btn-round';
-                                                            break;
-                                                        case 'FINALIZADO':
-                                                            $style = 'btn btn-sm btn-danger btn-round';
-                                                            break;
-                                                        case 'ANEXADO':
-                                                            $style = 'btn btn-sm btn-info btn-round';
-                                                            break;
-                                                    }
-                                                    echo '<button class="'.$style.'">'.$derivacion[$campos_derivacion[$i]].'</button>';
-                                                    ?>
-                                                </td>
-                                            <?php }else{?>
-                                                <td><?= $derivacion[$campos_derivacion[$i]];?></td>
-                                            <?php }?>
-                                        <?php }?>
-                                    </tr>
-                                    <?php }?>
-                                <?php }?>
-                                </tbody>
-                            </table>
-                        </div>
                     </div>
                 </div>
             </div>
+
+            <?= $seccion;?>
+
         </div>
     </div>
 </div>

@@ -111,6 +111,37 @@
                                 </table>
                             <?php }?>
                         </div>
+                        <?php if($registro_minero && $deuda){?>
+                            <h4 class="sub-title mt-3">Datos Catastro Minero</h4>
+                            <div class="table-responsive">
+                                <table class="table table-bordered mb-0">
+                                    <tbody>
+                                        <?php if($registro_minero){?>
+                                            <tr>
+                                                <th class="text-nowrap" width="350px" scope="row">Fecha de Registro Minero:</th>
+                                                <td><?= $registro_minero['fecha_inscripcion_minera'];?></td>
+                                                <th class="text-nowrap" width="180px" scope="row">Fecha de Vencimiento:</th>
+                                                <td><?= $registro_minero['fecha_vencimiento'];?></td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-nowrap" scope="row">Número de Gaceta de Publicación de Ley:</th>
+                                                <td><?= $registro_minero['gaceta_numero'];?></td>
+                                                <th class="text-nowrap" scope="row">Fecha de Publicación de Gaceta:</th>
+                                                <td><?= $registro_minero['gaceta_fecha'];?></td>
+                                            </tr>
+                                        <?php }?>
+                                        <?php if($deuda){?>
+                                            <tr>
+                                                <th class="text-nowrap" width="350px" scope="row">Deuda de Patente Minera (Años):</th>
+                                                <td><?= $deuda['anio_deuda'];?></td>
+                                                <th class="text-nowrap" width="180px" scope="row">Total (Bs.):</th>
+                                                <td><?= $deuda['deuda_total'];?></td>
+                                            </tr>
+                                        <?php }?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php }?>
                     </div>
                 </div>
             </div>

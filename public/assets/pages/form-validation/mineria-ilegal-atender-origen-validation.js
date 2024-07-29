@@ -38,7 +38,7 @@ $(document).ready(function () {
         },
         informe_tecnico_fecha: {
             presence: true,
-        },        
+        },
         descripcion_oficio: {
             presence: true,
         },
@@ -81,6 +81,22 @@ $(document).ready(function () {
         fk_estado_tramite_hijo:{
             presence: function(){
                 if($('#fk_estado_tramite').children('option:selected').data('padre') == 't')
+                    return true;
+                else
+                    return false;
+            }
+        },
+        "fecha_notificacion[]": {
+            presence: function(){
+                if($('#validacion_fecha_notificacion').val() == 'SI')
+                    return true;
+                else
+                    return false;
+            }
+        },
+        "documentos[]": {
+            presence: function(){
+                if($('#validacion_documento').val() == 'SI')
                     return true;
                 else
                     return false;

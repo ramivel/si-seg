@@ -48,7 +48,7 @@ $(document).ready(function () {
         },
         descripcion_lugar: {
             presence: true,
-        },        
+        },
         fk_estado_tramite: {
             presence: {
                 message: "^Debe seleccionar el Estado del Tramite."
@@ -62,6 +62,22 @@ $(document).ready(function () {
                     return false;
             }
         },
+        "fecha_notificacion[]": {
+            presence: function(){
+                if($('#validacion_fecha_notificacion').val() == 'SI')
+                    return true;
+                else
+                    return false;
+            }
+        },
+        "documentos[]": {
+            presence: function(){
+                if($('#validacion_documento').val() == 'SI')
+                    return true;
+                else
+                    return false;
+            }
+        },
         fk_usuario_destinatario:{
             presence: {
                 message: "^Debe seleccionar el Destinatario."
@@ -69,7 +85,7 @@ $(document).ready(function () {
         },
         instruccion: {
             presence: true,
-        },        
+        },
         motivo_anexo: {
             presence: function(){
                 if($('#anexar_hr').val().length > 0)

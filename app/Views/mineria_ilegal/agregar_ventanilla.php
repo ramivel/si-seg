@@ -200,7 +200,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="tab-pane " id="coordenadas_geograficas" role="tabpanel">
+                                    <div class="tab-pane" id="coordenadas_geograficas" role="tabpanel">
                                         <p>Nota. Haga <strong>DOBLE CLICK</strong> en el mapa para poner uno o mas puntos.</p>
                                         <div class="row">
                                             <div class="col-md-4 col-sm-12">

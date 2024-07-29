@@ -23,24 +23,6 @@
                                     <?php }else{?>
                                         <td></td>
                                     <?php }?>
-                                <?php }elseif($campos_listado[$i]=='estado'){?>
-                                    <td>
-                                        <?php
-                                        $style = '';
-                                        switch($row[$campos_listado[$i]]){
-                                            case 'INGRESADO':
-                                                $style = 'btn btn-sm btn-inverse btn-round';
-                                                break;
-                                            case 'RECIBIDO':
-                                                $style = 'btn btn-sm btn-success btn-round';
-                                                break;
-                                            case 'ATENDIDO':
-                                                $style = 'btn btn-sm btn-primary btn-round';
-                                                break;
-                                        }
-                                        echo '<button class="'.$style.'">'.$row[$campos_listado[$i]].'</button>';
-                                        ?>
-                                    </td>
                                 <?php }else{?>
                                     <td><?= $row[$campos_listado[$i]];?></td>
                                 <?php }?>

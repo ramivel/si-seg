@@ -39,6 +39,8 @@ class Usuarios extends BaseController
             13 => 'Responsable Minería Ilegal DFCCI',
             14 => 'Responsable Minería Ilegal Dirección Departamental o Regional',
             15 => 'Cargar Registro Manuales de Minería Ilegal',
+            18 => 'Reporte de denuncias',
+            19 => 'Reporte de denuncias a nivel nacional',
         ),
     );
 

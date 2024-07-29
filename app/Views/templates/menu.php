@@ -345,6 +345,20 @@
                                     </a>
                                 </li>
 
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'historico_sincobol') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'historico_sincobol');?>">
+                                        <span class="pcoded-mtext">Histórico SINCOBOL</span>
+                                    </a>
+                                </li>
+
+                                <?php if(in_array(18, session()->get('registroPermisos')) || in_array(19, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'reporte_denuncias_fechas') ? 'active' : '';?>">
+                                        <a href="<?= base_url($row['controlador'].'reporte_denuncias_fechas');?>">
+                                            <span class="pcoded-mtext">Reporte Denuncias por Fecha</span>
+                                        </a>
+                                    </li>
+                                <?php }?>
+
                             </ul>
                         </li>
                     <?php }?>

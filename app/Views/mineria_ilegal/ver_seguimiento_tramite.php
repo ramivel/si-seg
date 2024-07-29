@@ -15,32 +15,40 @@
                     <tbody>
                     <?php if(!empty($datos) && count($datos)>0){?>
                         <?php foreach ($datos as $n=>$row){?>
-                        <tr>
+                        <tr class="<?= (count($datos) == ($n+1) ? "table-warning" : "") ?>">
                             <?php for($i=0;$i<count($campos_listado);$i++){?>
-                                <?php if($campos_listado[$i]=='doc_digital'){ ?>
-                                    <?php if($row[$campos_listado[$i]]){?>
-                                        <td><a href="<?= base_url($row[$campos_listado[$i]]);?>" target="_blank" title="Ver Documento"><i class="feather icon-file"></i> Ver Documento</a></td>
-                                    <?php }else{?>
-                                        <td></td>
-                                    <?php }?>
-                                <?php }elseif($campos_listado[$i]=='estado'){?>
+                                <?php if($campos_listado[$i]=='estado'){?>
                                     <td>
                                         <?php
                                         $style = '';
                                         switch($row[$campos_listado[$i]]){
-                                            case 'INGRESADO':
-                                                $style = 'btn btn-sm btn-inverse btn-round';
-                                                break;
-                                            case 'RECIBIDO':
-                                                $style = 'btn btn-sm btn-success btn-round';
+                                            case 'REGULARIZACIÓN':
+                                                $style = 'btn btn-sm btn-danger btn-round';
                                                 break;
                                             case 'ATENDIDO':
+                                                $style = 'btn btn-sm btn-success btn-round';
+                                                break;
+                                            case 'RECIBIDO':
                                                 $style = 'btn btn-sm btn-primary btn-round';
+                                                break;
+                                            case 'DERIVADO':
+                                                $style = 'btn btn-sm btn-primary btn-round';
+                                                break;
+                                            case 'DEVUELTO':
+                                                $style = 'btn btn-sm btn-warning btn-round';
+                                                break;
+                                            case 'FINALIZADO':
+                                                $style = 'btn btn-sm btn-danger btn-round';
+                                                break;
+                                            case 'ANEXADO':
+                                                $style = 'btn btn-sm btn-info btn-round';
                                                 break;
                                         }
                                         echo '<button class="'.$style.'">'.$row[$campos_listado[$i]].'</button>';
                                         ?>
                                     </td>
+                                <?php }elseif($campos_listado[$i]=='hr_anexada'){?>
+                                    <td><a href="<?= base_url($controlador.'ver/'.$back.'/'.$row['id_hr_anexada']);?>" target="_blank"><?= $row[$campos_listado[$i]];?></a></td>
                                 <?php }else{?>
                                     <td><?= $row[$campos_listado[$i]];?></td>
                                 <?php }?>

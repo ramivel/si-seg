@@ -28,14 +28,11 @@
                                         <?php
                                         $style = '';
                                         switch($row[$campos_listado[$i]]){
-                                            case 'INGRESADO':
+                                            case 'SUELTO':
                                                 $style = 'btn btn-sm btn-inverse btn-round';
                                                 break;
-                                            case 'RECIBIDO':
+                                            case 'ANEXADO':
                                                 $style = 'btn btn-sm btn-success btn-round';
-                                                break;
-                                            case 'ATENDIDO':
-                                                $style = 'btn btn-sm btn-primary btn-round';
                                                 break;
                                         }
                                         echo '<button class="'.$style.'">'.$row[$campos_listado[$i]].'</button>';

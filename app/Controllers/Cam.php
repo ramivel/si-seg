@@ -113,6 +113,48 @@ class Cam extends BaseController
         $data['alertas'] = $this->alertasTramites();
         echo view('templates/template', $data);
     }
+    public function misTramitesExcel(){
+        $db = \Config\Database::connect();
+        $campos_listar=array(
+            ' ','Fecha','Días Pasados','H.R. Madre','Remitente','Destinatario','Responsable Trámite','Instrucción','Estado Tramite','Subestado Tramite',
+            'Codigo Unico','Denominacion','Representante Legal','Solicitante','Departamentos',
+        );
+        $campos_reales=array(
+            'ultimo_estado','ultimo_fecha_derivacion','dias','correlativo','remitente','destinatario','responsable','ultimo_instruccion','estado_tramite','sub_estado_tramite',
+            'codigo_unico', 'denominacion','representante_legal','titular','departamentos',
+        );
+        $campos = array(
+            'ac.ultimo_estado', "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion", "(CURRENT_DATE - ac.ultimo_fecha_derivacion::date) as dias", 'ac.correlativo',
+            "CONCAT(ur.nombre_completo,' - ',pr.nombre) as remitente", "CONCAT(ud.nombre_completo,' - ',pd.nombre) as destinatario", "CONCAT(ua.nombre_completo,' - ',pa.nombre) as responsable",
+            'ac.ultimo_instruccion',"CONCAT(etp.orden,'. ',etp.nombre) as estado_tramite",
+            "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE '' END as sub_estado_tramite",
+            'dam.codigo_unico', 'dam.denominacion','dam.representante_legal','dam.titular', 'dam.departamentos',
+        );
+        $where = array(
+            'ac.deleted_at' => NULL,
+            'ac.fk_usuario_actual' => session()->get('registroUser'),
+        );
+        $builder = $db->table('public.acto_administrativo as ac')
+        ->select($campos)
+        ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+        ->join('usuarios as ur', 'ac.ultimo_fk_usuario_remitente = ur.id', 'left')
+        ->join('perfiles as pr', 'ur.fk_perfil = pr.id', 'left')
+        ->join('usuarios as ud', 'ac.ultimo_fk_usuario_destinatario = ud.id', 'left')
+        ->join('perfiles as pd', 'ud.fk_perfil = pd.id', 'left')
+        ->join('estado_tramite as etp', 'ac.ultimo_fk_estado_tramite_padre = etp.id', 'left')
+        ->join('estado_tramite as eth', 'ac.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
+        ->join('usuarios as ua', 'ac.ultimo_fk_usuario_responsable = ua.id', 'left')
+        ->join('perfiles as pa', 'ua.fk_perfil = pa.id', 'left')
+        ->where($where)
+        ->orderBY('ac.id', 'DESC');
+        if($datos = $builder->get()->getResultArray()){
+            helper('security');
+            $file_name = sanitize_filename(mb_strtolower(session()->get('registroUserName'))).' - bandeja - '.date('YmdHis').'.xlsx';
+            $this->exportarXLS($campos_listar, $campos_reales, $datos, $file_name);
+        }else{
+            return redirect()->to($this->controlador.'mis_tramites');
+        }
+    }
 
     public function listadoRecepcion()
     {
@@ -2417,6 +2459,15 @@ class Cam extends BaseController
             $builder = $dbSincobol->table('contratos_licencias.area_minera')->where($where);
             $area_minera = $builder->get()->getFirstRow('array');
 
+            $where = array(
+                'id_area_minera' => $fila['fk_area_minera'],
+            );
+            $builder = $dbSincobol->table('contabilidad.vista_deuda_anio_total')->where($where);
+            $deuda = $builder->get()->getFirstRow('array');
+
+            $builder = $dbSincobol->table('siremi.reporte_general_cam')->where($where)->whereIn('estado', array('INSCRITO','FINALIZADO','HISTORICO'));
+            $registro_minero = $builder->get()->getFirstRow('array');
+
             switch($back){
                 case 1:
                     $url_atras = base_url($this->controlador.'buscador');
@@ -2445,6 +2496,8 @@ class Cam extends BaseController
             $contenido['fila'] = $fila;
             $contenido['hr_remitente'] = $hr_remitente;
             $contenido['area_minera'] = $area_minera;
+            $contenido['deuda'] = $deuda;
+            $contenido['registro_minero'] = $registro_minero;
             $contenido['seccion'] = $this->obtenerVerSeguimientoTramite($back, $fila['id']);
             $contenido['url_atras'] = $url_atras;
             $data['content'] = view($this->carpeta.'ver', $contenido);
@@ -2486,6 +2539,15 @@ class Cam extends BaseController
             $builder = $dbSincobol->table('contratos_licencias.area_minera')->where($where);
             $area_minera = $builder->get()->getFirstRow('array');
 
+            $where = array(
+                'id_area_minera' => $fila['fk_area_minera'],
+            );
+            $builder = $dbSincobol->table('contabilidad.vista_deuda_anio_total')->where($where);
+            $deuda = $builder->get()->getFirstRow('array');
+
+            $builder = $dbSincobol->table('siremi.reporte_general_cam')->where($where)->whereIn('estado', array('INSCRITO','FINALIZADO','HISTORICO'));
+            $registro_minero = $builder->get()->getFirstRow('array');
+
             switch($back){
                 case 1:
                     $url_atras = base_url($this->controlador.'buscador');
@@ -2514,6 +2576,8 @@ class Cam extends BaseController
             $contenido['fila'] = $fila;
             $contenido['hr_remitente'] = $hr_remitente;
             $contenido['area_minera'] = $area_minera;
+            $contenido['deuda'] = $deuda;
+            $contenido['registro_minero'] = $registro_minero;
             $contenido['seccion'] = $this->obtenerVerCorrespondenciaExterna($back, $fila['id']);
             $contenido['url_atras'] = $url_atras;
             $data['content'] = view($this->carpeta.'ver', $contenido);
@@ -2554,6 +2618,15 @@ class Cam extends BaseController
             $builder = $dbSincobol->table('contratos_licencias.area_minera')->where($where);
             $area_minera = $builder->get()->getFirstRow('array');
 
+            $where = array(
+                'id_area_minera' => $fila['fk_area_minera'],
+            );
+            $builder = $dbSincobol->table('contabilidad.vista_deuda_anio_total')->where($where);
+            $deuda = $builder->get()->getFirstRow('array');
+
+            $builder = $dbSincobol->table('siremi.reporte_general_cam')->where($where)->whereIn('estado', array('INSCRITO','FINALIZADO','HISTORICO'));
+            $registro_minero = $builder->get()->getFirstRow('array');
+
             switch($back){
                 case 1:
                     $url_atras = base_url($this->controlador.'buscador');
@@ -2582,6 +2655,8 @@ class Cam extends BaseController
             $contenido['fila'] = $fila;
             $contenido['hr_remitente'] = $hr_remitente;
             $contenido['area_minera'] = $area_minera;
+            $contenido['deuda'] = $deuda;
+            $contenido['registro_minero'] = $registro_minero;
             $contenido['seccion'] = $this->obtenerVerDocumentosGenerados($back, $fila['id']);
             $contenido['url_atras'] = $url_atras;
             $data['content'] = view($this->carpeta.'ver', $contenido);
@@ -2622,6 +2697,15 @@ class Cam extends BaseController
             $builder = $dbSincobol->table('contratos_licencias.area_minera')->where($where);
             $area_minera = $builder->get()->getFirstRow('array');
 
+            $where = array(
+                'id_area_minera' => $fila['fk_area_minera'],
+            );
+            $builder = $dbSincobol->table('contabilidad.vista_deuda_anio_total')->where($where);
+            $deuda = $builder->get()->getFirstRow('array');
+
+            $builder = $dbSincobol->table('siremi.reporte_general_cam')->where($where)->whereIn('estado', array('INSCRITO','FINALIZADO','HISTORICO'));
+            $registro_minero = $builder->get()->getFirstRow('array');
+
             switch($back){
                 case 1:
                     $url_atras = base_url($this->controlador.'buscador');
@@ -2650,6 +2734,8 @@ class Cam extends BaseController
             $contenido['fila'] = $fila;
             $contenido['hr_remitente'] = $hr_remitente;
             $contenido['area_minera'] = $area_minera;
+            $contenido['deuda'] = $deuda;
+            $contenido['registro_minero'] = $registro_minero;
             $contenido['seccion'] = $this->obtenerVerHojasRutaAnexadas($back, $fila['id']);
             $contenido['url_atras'] = $url_atras;
             $data['content'] = view($this->carpeta.'ver', $contenido);
@@ -2702,6 +2788,15 @@ class Cam extends BaseController
             $builder = $dbSincobol->table('contratos_licencias.area_minera')->where($where);
             $area_minera = $builder->get()->getFirstRow('array');
 
+            $where = array(
+                'id_area_minera' => $fila['fk_area_minera'],
+            );
+            $builder = $dbSincobol->table('contabilidad.vista_deuda_anio_total')->where($where);
+            $deuda = $builder->get()->getFirstRow('array');
+
+            $builder = $dbSincobol->table('siremi.reporte_general_cam')->where($where)->whereIn('estado', array('INSCRITO','FINALIZADO','HISTORICO'));
+            $registro_minero = $builder->get()->getFirstRow('array');
+
             switch($back){
                 case 1:
                     $url_atras = base_url($this->controlador.'buscador');
@@ -2731,6 +2826,8 @@ class Cam extends BaseController
             $contenido['hr_remitente'] = $hr_remitente;
             $contenido['hr_anexadas'] = $hr_anexadas;
             $contenido['area_minera'] = $area_minera;
+            $contenido['deuda'] = $deuda;
+            $contenido['registro_minero'] = $registro_minero;
             $contenido['seccion'] = $this->obtenerVerHistoricoSincobol($back, $fila['id'], $fila['fk_hoja_ruta']);
             $contenido['url_atras'] = $url_atras;
             $data['content'] = view($this->carpeta.'ver', $contenido);
@@ -2771,6 +2868,15 @@ class Cam extends BaseController
             $builder = $dbSincobol->table('contratos_licencias.area_minera')->where($where);
             $area_minera = $builder->get()->getFirstRow('array');
 
+            $where = array(
+                'id_area_minera' => $fila['fk_area_minera'],
+            );
+            $builder = $dbSincobol->table('contabilidad.vista_deuda_anio_total')->where($where);
+            $deuda = $builder->get()->getFirstRow('array');
+
+            $builder = $dbSincobol->table('siremi.reporte_general_cam')->where($where)->whereIn('estado', array('INSCRITO','FINALIZADO','HISTORICO'));
+            $registro_minero = $builder->get()->getFirstRow('array');
+
             switch($back){
                 case 1:
                     $url_atras = base_url($this->controlador.'buscador');
@@ -2799,6 +2905,8 @@ class Cam extends BaseController
             $contenido['fila'] = $fila;
             $contenido['hr_remitente'] = $hr_remitente;
             $contenido['area_minera'] = $area_minera;
+            $contenido['deuda'] = $deuda;
+            $contenido['registro_minero'] = $registro_minero;
             $contenido['seccion'] = $this->obtenerVerSeguimientoHistoricoSincobol($back, $fila['id'], $fila['fk_area_minera']);
             $contenido['url_atras'] = $url_atras;
             $data['content'] = view($this->carpeta.'ver', $contenido);
@@ -2888,23 +2996,25 @@ class Cam extends BaseController
             'Atendido Por',
             'Documento Externo',
             'Doc. Digital',
+            'Observaciones',
         );
         $campos_listado = array(
             'estado',
             'fecha_ingreso',
             'fecha_recepcion',
-            'fecha_recepcion',
+            'fecha_atencion',
             'ingreso',
             'recepcion',
-            'recepcion',
+            'atencion',
             'documento_externo',
             'doc_digital',
+            'observacion_atencion',
         );
         $campos = array(
-            'ce.id', 'ce.estado', "to_char(ce.created_at, 'DD/MM/YYYY') as fecha_ingreso", "to_char(ce.fecha_recepcion, 'DD/MM/YYYY') as fecha_recepcion",
-            "CONCAT(ui.nombre_completo,'<br><b>',pi.nombre,'<b>') as ingreso", "CONCAT(ur.nombre_completo,'<br><b>',pr.nombre,'<b>') as recepcion",
+            'ce.id', 'ce.estado', "to_char(ce.created_at, 'DD/MM/YYYY') as fecha_ingreso", "to_char(ce.fecha_recepcion, 'DD/MM/YYYY') as fecha_recepcion","to_char(ce.fecha_atencion, 'DD/MM/YYYY') as fecha_atencion",
+            "CONCAT(ui.nombre_completo,'<br><b>',pi.nombre,'<b>') as ingreso", "CONCAT(ur.nombre_completo,'<br><b>',pr.nombre,'<b>') as recepcion","CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as atencion",
             "CONCAT('CITE: ',ce.cite,'<br>Fecha: ',to_char(ce.fecha_cite, 'DD/MM/YYYY'),'<br>Remitente: ',CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')'),'<br>Referencia: ',ce.referencia) as documento_externo",
-            'ce.doc_digital'
+            'ce.doc_digital','ce.observacion_atencion'
         );
         $where = array(
             'ce.deleted_at' => NULL,
@@ -2916,6 +3026,8 @@ class Cam extends BaseController
         ->join('public.perfiles AS pi', 'ui.fk_perfil = pi.id', 'left')
         ->join('public.usuarios AS ur', 'ce.fk_usuario_recepcion = ur.id', 'left')
         ->join('public.perfiles AS pr', 'ur.fk_perfil = pr.id', 'left')
+        ->join('public.usuarios AS ua', 'ce.fk_usuario_atencion = ua.id', 'left')
+        ->join('public.perfiles AS pa', 'ua.fk_perfil = pa.id', 'left')
         ->join('public.persona_externa AS pe', 'ce.fk_persona_externa = pe.id', 'left')
         ->select($campos)
         ->where($where)

@@ -17,6 +17,11 @@
     </div>
     <?php }?>
     <div class="page-body">
+        <div class="row mb-3">
+            <div class="col-sm-12 text-right">
+                <a href="<?= base_url($controlador.'mis_tramites_excel');?>" class="btn btn-inverse" target="_blank"><i class="fa fa-file-excel-o"></i> Descargar Bandeja</a>                
+            </div>
+        </div>
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">

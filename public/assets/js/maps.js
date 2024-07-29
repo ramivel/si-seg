@@ -1,12 +1,25 @@
-var myMap = L.map('mi-map').setView([-17.5, -65.5], 7)
+var myMap = L.map('mi-map').setView([-17.5, -65.5], 6);
+var marker;
+var markers = L.layerGroup().addTo(myMap);
+var municipioLayer = L.geoJSON().addTo(myMap);
+const colorMunicipioPoligono = "#378AFE";
+const styleMunicipio = {
+  "color": colorMunicipioPoligono,
+  "weight": 3,
+  "opacity": 0.25
+};
+var areasMinerasLayer = L.geoJSON().addTo(myMap);
+const colorAreasMinerasPoligono = "#C5CA00";
+const styleAreasMineras = {
+  "color": colorAreasMinerasPoligono,
+  "weight": 3,
+  "opacity": 0.25
+};
 
 L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
   maxZoom: 18,
   subdomains:['mt0','mt1','mt2','mt3']
 }).addTo(myMap);
-
-var marker;
-var markers = L.layerGroup().addTo(myMap);
 
 myMap.doubleClickZoom.disable();
 myMap.on('dblclick', e => {
@@ -20,52 +33,41 @@ myMap.on('dblclick', e => {
   actualizarInputCoordenadas(lat, lng);
 });
 
-var geojsonFeature = {
-  "type": "Feature",
-  "properties": {
-      "name": "Coors Field",
-      "amenity": "Baseball Stadium",
-      "popupContent": "This is where the Rockies play!"
-  },
-  "geometry": {
-      "type": "Point",
-      "coordinates": [-104.99404, 39.75621]
-  }
-};
-var campus = {
-  "type": "Feature",
-  "properties": {
-      "popupContent": "This is the Auraria West Campus",
-      "style": {
-          weight: 2,
-          color: "#999",
-          opacity: 1,
-          fillColor: "#B0DE5C",
-          fillOpacity: 0.8
-      }
-  },
-  "geometry": {
-      "type": "MultiPolygon",
-      "coordinates": [
-          [
-              [
-                  [-105.00942707061768, 39.73989736613708],
-                  [-105.00942707061768, 39.73910536278566],
-                  [-105.00685214996338, 39.73923736397631],
-                  [-105.00384807586671, 39.73910536278566],
-                  [-105.00174522399902, 39.73903936209552],
-                  [-105.00041484832764, 39.73910536278566],
-                  [-105.00041484832764, 39.73979836621592],
-                  [-105.00535011291504, 39.73986436617916],
-                  [-105.00942707061768, 39.73989736613708]
-              ]
-          ]
-      ]
-  }
-};
+const legend = L.control.Legend({
+  position: "bottomleft",
+  title: "Capas",
+  opacity: 0.75,
+  symbolWidth: 30,
+  legends: [
+    {
+      label: " Municipio",
+      type: "polygon",
+      sides: 4,
+      color: "#000",
+      fillColor: colorMunicipioPoligono,
+      layers: municipioLayer,
+    },
+    {
+      label: "Área(s) Minera(s)",
+      type: "polygon",
+      sides: 4,
+      color: "#000",
+      fillColor: colorAreasMinerasPoligono,
+      layers: areasMinerasLayer,
+    },
+  ]
+})
+.addTo(myMap);
 
-L.geoJSON(campus).addTo(myMap);
+function onEachFeature(feature, layer) {
+  let popupContent = `<p>I started out as a GeoJSON ${feature.geometry.type}, but now I'm a Leaflet vector!</p>`;
 
+  if (feature.properties && feature.properties.popupContent) {
+    popupContent += feature.properties.popupContent;
+  }
+
+  layer.bindPopup(popupContent);
+}
 
 function agregarPunto(){
   var latitude = document.getElementById("latitude").value;
@@ -109,5 +111,53 @@ function limpiarCoordenadas(){
 
 function redimensionar(){
   L.Util.requestAnimFrame(myMap.invalidateSize,myMap,!1,myMap._container);
+}
+
+function agregarPoligonoMunicipio(geometry){
+  municipioLayer.clearLayers();
+  var municipioPoligono = {
+    "type": "Feature",
+    "geometry": geometry,
+  };
+  municipioLayer.addData(municipioPoligono);
+  municipioLayer.setStyle(styleMunicipio);
+  //municipioLayer.bindTooltip(nombre, {permanent: true, direction: "center", className: "my-labels"});
+}
+
+function actualizarAreasMinerasLayer(){
+  areasMinerasLayer.clearLayers();
+  let areasMineras = document.getElementsByName('id_areas_mineras[]');
+  areasMineras.forEach( function(areaMinera, indice) {
+    $.ajax({
+      url: "/garnet/mineria_ilegal/ajax_datos_area_minera_mineria_ilegal",
+      type: "POST",
+      data: {
+        id: areaMinera.value,
+      },
+      dataType: "json",
+      success: function (result) {
+        if(result.estado == 'success' && result.poligono)
+          agregarPoligonoAreasMineras($.parseJSON(result.poligono), result.codigo_unico);
+        else
+          console.log(result);
+      },
+    });
+  });
+  
+}
+
+function agregarPoligonoAreasMineras(geometry, label){
+  var areaMineraPoligono = {
+    "type": "Feature",
+    "properties": {
+        "name": label,
+    },
+    "geometry": geometry,
+  };
+  areasMinerasLayer.addData(areaMineraPoligono);
+  areasMinerasLayer.setStyle(styleAreasMineras);
+  areasMinerasLayer.eachLayer(function (layer) {
+    layer.bindTooltip(layer.feature.properties.name, {permanent: true, direction: "center", className: "my-labels"});
+  });
 }
 

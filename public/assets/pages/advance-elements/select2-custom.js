@@ -686,6 +686,24 @@ $(document).ready(function () {
       });
     }
   });
+  $("#fk_municipio").on("change", function () {
+    const id_municipio = parseInt($(this).val());
+    if (id_municipio > 0) {
+      $.ajax({
+        type: "POST",
+        url: baseUrl + "mineria_ilegal/ajax_geom_municipio",
+        data: {
+          id_municipio: id_municipio,
+        },
+        error: function () {
+          console.log("error ajax.");
+        },
+        success: function (result) {
+          agregarPoligonoMunicipio($.parseJSON(result));
+        },
+      });
+    }
+  });
 
   /* BUSCADOR DE DENUNCIANTE */
   $(".denunciante-ajax").select2({
@@ -808,6 +826,8 @@ $(document).ready(function () {
             "</tr>";
             $("#tabla_areas_mineras tbody").append(markup);
             $(".area-minera-mineria-ilegal-ajax").val('').trigger('change');
+            if(result.poligono)
+              actualizarAreasMinerasLayer();
           }else{
             console.log(result);
           }
@@ -856,7 +876,16 @@ $(document).ready(function () {
           $(".libro-registro-ajax").val('').trigger('change');
         },
       });
-    }    
+    }
+  });
+  $(".agregar-espacio").click(function () {
+    $.ajax({
+      url: baseUrl + "ajax_tr_salto_linea",
+      type: "POST",
+      success: function (result) {
+        $("#tabla-libro-registro tbody").append(result);
+      },
+    });
   });
   $('#tabla-libro-registro tbody').on('click', '.eliminar-hr', function () {
     $(this).parent('td.text-center').parent('tr.rowClass').remove();
@@ -914,7 +943,7 @@ $(document).ready(function () {
     if($(this).val()=='fecha_hoja_ruta')
       $('#texto').attr('type', 'date');
     else
-      $('#texto').attr('type', 'text');    
+      $('#texto').attr('type', 'text');
   });
   /* Filtros Buscador */
 
@@ -937,6 +966,7 @@ function desanexar_denunciante(n) {
 function desanexar_area_minera_mineria_ilegal(n) {
   var row = document.getElementById("am" + n);
   row.parentNode.removeChild(row);
+  actualizarAreasMinerasLayer();
 }
 function eliminar_adjunto(n) {
   var row = document.getElementById("adj" + n);

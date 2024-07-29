@@ -13,14 +13,14 @@ class LibroRegistroPdf extends TCPDF{
         $this->Cell(0, 15, 'LIBRO DE REGISTROS', 0, false, 'C');
         $this->Ln(12);
         $cabecera = array(
-            array('tamanio' => 90,'texto' => 'Correlativo'),
+            array('tamanio' => 75,'texto' => 'Correlativo'),
             array('tamanio' => 95,'texto' => 'Tipo Trámite'),
             array('tamanio' => 55,'texto' => 'Fecha Ingreso'),
             array('tamanio' => 75,'texto' => 'Destinatario'),
-            array('tamanio' => 95,'texto' => 'Proveido'),
-            array('tamanio' => 125,'texto' => 'Derivado'),
-            array('tamanio' => 125,'texto' => 'Derivado'),
-            array('tamanio' => 125,'texto' => 'Derivado'),
+            array('tamanio' => 90,'texto' => 'Proveido'),
+            array('tamanio' => 124,'texto' => 'Derivado'),
+            array('tamanio' => 124,'texto' => 'Derivado'),
+            array('tamanio' => 124,'texto' => 'Derivado'),
         );
         $html = '<table border="1" cellpadding="3" cellspacing="0"><tr>';
         foreach($cabecera as $row)

@@ -38,8 +38,9 @@
                                     echo form_dropdown($campo, $hojas_ruta, set_value($campo), array('id' => $campo, 'class' => 'libro-registro-ajax col-sm-12'));
                                 ?>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-4">
                                 <button type="button" class="btn btn-info agregar-hr"><i class="fa fa-plus"></i> Agregar al Libro</button>
+                                <button type="button" class="btn btn-warning agregar-espacio"><i class="fa fa-arrows-v"></i> Agregar Salto de Línea</button>
                             </div>
                         </div>                    
                         <?= form_open($accion, array('target'=>'_blank'));?>
