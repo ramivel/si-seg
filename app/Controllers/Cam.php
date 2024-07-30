@@ -591,7 +591,7 @@ class Cam extends BaseController
                 'ur.nombre_completo as ultimo_remitente', 'per.nombre as ultimo_cargo', "to_char(der.created_at, 'DD/MM/YYYY') as ultimo_fecha_derivacion",
                 'der.instruccion as ultimo_instruccion', "CONCAT(etp.orden,'. ',etp.nombre) as ultimo_estado_tramite_padre",
                 "CASE WHEN der.fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE '' END as ultimo_estado_tramite_hijo",
-                'der.fk_estado_tramite_padre', 'der.fk_estado_tramite_hijo', 'urt.nombre_completo as nombre_responsable', 'prt.nombre as cargo_responsable',
+                'der.fk_estado_tramite_padre', 'der.fk_estado_tramite_hijo', "CONCAT(urt.nombre_completo,' - ',prt.nombre) as usuario_responsable",
                 'etp.anexar_documentos as anexar_documentos_padre', 'eth.anexar_documentos as anexar_documentos_hijo',
                 'der.recurso_jerarquico', 'der.recurso_revocatoria', 'der.oposicion'
             );
@@ -657,7 +657,6 @@ class Cam extends BaseController
     public function guardarAtender(){
         if ($this->request->getPost()) {
             $id = $this->request->getPost('id');
-            $id_derivacion = $this->request->getPost('id_derivacion');
             $fk_hoja_ruta_solicitud = $this->request->getPost('fk_hoja_ruta_solicitud');
             $anexar_hr = $this->request->getPost('anexar_hr');
             $documentos = $this->obtenerDocumentosAtender($id);
@@ -835,7 +834,7 @@ class Cam extends BaseController
                         }
 
                         $dataDerivacionActualizacion = array(
-                            'id' => $id_derivacion,
+                            'id' => $this->request->getPost('id_derivacion'),
                             'estado' => 'ATENDIDO',
                             'fecha_atencion' => date('Y-m-d H:i:s'),
                         );
@@ -1525,7 +1524,7 @@ class Cam extends BaseController
                         'representante_legal' => mb_strtoupper($this->request->getPost('representante_legal')),
                         'nacionalidad' => mb_strtoupper($this->request->getPost('nacionalidad')),
                         'titular' => $this->request->getPost('titular'),
-                        'clasificacion_titular' => $this->request->getPost('clasificacion'),
+                        'clasificacion_titular' => $this->request->getPost('clasificacion_titular'),
                         'the_geom' => $this->obtenerPoligonoAreaMinera($this->request->getPost('fk_area_minera')),
                     );
                     if($datosAreaMineraModel->save($dataDatosAreaMinera) === false)
@@ -1715,7 +1714,7 @@ class Cam extends BaseController
                         'representante_legal' => mb_strtoupper($this->request->getPost('representante_legal')),
                         'nacionalidad' => mb_strtoupper($this->request->getPost('nacionalidad')),
                         'titular' => $this->request->getPost('titular'),
-                        'clasificacion_titular' => $this->request->getPost('clasificacion'),
+                        'clasificacion_titular' => $this->request->getPost('clasificacion_titular'),
                         'the_geom' => $this->obtenerPoligonoAreaMinera($this->request->getPost('fk_area_minera')),
                     );
                     if($datosAreaMineraModel->save($dataDatosAreaMinera) === false)

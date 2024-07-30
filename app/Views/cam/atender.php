@@ -576,6 +576,22 @@
                                     </div>
                                     <div class="tab-pane" id="derivacion" role="tabpanel">
                                         <div class="form-group row">
+                                            <label class="col-sm-2 col-form-label">Usuario Responsable del Trámite:</label>
+                                            <div class="col-sm-10">
+                                                <?php
+                                                    $campo = 'usuario_responsable';
+                                                    echo form_input(array(
+                                                        'name' => $campo,
+                                                        'id' => $campo,
+                                                        'class' => 'form-control',
+                                                        'readonly' => true,
+                                                        'value' => set_value($campo, (isset($ultima_derivacion[$campo]) ? $ultima_derivacion[$campo] : ''),false)
+                                                    ));
+                                                ?>
+                                                <span class="messages"></span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Destinatario*:</label>
                                             <div class="col-sm-10">
                                                 <?php $campo = 'fk_usuario_destinatario';?>
