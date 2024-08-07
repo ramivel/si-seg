@@ -27,7 +27,40 @@
                     <div class="card-block">
                         <?= form_open($accion);?>
                             <div class="form-group row">
+                                <div class="col-sm-2">
+                                    <label class="col-form-label">Fecha Inicio:</label>
+                                    <?php
+                                        $campo = 'fecha_inicio';
+                                        echo form_input(array(
+                                            'name' => $campo,
+                                            'id' => $campo,
+                                            'type' => 'date',
+                                            'class' => 'form-control',
+                                            'value' => set_value($campo,'',false)
+                                        ));
+                                    ?>
+                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                    <?php }?>
+                                </div>
+                                <div class="col-sm-2">
+                                    <label class="col-form-label">Fecha Fin:</label>
+                                    <?php
+                                        $campo = 'fecha_fin';
+                                        echo form_input(array(
+                                            'name' => $campo,
+                                            'id' => $campo,
+                                            'type' => 'date',
+                                            'class' => 'form-control',
+                                            'value' => set_value($campo,'',false)
+                                        ));
+                                    ?>
+                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                    <?php }?>
+                                </div>
                                 <div class="col-sm-4">
+                                    <label class="col-form-label">Oficina:</label>
                                     <?php
                                         $campo = 'oficina';
                                         echo form_dropdown($campo, $oficinas, set_value($campo), array('class' => 'form-control'));
@@ -36,7 +69,7 @@
                                         <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
                                     <?php }?>
                                 </div>                                
-                                <div class="col-sm-3">
+                                <div class="col-sm-12 mt-3">
                                     <button name="enviar" class="btn btn-info" type="submit" value="buscar"><i class="fa fa-list"></i> Generar Reporte</button>
                                     <button name="enviar" class="btn btn-inverse" type="submit" value="excel"><i class="fa fa-file-excel-o"></i> Exportar Excel</button>
                                 </div>

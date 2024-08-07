@@ -5663,118 +5663,127 @@ class MineriaIlegal extends BaseController
     }
 
     public function reporte(){
+        $oficina = $this->request->getPost('oficina');
         $oficinas = $this->obtenerOficinasReporte();
         $estados_tramites = $this->obtenerEstadosTramites($this->idTramite);
-        $clasificaciones = $this->obtenerClasificacionesTitulares();
+        $clasificaciones = $this->tipoDenuncias;
         if ($this->request->getPost()) {
-            $db = \Config\Database::connect();
-            $oficina = $this->request->getPost('oficina');
-            if($oficina > 0){
-                /* consulta de oficina */
-                $campos = array('ad.clasificacion_titular', "CONCAT(etp.orden,'. ', etp.nombre) as estado_padre", 'count(ad.correlativo) as n');
-                $where = array(
-                    'ad.deleted_at' => NULL,
-                    'ad.fk_oficina' => $oficina
-                );
-                $builder = $db->table('public.acto_administrativo as ad')
-                ->select($campos)
-                ->join('public.estado_tramite as etp', 'ad.ultimo_fk_estado_tramite_padre = etp.id', 'left')
-                ->join('public.estado_tramite as eth', 'ad.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
-                ->where($where)
-                ->groupBy(array('ad.clasificacion_titular', 'etp.orden', 'estado_padre'))
-                ->orderBY('ad.clasificacion_titular ASC, etp.orden ASC');
-                $datos = $builder->get()->getResultArray();
-                $resultado = array();
-                $total_clasificaciones = array();
-                if($datos){
-                    foreach($datos as $row){
-                        if(!isset($total_clasificaciones[$row['clasificacion_titular']]))
-                            $total_clasificaciones[$row['clasificacion_titular']] = $row['n'];
-                        else
-                            $total_clasificaciones[$row['clasificacion_titular']] += $row['n'];
-                        $resultado[$row['clasificacion_titular']][$row['estado_padre']] = $row['n'];
-                    }
-                }
-
-                /* Datos JSON*/
-                $data_js = array();
-                $tmp_header = array('ESTADO');
-                foreach($clasificaciones as $clasificacion)
-                    $tmp_header[] = $clasificacion;
-
-                $data_js[] = $tmp_header;
-                foreach($estados_tramites as $estado){
-                    if($estado['id'] > 0){
-                        $tmp_estado = array($estado['orden']);
-                        foreach($clasificaciones as $clasificacion){
-                            $tmp_estado[] = intval((isset($resultado[$clasificacion][$estado['texto']]) && $resultado[$clasificacion][$estado['texto']] > 0) ? $resultado[$clasificacion][$estado['texto']] : 0);
-                        }
-                        $data_js[] = $tmp_estado;
-                    }
-                }
-
-                $contenido['total_clasificaciones'] = $total_clasificaciones;
-                $contenido['resultado_oficina'] = $resultado;
-                $contenido['oficina'] = $oficina;
-                $data['data_chart'] = json_encode($data_js);
-                $data['charts_js'] = 'chart_oficina_cam.js';
-
-                if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
-                    $this->exportarReporteOficina($estados_tramites, $clasificaciones, $resultado, $oficinas[$oficina]);
-                }
-
+            $camposValidacion = array(
+                'fecha_inicio' => [
+                    'rules' => 'required|valid_date[Y-m-d]',
+                ],
+                'fecha_fin' => [
+                    'rules' => 'required|valid_date[Y-m-d]',
+                ],
+            );
+            if(!$this->validate($camposValidacion)){
+                $contenido['validation'] = $this->validator;
             }else{
-                $campos = array('o.nombre as oficina', "CONCAT(etp.orden,'. ', etp.nombre) as estado_padre", 'count(ad.correlativo) as n');
-                $where = array(
-                    'ad.deleted_at' => NULL,
-                );
-                $builder = $db->table('public.acto_administrativo as ad')
-                ->select($campos)
-                ->join('public.oficinas as o', 'ad.fk_oficina = o.id', 'left')
-                ->join('public.estado_tramite as etp', 'ad.ultimo_fk_estado_tramite_padre = etp.id', 'left')
-                ->join('public.estado_tramite as eth', 'ad.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
-                ->where($where)
-                ->groupBy(array('oficina', 'etp.orden', 'estado_padre'))
-                ->orderBY('o.nombre ASC, etp.orden ASC');
-                $datos = $builder->get()->getResultArray();
-                $resultado = array();
-                $total_oficinas = array();
-                if($datos){
-                    foreach($datos as $row){
-                        if(!isset($total_oficinas[$row['oficina']]))
-                            $total_oficinas[$row['oficina']] = $row['n'];
-                        else
-                            $total_oficinas[$row['oficina']] += $row['n'];
-                        $resultado[$row['oficina']][$row['estado_padre']] = $row['n'];
-                    }
-                }
-                /* Datos JSON*/
-                $data_js = array();
-                $tmp_header = array('ESTADO');
-                foreach($oficinas as $idOficina => $oficina){
-                    if($idOficina > 0)
-                        $tmp_header[] = $oficina;
-                }
-                $data_js[] = $tmp_header;
-                foreach($estados_tramites as $estado){
-                    if($estado['id'] > 0){
-                        $tmp_estado = array($estado['orden']);
-                        foreach($oficinas as $idOficina => $oficina){
-                            if($idOficina > 0)
-                                $tmp_estado[] = intval((isset($resultado[$oficina][$estado['texto']]) && $resultado[$oficina][$estado['texto']] > 0) ? $resultado[$oficina][$estado['texto']] : 0);
+                $db = \Config\Database::connect();
+                if($oficina > 0){
+                    /* consulta de oficina */
+                    $campos = array("tipo_denuncia", "estado_tramite", "COUNT(correlativo_denuncia) as n");
+                    $where = array(
+                        'id_oficina_denuncia' => $oficina,
+                        'fecha_denuncia_busqueda >=' => $this->request->getPost('fecha_inicio'),
+                        'fecha_denuncia_busqueda <=' => $this->request->getPost('fecha_fin'),
+                    );
+                    $builder = $db->table('mineria_ilegal.vista_buscador')
+                    ->select($campos)
+                    ->where($where)
+                    ->groupBy(array("tipo_denuncia", "estado_tramite"))
+                    ->orderBY('tipo_denuncia ASC, estado_tramite ASC');
+                    $datos = $builder->get()->getResultArray();
+                    $resultado = array();
+                    $total_clasificaciones = array();
+                    if($datos){
+                        foreach($datos as $row){
+                            if(!isset($total_clasificaciones[$row['tipo_denuncia']]))
+                                $total_clasificaciones[$row['tipo_denuncia']] = $row['n'];
+                            else
+                                $total_clasificaciones[$row['tipo_denuncia']] += $row['n'];
+                            $resultado[$row['tipo_denuncia']][$row['estado_tramite']] = $row['n'];
                         }
-                        $data_js[] = $tmp_estado;
                     }
-                }
-                $contenido['total_oficinas'] = $total_oficinas;
-                $contenido['resultado_general'] = $resultado;
-                $data['data_chart'] = json_encode($data_js);
-                $data['charts_js'] = 'chart_general_cam.js';
 
-                if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
-                    $this->exportarReporteGeneral($estados_tramites, $oficinas, $resultado);
-                }
+                    /* Datos JSON*/
+                    $data_js = array();
+                    $tmp_header = array('ESTADO');
+                    foreach($clasificaciones as $clasificacion)
+                        $tmp_header[] = $clasificacion;
 
+                    $data_js[] = $tmp_header;
+                    foreach($estados_tramites as $estado){
+                        if($estado['id'] > 0){
+                            $tmp_estado = array($estado['orden']);
+                            foreach($clasificaciones as $clasificacion){
+                                $tmp_estado[] = intval((isset($resultado[$clasificacion][$estado['texto']]) && $resultado[$clasificacion][$estado['texto']] > 0) ? $resultado[$clasificacion][$estado['texto']] : 0);
+                            }
+                            $data_js[] = $tmp_estado;
+                        }
+                    }
+
+                    $contenido['total_clasificaciones'] = $total_clasificaciones;
+                    $contenido['resultado_oficina'] = $resultado;
+                    $contenido['oficina'] = $oficina;
+                    $data['data_chart'] = json_encode($data_js);
+                    $data['charts_js'] = 'chart_oficina.js';
+
+                    if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
+                        $this->exportarReporteOficina($estados_tramites, $clasificaciones, $resultado, "REPORTE - ".$oficinas[$oficina], 'DE : '.$this->request->getPost('fecha_inicio').' A :'.$this->request->getPost('fecha_fin'));
+                    }
+
+                }else{
+                    $campos = array("oficina_denuncia as oficina", "estado_tramite as estado_padre", "COUNT(correlativo_denuncia) as n");
+                    $where = array(
+                        'fecha_denuncia_busqueda >=' => $this->request->getPost('fecha_inicio'),
+                        'fecha_denuncia_busqueda <=' => $this->request->getPost('fecha_fin'),
+                    );
+                    $builder = $db->table('mineria_ilegal.vista_buscador')
+                    ->select($campos)
+                    ->where($where)
+                    ->groupBy(array("oficina_denuncia", "estado_tramite"))
+                    ->orderBY('oficina_denuncia ASC, estado_tramite ASC');
+                    $datos = $builder->get()->getResultArray();
+                    $resultado = array();
+                    $total_oficinas = array();
+                    if($datos){
+                        foreach($datos as $row){
+                            if(!isset($total_oficinas[$row['oficina']]))
+                                $total_oficinas[$row['oficina']] = $row['n'];
+                            else
+                                $total_oficinas[$row['oficina']] += $row['n'];
+                            $resultado[$row['oficina']][$row['estado_padre']] = $row['n'];
+                        }
+                    }
+                    /* Datos JSON*/
+                    $data_js = array();
+                    $tmp_header = array('ESTADO');
+                    foreach($oficinas as $idOficina => $oficina){
+                        if($idOficina > 0)
+                            $tmp_header[] = $oficina;
+                    }
+                    $data_js[] = $tmp_header;
+                    foreach($estados_tramites as $estado){
+                        if($estado['id'] > 0){
+                            $tmp_estado = array($estado['orden']);
+                            foreach($oficinas as $idOficina => $oficina){
+                                if($idOficina > 0)
+                                    $tmp_estado[] = intval((isset($resultado[$oficina][$estado['texto']]) && $resultado[$oficina][$estado['texto']] > 0) ? $resultado[$oficina][$estado['texto']] : 0);
+                            }
+                            $data_js[] = $tmp_estado;
+                        }
+                    }
+                    $contenido['total_oficinas'] = $total_oficinas;
+                    $contenido['resultado_general'] = $resultado;
+                    $data['data_chart'] = json_encode($data_js);
+                    $data['charts_js'] = 'chart_general.js';
+
+                    if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
+                        $this->exportarReporteGeneral($estados_tramites, $oficinas, $resultado, "REPORTE GENERAL MINERÍA ILEGAL", 'DE : '.$this->request->getPost('fecha_inicio').' A :'.$this->request->getPost('fecha_fin'));
+                    }
+
+                }
             }
         }
         $cabera['titulo'] = $this->titulo;
@@ -5790,14 +5799,15 @@ class MineriaIlegal extends BaseController
         $data['content'] = view($this->carpeta.'reporte', $contenido);
         $data['menu_actual'] = $this->menuActual.'reporte';
         $data['tramites_menu'] = $this->tramitesMenu();
+        $data['alertas'] = $this->alertasTramites();
         echo view('templates/template', $data);
     }
 
-    public function exportarReporteGeneral($estados, $oficinas, $datos){
+    public function exportarReporteGeneral($estados, $oficinas, $datos, $titulo, $subtitulo){
         $file_name = 'reporte_general-'.date('YmdHis').'.xlsx';
         $spreadsheet = new Spreadsheet();
         $activeWorksheet = $spreadsheet->getActiveSheet();
-        $activeWorksheet->setTitle("Reporte Estado CAM");
+        $activeWorksheet->setTitle("Reporte Estado Minería Ilegal");
         $styleHeader = array(
             'borders' => array(
                 'allBorders' => array(
@@ -5838,11 +5848,15 @@ class MineriaIlegal extends BaseController
         }
 
         $nColumnas = 1;
-        $activeWorksheet->setCellValue('A'.$nColumnas, 'REPORTE GENERAL CONTRATOS ADMINISTRATIVOS MINEROS');
+        $activeWorksheet->setCellValue('A'.$nColumnas, $titulo);
         $activeWorksheet->mergeCells('A'.$nColumnas.':'.$this->alpha[count($tmp_header)-1].$nColumnas);
-        $activeWorksheet->getStyle('A'.$nColumnas)->applyFromArray($styleHeader);
-
+        $activeWorksheet->getStyle('A'.$nColumnas.':'.$this->alpha[count($tmp_header)-1].$nColumnas)->applyFromArray($styleHeader);
         $nColumnas++;
+        $activeWorksheet->setCellValue('A'.$nColumnas, $subtitulo);
+        $activeWorksheet->mergeCells('A'.$nColumnas.':'.$this->alpha[count($tmp_header)-1].$nColumnas);
+        $activeWorksheet->getStyle('A'.$nColumnas.':'.$this->alpha[count($tmp_header)-1].$nColumnas)->applyFromArray($styleHeader);
+        $nColumnas++;
+
         $activeWorksheet->fromArray($tmp_header,NULL,'A'.$nColumnas);
         $activeWorksheet->getStyle('A'.$nColumnas.':'.$activeWorksheet->getHighestColumn().$nColumnas)->applyFromArray($styleHeader);
         if($datos){
@@ -5877,11 +5891,11 @@ class MineriaIlegal extends BaseController
 		exit;
     }
 
-    public function exportarReporteOficina($estados, $clasificaciones, $datos, $direccion){
+    public function exportarReporteOficina($estados, $clasificaciones, $datos, $titulo, $subtitulo){
         $file_name = 'reporte_direccion-'.date('YmdHis').'.xlsx';
         $spreadsheet = new Spreadsheet();
         $activeWorksheet = $spreadsheet->getActiveSheet();
-        $activeWorksheet->setTitle("Reporte Estado CAM");
+        $activeWorksheet->setTitle("Reporte Estado Minería Ilegal");
         $styleHeader = array(
             'borders' => array(
                 'allBorders' => array(
@@ -5921,11 +5935,15 @@ class MineriaIlegal extends BaseController
 
 
         $nColumnas = 1;
-        $activeWorksheet->setCellValue('A'.$nColumnas, 'REPORTE - '.$direccion);
+        $activeWorksheet->setCellValue('A'.$nColumnas, $titulo);
         $activeWorksheet->mergeCells('A'.$nColumnas.':'.$this->alpha[count($tmp_header)-1].$nColumnas);
-        $activeWorksheet->getStyle('A'.$nColumnas)->applyFromArray($styleHeader);
-
+        $activeWorksheet->getStyle('A'.$nColumnas.':'.$this->alpha[count($tmp_header)-1].$nColumnas)->applyFromArray($styleHeader);
         $nColumnas++;
+        $activeWorksheet->setCellValue('A'.$nColumnas, $subtitulo);
+        $activeWorksheet->mergeCells('A'.$nColumnas.':'.$this->alpha[count($tmp_header)-1].$nColumnas);
+        $activeWorksheet->getStyle('A'.$nColumnas.':'.$this->alpha[count($tmp_header)-1].$nColumnas)->applyFromArray($styleHeader);
+        $nColumnas++;
+
         $activeWorksheet->fromArray($tmp_header,NULL,'A'.$nColumnas);
         $activeWorksheet->getStyle('A'.$nColumnas.':'.$activeWorksheet->getHighestColumn().$nColumnas)->applyFromArray($styleHeader);
         if($datos){
@@ -7473,11 +7491,20 @@ class MineriaIlegal extends BaseController
 
     public function reporteDenunciasFechas()
     {
+        $oficina = $this->request->getPost('oficina');
+        $estado = $this->request->getPost('estado');
+        $subestado = $this->request->getPost('subestado');
         $oficinaModel = new OficinasModel();
         $tmpOficinas = $oficinaModel->where(array('desconcentrado' => 'true'))->findAll();
         $oficinas = array('' => 'TODAS LAS DIRECCIONES DEPARTAMENTALES Y REGIONAL');
         foreach($tmpOficinas as $row)
             $oficinas[$row['id']] = $row['nombre'];
+        $estadosTramites = $this->obtenerEstadosTramites($this->idTramite);
+        $estados = array('' => 'TODOS LOS ESTADOS');
+        foreach($estadosTramites as $row){
+            if(is_numeric($row['id']) && $row['id'] > 0)
+                $estados[$row['id']] = $row['texto'];
+        }
         $datos = array();
         $campos_listar=array(
             ' ', 'Fecha H.R.', 'Hoja de Ruta', 'Fecha F.M.I.', 'Formulario Minería Ilegal', 'Tipo Denuncia', 'Fecha F.D.W.', 'Formulario Denuncia Web', 'Denunciate(s)',
@@ -7489,7 +7516,6 @@ class MineriaIlegal extends BaseController
         );
 
         if ($this->request->getPost()) {
-            $oficina = $this->request->getPost('oficina');
             $camposValidacion = array(
                 'fecha_inicio' => [
                     'rules' => 'required|valid_date[Y-m-d]',
@@ -7506,10 +7532,14 @@ class MineriaIlegal extends BaseController
                     'fecha_denuncia_busqueda >=' => $this->request->getPost('fecha_inicio'),
                     'fecha_denuncia_busqueda <=' => $this->request->getPost('fecha_fin'),
                 );
-                if(is_numeric($oficina) && $oficina > 0){
-                    $oficinaBusqueda = $oficinaModel->find($oficina);
-                    $where['oficina_denuncia'] = $oficinaBusqueda['nombre'];
-                }
+
+                if(is_numeric($oficina) && $oficina > 0)
+                    $where['id_oficina_denuncia'] = $oficina;
+                if(is_numeric($estado) && $estado > 0)
+                    $where['ultimo_fk_estado_tramite_padre'] = $estado;
+                if(is_numeric($subestado) && $subestado > 0)
+                    $where['ultimo_fk_estado_tramite_hijo'] = $subestado;
+
                 $builder = $db->table('mineria_ilegal.vista_buscador')
                 ->where($where)
                 ->orderBY('oficina_denuncia ASC, fecha_denuncia_busqueda ASC');
@@ -7526,6 +7556,7 @@ class MineriaIlegal extends BaseController
         $cabera['subtitulo'] = 'Reporte de Denuncias por Fecha';
         $contenido['title'] = view('templates/title',$cabera);
         $contenido['oficinas'] = $oficinas;
+        $contenido['estados'] = $estados;
         $contenido['subtitulo'] = 'Reporte de Denuncias por Fecha';
         $contenido['datos'] = $datos;
         $contenido['campos_listar'] = $campos_listar;

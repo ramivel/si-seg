@@ -359,6 +359,14 @@
                                     </li>
                                 <?php }?>
 
+                                <?php if(in_array(8, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'reporte') ? 'active' : '';?>">
+                                        <a href="<?= base_url($row['controlador'].'reporte');?>">
+                                            <span class="pcoded-mtext">Reporte Ejecutivo</span>
+                                        </a>
+                                    </li>
+                                <?php }?>
+
                             </ul>
                         </li>
                     <?php }?>

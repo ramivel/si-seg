@@ -3297,7 +3297,7 @@ class Cam extends BaseController
                     $contenido['resultado_oficina'] = $resultado;
                     $contenido['oficina'] = $oficina;
                     $data['data_chart'] = json_encode($data_js);
-                    $data['charts_js'] = 'chart_oficina_cam.js';
+                    $data['charts_js'] = 'chart_oficina.js';
 
                     if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
                         $this->exportarReporteOficina($estados_tramites, $clasificaciones, $resultado, $oficinas[$oficina]);
@@ -3351,7 +3351,7 @@ class Cam extends BaseController
                     $contenido['total_oficinas'] = $total_oficinas;
                     $contenido['resultado_general'] = $resultado;
                     $data['data_chart'] = json_encode($data_js);
-                    $data['charts_js'] = 'chart_general_cam.js';
+                    $data['charts_js'] = 'chart_general.js';
 
                     if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
                         $this->exportarReporteGeneral($estados_tramites, $oficinas, $resultado);
