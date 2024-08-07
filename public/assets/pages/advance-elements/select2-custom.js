@@ -928,14 +928,34 @@ $(document).ready(function () {
         error: function () {
           console.log("error ajax.");
         },
-        success: function (html) {
-          console.log(html);
+        success: function (html) {          
           $("#usuario-reporte").html(html);
         },
       });
     }
   });
   /* Fin Reporte Administracion Usuarios */
+
+  /* Reporte de Tramite por Fecha Mecanizada */
+  $("#estado-reporte").on("change", function () {
+    $("#subestado-reporte").html('<option value="">TODOS LOS SUBESTADOS</option>');
+    if (this.value.length > 0) {
+      $.ajax({
+        type: "POST",
+        url: baseUrl + "cam/ajax_estado_tramite_hijo_reporte",
+        data: {
+          id_padre: this.value,
+        },
+        error: function () {
+          console.log("error ajax.");
+        },
+        success: function (html) {          
+          $("#subestado-reporte").html(html);
+        },
+      });
+    }
+  });
+  /* Fin Reporte de Tramite por Fecha Mecanizada */
 
   /* Filtros Buscador */
   $("#filtro-buscador").on("change", function () {

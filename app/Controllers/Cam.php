@@ -2124,6 +2124,7 @@ class Cam extends BaseController
             'correlativo' => 'H.R. Madre',
             'codigo_unico' => 'Código Único',
             'denominacion' => 'Denominación',
+            'titular' => 'Solicitante'
         );
         if ($this->request->getPost()) {
             $validation = $this->validate([
@@ -2179,6 +2180,9 @@ class Cam extends BaseController
                         break;
                     case 'denominacion':
                         $query = $builder->where($where)->like('dam.denominacion', $texto);
+                        break;
+                    case 'titular':
+                        $query = $builder->where($where)->like('dam.titular', $texto);
                         break;
                 }
                 $dataLog = array(
@@ -2963,6 +2967,7 @@ class Cam extends BaseController
             );
         $where = array(
             'd.fk_acto_administrativo' => $id_acto_administrativo,
+            'd.deleted_at' => NULL,
         );
         $query = $db->table('derivacion as d')
         ->select($campos)
@@ -3224,119 +3229,135 @@ class Cam extends BaseController
     }
 
     public function reporte(){
+        $oficina = $this->request->getPost('oficina');
         $oficinas = $this->obtenerOficinasReporte();
         $estados_tramites = $this->obtenerEstadosTramites($this->idTramite);
         $clasificaciones = $this->obtenerClasificacionesTitulares();
         if ($this->request->getPost()) {
-            $db = \Config\Database::connect();
-            $oficina = $this->request->getPost('oficina');
-            if($oficina > 0){
-                /* consulta de oficina */
-                $campos = array('dam.clasificacion_titular', "CONCAT(etp.orden,'. ', etp.nombre) as estado_padre", 'count(ad.correlativo) as n');
-                $where = array(
-                    'ad.deleted_at' => NULL,
-                    'ad.fk_oficina' => $oficina
-                );
-                $builder = $db->table('public.acto_administrativo as ad')
-                ->select($campos)
-                ->join('public.datos_area_minera as dam', 'ad.id = dam.fk_acto_administrativo', 'left')
-                ->join('public.estado_tramite as etp', 'ad.ultimo_fk_estado_tramite_padre = etp.id', 'left')
-                ->join('public.estado_tramite as eth', 'ad.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
-                ->where($where)
-                ->groupBy(array('dam.clasificacion_titular', 'etp.orden', 'estado_padre'))
-                ->orderBY('dam.clasificacion_titular ASC, etp.orden ASC');
-                $datos = $builder->get()->getResultArray();
-                $resultado = array();
-                $total_clasificaciones = array();
-                if($datos){
-                    foreach($datos as $row){
-                        if(!isset($total_clasificaciones[$row['clasificacion_titular']]))
-                            $total_clasificaciones[$row['clasificacion_titular']] = $row['n'];
-                        else
-                            $total_clasificaciones[$row['clasificacion_titular']] += $row['n'];
-                        $resultado[$row['clasificacion_titular']][$row['estado_padre']] = $row['n'];
-                    }
-                }
-
-                /* Datos JSON*/
-                $data_js = array();
-                $tmp_header = array('ESTADO');
-                foreach($clasificaciones as $clasificacion)
-                    $tmp_header[] = $clasificacion;
-
-                $data_js[] = $tmp_header;
-                foreach($estados_tramites as $estado){
-                    if($estado['id'] > 0){
-                        $tmp_estado = array($estado['orden']);
-                        foreach($clasificaciones as $clasificacion){
-                            $tmp_estado[] = intval((isset($resultado[$clasificacion][$estado['texto']]) && $resultado[$clasificacion][$estado['texto']] > 0) ? $resultado[$clasificacion][$estado['texto']] : 0);
-                        }
-                        $data_js[] = $tmp_estado;
-                    }
-                }
-
-                $contenido['total_clasificaciones'] = $total_clasificaciones;
-                $contenido['resultado_oficina'] = $resultado;
-                $contenido['oficina'] = $oficina;
-                $data['data_chart'] = json_encode($data_js);
-                $data['charts_js'] = 'chart_oficina_cam.js';
-
-                if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
-                    $this->exportarReporteOficina($estados_tramites, $clasificaciones, $resultado, $oficinas[$oficina]);
-                }
-
+            $camposValidacion = array(
+                'fecha_inicio' => [
+                    'rules' => 'required|valid_date[Y-m-d]',
+                ],
+                'fecha_fin' => [
+                    'rules' => 'required|valid_date[Y-m-d]',
+                ],
+            );
+            if(!$this->validate($camposValidacion)){
+                $contenido['validation'] = $this->validator;
             }else{
-                $campos = array('o.nombre as oficina', "CONCAT(etp.orden,'. ', etp.nombre) as estado_padre", 'count(ad.correlativo) as n');
-                $where = array(
-                    'ad.deleted_at' => NULL,
-                );
-                $builder = $db->table('public.acto_administrativo as ad')
-                ->select($campos)
-                ->join('public.oficinas as o', 'ad.fk_oficina = o.id', 'left')
-                ->join('public.estado_tramite as etp', 'ad.ultimo_fk_estado_tramite_padre = etp.id', 'left')
-                ->join('public.estado_tramite as eth', 'ad.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
-                ->where($where)
-                ->groupBy(array('oficina', 'etp.orden', 'estado_padre'))
-                ->orderBY('o.nombre ASC, etp.orden ASC');
-                $datos = $builder->get()->getResultArray();
-                $resultado = array();
-                $total_oficinas = array();
-                if($datos){
-                    foreach($datos as $row){
-                        if(!isset($total_oficinas[$row['oficina']]))
-                            $total_oficinas[$row['oficina']] = $row['n'];
-                        else
-                            $total_oficinas[$row['oficina']] += $row['n'];
-                        $resultado[$row['oficina']][$row['estado_padre']] = $row['n'];
-                    }
-                }
-                /* Datos JSON*/
-                $data_js = array();
-                $tmp_header = array('ESTADO');
-                foreach($oficinas as $idOficina => $oficina){
-                    if($idOficina > 0)
-                        $tmp_header[] = $oficina;
-                }
-                $data_js[] = $tmp_header;
-                foreach($estados_tramites as $estado){
-                    if($estado['id'] > 0){
-                        $tmp_estado = array($estado['orden']);
-                        foreach($oficinas as $idOficina => $oficina){
-                            if($idOficina > 0)
-                                $tmp_estado[] = intval((isset($resultado[$oficina][$estado['texto']]) && $resultado[$oficina][$estado['texto']] > 0) ? $resultado[$oficina][$estado['texto']] : 0);
+                $db = \Config\Database::connect();                
+                if($oficina > 0){
+                    /* consulta de oficina */
+                    $campos = array('dam.clasificacion_titular', "CONCAT(etp.orden,'. ', etp.nombre) as estado_padre", 'count(ad.correlativo) as n');
+                    $where = array(
+                        'ad.deleted_at' => NULL,
+                        'ad.fk_oficina' => $oficina,
+                        'ad.fecha_mecanizada >=' => $this->request->getPost('fecha_inicio'),
+                        'ad.fecha_mecanizada <=' => $this->request->getPost('fecha_fin'),
+                    );
+                    $builder = $db->table('public.acto_administrativo as ad')
+                    ->select($campos)
+                    ->join('public.datos_area_minera as dam', 'ad.id = dam.fk_acto_administrativo', 'left')
+                    ->join('public.estado_tramite as etp', 'ad.ultimo_fk_estado_tramite_padre = etp.id', 'left')
+                    ->join('public.estado_tramite as eth', 'ad.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
+                    ->where($where)
+                    ->groupBy(array('dam.clasificacion_titular', 'etp.orden', 'estado_padre'))
+                    ->orderBY('dam.clasificacion_titular ASC, etp.orden ASC');
+                    $datos = $builder->get()->getResultArray();                    
+                    $resultado = array();
+                    $total_clasificaciones = array();
+                    if($datos){
+                        foreach($datos as $row){
+                            if(!isset($total_clasificaciones[$row['clasificacion_titular']]))
+                                $total_clasificaciones[$row['clasificacion_titular']] = $row['n'];
+                            else
+                                $total_clasificaciones[$row['clasificacion_titular']] += $row['n'];
+                            $resultado[$row['clasificacion_titular']][$row['estado_padre']] = $row['n'];
                         }
-                        $data_js[] = $tmp_estado;
+                    }                    
+
+                    /* Datos JSON*/
+                    $data_js = array();
+                    $tmp_header = array('ESTADO');
+                    foreach($clasificaciones as $clasificacion)
+                        $tmp_header[] = $clasificacion;
+
+                    $data_js[] = $tmp_header;
+                    foreach($estados_tramites as $estado){
+                        if($estado['id'] > 0){
+                            $tmp_estado = array($estado['orden']);
+                            foreach($clasificaciones as $clasificacion){
+                                $tmp_estado[] = intval((isset($resultado[$clasificacion][$estado['texto']]) && $resultado[$clasificacion][$estado['texto']] > 0) ? $resultado[$clasificacion][$estado['texto']] : 0);
+                            }
+                            $data_js[] = $tmp_estado;
+                        }
                     }
-                }
-                $contenido['total_oficinas'] = $total_oficinas;
-                $contenido['resultado_general'] = $resultado;
-                $data['data_chart'] = json_encode($data_js);
-                $data['charts_js'] = 'chart_general_cam.js';
 
-                if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
-                    $this->exportarReporteGeneral($estados_tramites, $oficinas, $resultado);
-                }
+                    $contenido['total_clasificaciones'] = $total_clasificaciones;
+                    $contenido['resultado_oficina'] = $resultado;
+                    $contenido['oficina'] = $oficina;
+                    $data['data_chart'] = json_encode($data_js);
+                    $data['charts_js'] = 'chart_oficina_cam.js';
 
+                    if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
+                        $this->exportarReporteOficina($estados_tramites, $clasificaciones, $resultado, $oficinas[$oficina]);
+                    }
+
+                }else{
+                    $campos = array('o.nombre as oficina', "CONCAT(etp.orden,'. ', etp.nombre) as estado_padre", 'count(ad.correlativo) as n');
+                    $where = array(
+                        'ad.deleted_at' => NULL,
+                        'ad.fecha_mecanizada >=' => $this->request->getPost('fecha_inicio'),
+                        'ad.fecha_mecanizada <=' => $this->request->getPost('fecha_fin'),
+                    );
+                    $builder = $db->table('public.acto_administrativo as ad')
+                    ->select($campos)
+                    ->join('public.oficinas as o', 'ad.fk_oficina = o.id', 'left')
+                    ->join('public.estado_tramite as etp', 'ad.ultimo_fk_estado_tramite_padre = etp.id', 'left')
+                    ->join('public.estado_tramite as eth', 'ad.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
+                    ->where($where)
+                    ->groupBy(array('oficina', 'etp.orden', 'estado_padre'))
+                    ->orderBY('o.nombre ASC, etp.orden ASC');
+                    $datos = $builder->get()->getResultArray();
+                    $resultado = array();
+                    $total_oficinas = array();
+                    if($datos){
+                        foreach($datos as $row){
+                            if(!isset($total_oficinas[$row['oficina']]))
+                                $total_oficinas[$row['oficina']] = $row['n'];
+                            else
+                                $total_oficinas[$row['oficina']] += $row['n'];
+                            $resultado[$row['oficina']][$row['estado_padre']] = $row['n'];
+                        }
+                    }
+                    /* Datos JSON*/
+                    $data_js = array();
+                    $tmp_header = array('ESTADO');
+                    foreach($oficinas as $idOficina => $oficina){
+                        if($idOficina > 0)
+                            $tmp_header[] = $oficina;
+                    }
+                    $data_js[] = $tmp_header;
+                    foreach($estados_tramites as $estado){
+                        if($estado['id'] > 0){
+                            $tmp_estado = array($estado['orden']);
+                            foreach($oficinas as $idOficina => $oficina){
+                                if($idOficina > 0)
+                                    $tmp_estado[] = intval((isset($resultado[$oficina][$estado['texto']]) && $resultado[$oficina][$estado['texto']] > 0) ? $resultado[$oficina][$estado['texto']] : 0);
+                            }
+                            $data_js[] = $tmp_estado;
+                        }
+                    }
+                    $contenido['total_oficinas'] = $total_oficinas;
+                    $contenido['resultado_general'] = $resultado;
+                    $data['data_chart'] = json_encode($data_js);
+                    $data['charts_js'] = 'chart_general_cam.js';
+
+                    if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
+                        $this->exportarReporteGeneral($estados_tramites, $oficinas, $resultado);
+                    }
+
+                }
             }
         }
         $cabera['titulo'] = $this->titulo;
@@ -3885,7 +3906,7 @@ class Cam extends BaseController
         $builder = $db->table('public.acto_administrativo as ac')
         ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
         ->select('DISTINCT(dam.clasificacion_titular) AS clasificacion')
-        ->where('ac.deleted_at IS NULL')
+        ->where("ac.deleted_at IS NULL AND dam.clasificacion_titular <> ''")
         ->orderBy('clasificacion');
         $clasificacionesTitulares = $builder->get()->getResultArray();
         $temporal = array();
@@ -4313,6 +4334,26 @@ class Cam extends BaseController
             if($datos){
                 foreach($datos as $row){
                     $html .= '<option value="'.$row['id'].'" data-anexar="'.$row['anexar_documentos'].'" >'.$categoria['orden'].'.'.$row['orden'].'. '.$row['nombre'].'</option>';
+                }
+            }
+        }
+        echo $html;
+    }
+
+    public function ajaxEstadoTramiteHijoReporte(){
+        $id_padre = $this->request->getPost('id_padre');
+        $estadoTramiteModel = new EstadoTramiteModel();
+        $html = '<option value="">TODOS LOS SUBESTADOS</option>';
+        if($id_padre){
+            $categoria = $estadoTramiteModel->find($id_padre);
+            $db = \Config\Database::connect();
+            $builder = $db->table('public.estado_tramite')
+            ->where('deleted_at IS NULL AND fk_estado_padre = '.$id_padre)
+            ->orderBy('orden');
+            $datos = $builder->get()->getResult('array');
+            if($datos){
+                foreach($datos as $row){
+                    $html .= '<option value="'.$row['id'].'">'.$categoria['orden'].'.'.$row['orden'].'. '.$row['nombre'].'</option>';
                 }
             }
         }
@@ -5225,25 +5266,38 @@ class Cam extends BaseController
     }
     public function reporteFechaMecanizada()
     {
+        $oficina = $this->request->getPost('oficina');
+        $estado = $this->request->getPost('estado');
+        $subestado = $this->request->getPost('subestado');
         $oficinaModel = new OficinasModel();
         $tmpOficinas = $oficinaModel->where(array('desconcentrado' => 'true'))->findAll();
-        $oficinas = array('' => 'SELECCIONE UNA DIRECCIÓN');
+        $oficinas = array('' => 'TODAS LAS DIRECCIONES DEPARTAMENTALES Y REGIONAL');
         foreach($tmpOficinas as $row)
             $oficinas[$row['id']] = $row['nombre'];
+        $estadosTramites = $this->obtenerEstadosTramites($this->idTramite);
+        $estados = array('' => 'TODOS LOS ESTADOS');
+        foreach($estadosTramites as $row){
+            if(is_numeric($row['id']) && $row['id'] > 0)
+                $estados[$row['id']] = $row['texto'];
+        }
+        $subestados = array('' => 'TODOS LOS SUBESTADOS');
+        if($estadosTramitesHijo = $this->obtenerEstadosTramitesHijo($estado)){
+            foreach($estadosTramitesHijo as $row){
+                if(is_numeric($row['id']) && $row['id'] > 0)
+                    $subestados[$row['id']] = $row['texto'];
+            }
+        }
         $datos = array();
         $campos_listar=array(
-            'Fecha Mecanizada','H.R. Madre','Estado Tramite','Fecha Derivación','Responsable Trámite','Remitente','Destinatario','Instrucción','Codigo Unico','Denominacion','Representante Legal','Solicitante','Clasificación APM','Departamentos',
+            'Fecha Mecanizada','H.R. Madre','Estado Tramite','Fecha Derivación','Responsable Trámite','Remitente','Destinatario','Instrucción','Codigo Unico','Denominacion','Representante Legal','Solicitante','Clasificación APM','Departamentos', 'Dirección Departamental/Regional'
         );
         $campos_reales=array(
-            'fecha_mecanizada','correlativo','estado_tramite','ultimo_fecha_derivacion','responsable','remitente','destinatario','ultimo_instruccion','codigo_unico','denominacion','representante_legal','titular','clasificacion_titular','departamentos',
+            'fecha_mecanizada','correlativo','estado_tramite','ultimo_fecha_derivacion','responsable','remitente','destinatario','ultimo_instruccion','codigo_unico','denominacion','representante_legal','titular','clasificacion_titular','departamentos', 'regional'
         );
 
         if ($this->request->getPost()) {
-            $oficina = $this->request->getPost('oficina');
+
             $camposValidacion = array(
-                'oficina' => [
-                    'rules' => 'required',
-                ],
                 'fecha_inicio' => [
                     'rules' => 'required|valid_date[Y-m-d]',
                 ],
@@ -5263,13 +5317,20 @@ class Cam extends BaseController
                 "CONCAT(etp.orden,'. ',etp.nombre) as estado_tramite_excel",
                 "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE '' END as sub_estado_tramite_excel",
                 "CONCAT(ua.nombre_completo,' - ',pa.nombre) as responsable_excel", "CONCAT(ur.nombre_completo,' - ',pr.nombre) as remitente_excel", "CONCAT(ud.nombre_completo,' - ',pd.nombre) as destinatario_excel",
+                "o.nombre as regional"
                 );
                 $where = array(
                     'ac.deleted_at' => NULL,
-                    'ac.fk_oficina' => $oficina,
                     'ac.fecha_mecanizada >=' => $this->request->getPost('fecha_inicio'),
                     'ac.fecha_mecanizada <=' => $this->request->getPost('fecha_fin'),
                 );
+                if(is_numeric($oficina) && $oficina > 0)
+                    $where['ac.fk_oficina'] = $oficina;
+                if(is_numeric($estado) && $estado > 0)
+                    $where['ac.ultimo_fk_estado_tramite_padre'] = $estado;
+                if(is_numeric($subestado) && $subestado > 0)
+                    $where['ac.ultimo_fk_estado_tramite_hijo'] = $subestado;
+
                 $builder = $db->table('public.acto_administrativo as ac')
                 ->select($campos)
                 ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
@@ -5281,16 +5342,17 @@ class Cam extends BaseController
                 ->join('estado_tramite as eth', 'ac.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
                 ->join('usuarios as ua', 'ac.ultimo_fk_usuario_responsable = ua.id', 'left')
                 ->join('perfiles as pa', 'ua.fk_perfil = pa.id', 'left')
+                ->join('public.oficinas as o', 'ac.fk_oficina = o.id', 'left')
                 ->where($where)
-                ->orderBY('ac.fecha_mecanizada', 'ASC');
+                ->orderBY('o.nombre ASC, ac.fecha_mecanizada ASC');
                 $datos = $builder->get()->getResultArray();
                 if ($this->request->getPost('enviar')=='excel') {
                     helper('security');
                     $campos_listar_excel=array(
-                        'Fecha Mecanizada','H.R. Madre','Estado Tramite','Sub Estado Tramite','Fecha Derivación','Responsable Trámite','Remitente','Destinatario','Instrucción','Codigo Unico','Denominacion','Representante Legal','Solicitante','Clasificación APM','Departamentos',
+                        'Fecha Mecanizada','H.R. Madre','Estado Tramite','Sub Estado Tramite','Fecha Derivación','Responsable Trámite','Remitente','Destinatario','Instrucción','Codigo Unico','Denominacion','Representante Legal','Solicitante','Clasificación APM','Departamentos', 'Dirección Departamental/Regional'
                     );
                     $campos_reales_excel=array(
-                        'fecha_mecanizada','correlativo','estado_tramite_excel','sub_estado_tramite_excel','ultimo_fecha_derivacion','responsable_excel','remitente_excel','destinatario_excel','ultimo_instruccion','codigo_unico','denominacion','representante_legal','titular','clasificacion_titular','departamentos',
+                        'fecha_mecanizada','correlativo','estado_tramite_excel','sub_estado_tramite_excel','ultimo_fecha_derivacion','responsable_excel','remitente_excel','destinatario_excel','ultimo_instruccion','codigo_unico','denominacion','representante_legal','titular','clasificacion_titular','departamentos', 'regional'
                     );
                     $file_name = 'CAM_'.$this->request->getPost('fecha_inicio').'_'.$this->request->getPost('fecha_fin').'.xlsx';
                     $this->exportarXLS($campos_listar_excel, $campos_reales_excel, $datos, $file_name, $oficinas[$oficina], 'DE : '.$this->request->getPost('fecha_inicio').' A :'.$this->request->getPost('fecha_fin'));
@@ -5302,6 +5364,8 @@ class Cam extends BaseController
         $cabera['subtitulo'] = 'Reporte de Trámites por Fecha Mecanizada';
         $contenido['title'] = view('templates/title',$cabera);
         $contenido['oficinas'] = $oficinas;
+        $contenido['estados'] = $estados;
+        $contenido['subestados'] = $subestados;
         $contenido['subtitulo'] = 'Reporte de Trámites por Fecha Mecanizada';
         $contenido['datos'] = $datos;
         $contenido['campos_listar'] = $campos_listar;

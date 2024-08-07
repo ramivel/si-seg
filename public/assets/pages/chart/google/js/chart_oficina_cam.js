@@ -1,6 +1,6 @@
 "use strict";
 $(document).ready(function() {
-    
+
     google.charts.load('current', {'packages':['bar'], 'language': 'es'});
     google.charts.setOnLoadCallback(drawChart);
 
@@ -16,34 +16,51 @@ $(document).ready(function() {
                 title: 'Estado Tramite',
             },
             vAxis: {
-                title: 'N° Tramites',                
+                title: 'N° Tramites',
             },
         };
 
-        /*var chart_div = document.getElementById('chart_div');
-        var chart = new google.charts.Bar(chart_div);
-
-        // Wait for the chart to finish drawing before calling the getImageURI() method.
-        google.visualization.events.addListener(chart, 'ready', function () {
-            chart_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
-            console.log(chart_div.innerHTML);
-        });
-
-        chart.draw(data, options);*/
-
-
         var chart = new google.charts.Bar(document.getElementById('avance_oficina'));
-
-        google.visualization.events.addListener(chart, 'ready', function () {
-            /* html2canvas*/
-            //console.log(chart.getImageURI());
-            /*avance.innerHTML = '<img id="chart" src=' + chart.getImageURI() + '>';
-            document.getElementById("download_link").setAttribute("href", chart.getImageURI())
-            document.getElementById("download_link").click();*/
-
-        });
-
         chart.draw(data, google.charts.Bar.convertOptions(options));
+    }
+
+    setUpDownloadPageAsImage();
+
+    function setUpDownloadPageAsImage() {
+        document.getElementById("imprimir-chart-oficina").addEventListener("click", function() {
+            html2canvas($('#avance_oficina').get(0)).then(function(canvas) {
+                simulateDownloadImageClick(canvas.toDataURL(), getRandomFileName());
+            });
+        });
+    }
+
+    function simulateDownloadImageClick(uri, filename) {
+        var link = document.createElement('a');
+        if (typeof link.download !== 'string') {
+            window.open(uri);
+        } else {
+            link.href = uri;
+            link.download = filename;
+            accountForFirefox(clickLink, link);
+        }
+    }
+
+    function clickLink(link) {
+        link.click();
+    }
+
+    function accountForFirefox(click) { // wrapper function
+        let link = arguments[1];
+        document.body.appendChild(link);
+        click(link);
+        document.body.removeChild(link);
+    }
+
+    function getRandomFileName() {
+        var timestamp = new Date().toISOString().replace(/[-:.]/g,"");
+        var random = ("" + Math.random()).substring(2, 8);
+        var random_number = timestamp+random+".png";
+        return random_number;
     }
 
 });

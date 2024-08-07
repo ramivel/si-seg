@@ -27,20 +27,6 @@
                     <div class="card-block">
                         <?= form_open($accion);?>
                             <div class="form-group row">
-                                <?php if(in_array(100, session()->get('registroPermisos')) || in_array(17, session()->get('registroPermisos'))){?>
-                                <div class="col-sm-4">
-                                    <label class="col-form-label">Oficina:</label>
-                                    <?php
-                                        $campo = 'oficina';
-                                        echo form_dropdown($campo, $oficinas, set_value($campo), array('class' => 'form-control'));
-                                    ?>
-                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                    <?php }?>
-                                </div>
-                                <?php }else{?>
-                                    <?= form_hidden('oficina', set_value('oficina', session()->get('registroOficina'), false));?>
-                                <?php }?>
                                 <div class="col-sm-2">
                                     <label class="col-form-label">Fecha Mecanizada Inicio:</label>
                                     <?php
@@ -68,6 +54,40 @@
                                             'class' => 'form-control',
                                             'value' => set_value($campo,'',false)
                                         ));
+                                    ?>
+                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                    <?php }?>
+                                </div>
+                                <?php if(in_array(100, session()->get('registroPermisos')) || in_array(17, session()->get('registroPermisos'))){?>
+                                <div class="col-sm-4">
+                                    <label class="col-form-label">Oficina:</label>
+                                    <?php
+                                        $campo = 'oficina';
+                                        echo form_dropdown($campo, $oficinas, set_value($campo), array('class' => 'form-control'));
+                                    ?>
+                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                    <?php }?>
+                                </div>
+                                <?php }else{?>
+                                    <?= form_hidden('oficina', set_value('oficina', session()->get('registroOficina'), false));?>
+                                <?php }?>
+                                <div class="col-sm-2">
+                                    <label class="col-form-label">Estado:</label>
+                                    <?php
+                                        $campo = 'estado';
+                                        echo form_dropdown($campo, $estados, set_value($campo), array('id' => 'estado-reporte','class' => 'form-control'));
+                                    ?>
+                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                    <?php }?>
+                                </div>
+                                <div class="col-sm-2">
+                                    <label class="col-form-label">SubEstado:</label>
+                                    <?php
+                                        $campo = 'subestado';
+                                        echo form_dropdown($campo, $subestados, set_value($campo), array('id' => 'subestado-reporte','class' => 'form-control'));
                                     ?>
                                     <?php if(isset($validation) && $validation->hasError($campo)){?>
                                         <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>

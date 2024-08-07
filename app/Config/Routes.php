@@ -153,6 +153,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_area_minera_cmn_cmc', 'Cam::ajaxAreaMineraCmnCmc');
         $routes->add('ajax_datos_area_minera_cmn_cmc', 'Cam::ajaxDatosAreaMineraCmnCmc');
         $routes->add('ajax_estado_tramite_hijo', 'Cam::ajaxEstadoTramiteHijo');
+        $routes->add('ajax_estado_tramite_hijo_reporte', 'Cam::ajaxEstadoTramiteHijoReporte');        
         $routes->add('ajax_analista_destinario', 'Cam::ajaxAnalistaDestinatario');
         $routes->add('ajax_hr_in_ex', 'Cam::ajaxHrInEx');
         $routes->add('ajax_datos_hr_in_ex', 'Cam::ajaxDatosHrInEx');

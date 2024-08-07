@@ -100,6 +100,7 @@
 
     <!-- google chart -->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="<?= base_url('assets/pages/html2canvas/html2canvas.js');?>"></script>
 
         <!--script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></!--script-->
     <!-- Chart js
@@ -220,7 +221,7 @@
         <script type="text/javascript">
             <?= 'const datos_chart = '.$data_chart.';'?>
         </script>
-        <script type="text/javascript" src="<?= base_url('assets/pages/chart/google/js/'.$charts_js);?>"></script>
+        <script type="text/javascript" src="<?= base_url('assets/pages/chart/google/js/'.$charts_js);?>"></script>        
     <?php }?>
 
     <!-- Custom ck editor -->

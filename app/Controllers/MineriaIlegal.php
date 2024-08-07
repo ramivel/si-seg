@@ -7475,25 +7475,22 @@ class MineriaIlegal extends BaseController
     {
         $oficinaModel = new OficinasModel();
         $tmpOficinas = $oficinaModel->where(array('desconcentrado' => 'true'))->findAll();
-        $oficinas = array('' => 'SELECCIONE UNA DIRECCIÓN');
+        $oficinas = array('' => 'TODAS LAS DIRECCIONES DEPARTAMENTALES Y REGIONAL');
         foreach($tmpOficinas as $row)
             $oficinas[$row['id']] = $row['nombre'];
         $datos = array();
         $campos_listar=array(
             ' ', 'Fecha H.R.', 'Hoja de Ruta', 'Fecha F.M.I.', 'Formulario Minería Ilegal', 'Tipo Denuncia', 'Fecha F.D.W.', 'Formulario Denuncia Web', 'Denunciate(s)',
-            'Departamento', 'Provincia', 'Municipio', 'Oficina', 'Fecha Derivación', 'Remitente', 'Destinatario', 'Instrucción', 'Estado Trámite', 'H.R. Anexada'
+            'Departamento', 'Provincia', 'Municipio', 'Fecha Derivación', 'Remitente', 'Destinatario', 'Instrucción', 'Estado Trámite', 'H.R. Anexada', 'Dirección Departamental/Regional'
         );
         $campos_reales=array(
             'ultimo_estado','fecha_hoja_ruta', 'correlativo_hoja_ruta','fecha_denuncia','correlativo_denuncia', 'tipo_denuncia', 'fecha_denuncia_web', 'correlativo_denuncia_web', 'denunciante',
-            'departamento', 'provincia', 'municipio', 'oficina_denuncia', 'fecha_derivacion', 'remitente','destinatario', 'instruccion', 'estado_tramite', 'hoja_ruta_anexada'
+            'departamento', 'provincia', 'municipio', 'fecha_derivacion', 'remitente','destinatario', 'instruccion', 'estado_tramite', 'hoja_ruta_anexada', 'oficina_denuncia'
         );
 
         if ($this->request->getPost()) {
             $oficina = $this->request->getPost('oficina');
             $camposValidacion = array(
-                'oficina' => [
-                    'rules' => 'required',
-                ],
                 'fecha_inicio' => [
                     'rules' => 'required|valid_date[Y-m-d]',
                 ],
@@ -7505,15 +7502,17 @@ class MineriaIlegal extends BaseController
                 $contenido['validation'] = $this->validator;
             }else{
                 $db = \Config\Database::connect();
-                $oficinaBusqueda = $oficinaModel->find($oficina);
                 $where = array(
                     'fecha_denuncia_busqueda >=' => $this->request->getPost('fecha_inicio'),
                     'fecha_denuncia_busqueda <=' => $this->request->getPost('fecha_fin'),
-                    'oficina_denuncia' => $oficinaBusqueda['departamento'],
                 );
+                if(is_numeric($oficina) && $oficina > 0){
+                    $oficinaBusqueda = $oficinaModel->find($oficina);
+                    $where['oficina_denuncia'] = $oficinaBusqueda['nombre'];
+                }
                 $builder = $db->table('mineria_ilegal.vista_buscador')
                 ->where($where)
-                ->orderBY('fecha_denuncia_busqueda', 'ASC');
+                ->orderBY('oficina_denuncia ASC, fecha_denuncia_busqueda ASC');
                 $datos = $builder->get()->getResultArray();
                 if ($this->request->getPost('enviar')=='excel') {
                     helper('security');

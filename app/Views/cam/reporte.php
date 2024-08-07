@@ -27,7 +27,40 @@
                     <div class="card-block">
                         <?= form_open($accion);?>
                             <div class="form-group row">
+                            <div class="col-sm-2">
+                                    <label class="col-form-label">Fecha Mecanizada Inicio:</label>
+                                    <?php
+                                        $campo = 'fecha_inicio';
+                                        echo form_input(array(
+                                            'name' => $campo,
+                                            'id' => $campo,
+                                            'type' => 'date',
+                                            'class' => 'form-control',
+                                            'value' => set_value($campo,'',false)
+                                        ));
+                                    ?>
+                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                    <?php }?>
+                                </div>
+                                <div class="col-sm-2">
+                                    <label class="col-form-label">Fecha Mecanizada Fin:</label>
+                                    <?php
+                                        $campo = 'fecha_fin';
+                                        echo form_input(array(
+                                            'name' => $campo,
+                                            'id' => $campo,
+                                            'type' => 'date',
+                                            'class' => 'form-control',
+                                            'value' => set_value($campo,'',false)
+                                        ));
+                                    ?>
+                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                    <?php }?>
+                                </div>
                                 <div class="col-sm-4">
+                                    <label class="col-form-label">Oficina:</label>
                                     <?php
                                         $campo = 'oficina';
                                         echo form_dropdown($campo, $oficinas, set_value($campo), array('class' => 'form-control'));
@@ -35,8 +68,8 @@
                                     <?php if(isset($validation) && $validation->hasError($campo)){?>
                                         <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
                                     <?php }?>
-                                </div>                                
-                                <div class="col-sm-3">
+                                </div>
+                                <div class="col-sm-12 mt-3">
                                     <button name="enviar" class="btn btn-info" type="submit" value="buscar"><i class="fa fa-list"></i> Generar Reporte</button>
                                     <button name="enviar" class="btn btn-inverse" type="submit" value="excel"><i class="fa fa-file-excel-o"></i> Exportar Excel</button>
                                 </div>
@@ -50,7 +83,7 @@
             <div class="col-sm-12">
                 <div class="card">
                     <div class="card-block">
-                        <h5 class="mb-4 text-center">Reporte General</h5>                        
+                        <h5 class="mb-4 text-center">Reporte General</h5>
                         <div class="row">
                             <div class="col-md-12 table-responsive">
                                 <table class="table table-xs table-bordered">
@@ -72,10 +105,10 @@
                                                 <tr>
                                                     <td><?= $estado['texto'];?></td>
                                                     <?php foreach($oficinas as $idOficina=>$oficina){?>
-                                                        <?php if($idOficina>0){?>                                                            
+                                                        <?php if($idOficina>0){?>
                                                             <td class="text-center"><?= (isset($resultado_general[$oficina][$estado['texto']]) && $resultado_general[$oficina][$estado['texto']] > 0) ? $resultado_general[$oficina][$estado['texto']] : 0; ?></td>
                                                             <?php $total_estado += (isset($resultado_general[$oficina][$estado['texto']]) && $resultado_general[$oficina][$estado['texto']] > 0) ? $resultado_general[$oficina][$estado['texto']] : 0; ?>
-                                                        <?php }?>                                                        
+                                                        <?php }?>
                                                     <?php }?>
                                                     <th class="text-center"><?= $total_estado;?></th>
                                                 </tr>
@@ -105,12 +138,10 @@
                         <h5 class="mb-4 text-center">Gráfico de Avance</h5>
                         <div class="row mb-4">
                             <div class="col-md-12">
-                                <button class="btn btn-success"><i class="fa fa fa-download"></i> Descargar (Imagen)</button>
+                                <button id="imprimir-chart-general" class="btn btn-success"><i class="fa fa fa-download"></i> Descargar (Imagen)</button>
                             </div>
                         </div>
-                        <!--div id="chart_div" style="width: 100%; height: 750px;"></!--div-->
                         <div id="avance" style="width: 100%; height: 750px;"></div>
-                        <a style="display:none" id="download_link" href="/" download>download</a>
                     </div>
                 </div>
             </div>
@@ -119,10 +150,10 @@
             <?php if(isset($resultado_oficina)){?>
             <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-block">                                                  
-                        <h5 class="mb-4 text-center"><?= $oficinas[$oficina];?></h5>                        
+                    <div class="card-block">
+                        <h5 class="mb-4 text-center"><?= $oficinas[$oficina];?></h5>
                         <div class="row">
-                            <div class="col-md-12 table-responsive">                            
+                            <div class="col-md-12 table-responsive">
                                 <table class="table table-xs table-bordered">
                                     <thead>
                                         <tr>
@@ -139,9 +170,9 @@
                                             <?php if($estado['id']>0){?>
                                                 <tr>
                                                     <td><?= $estado['texto'];?></td>
-                                                    <?php foreach($clasificaciones as $clasificacion){?>                                                        
+                                                    <?php foreach($clasificaciones as $clasificacion){?>
                                                         <td class="text-center"><?= (isset($resultado_oficina[$clasificacion][$estado['texto']]) && $resultado_oficina[$clasificacion][$estado['texto']] > 0) ? $resultado_oficina[$clasificacion][$estado['texto']] : 0; ?></td>
-                                                        <?php $total_estado += (isset($resultado_oficina[$clasificacion][$estado['texto']]) && $resultado_oficina[$clasificacion][$estado['texto']] > 0) ? $resultado_oficina[$clasificacion][$estado['texto']] : 0; ?>                                                                         
+                                                        <?php $total_estado += (isset($resultado_oficina[$clasificacion][$estado['texto']]) && $resultado_oficina[$clasificacion][$estado['texto']] > 0) ? $resultado_oficina[$clasificacion][$estado['texto']] : 0; ?>
                                                     <?php }?>
                                                     <th class="text-center"><?= $total_estado;?></th>
                                                 </tr>
@@ -150,9 +181,9 @@
                                         <tr>
                                             <th>TOTAL</th>
                                             <?php $total = 0;?>
-                                            <?php foreach($clasificaciones as $clasificacion){?>                                                
+                                            <?php foreach($clasificaciones as $clasificacion){?>
                                                 <th class="text-center"><?= (isset($total_clasificaciones[$clasificacion]) && $total_clasificaciones[$clasificacion] > 0) ? $total_clasificaciones[$clasificacion] : 0; ?></th>
-                                                <?php $total += (isset($total_clasificaciones[$clasificacion]) && $total_clasificaciones[$clasificacion] > 0) ? $total_clasificaciones[$clasificacion] : 0; ?>                                                
+                                                <?php $total += (isset($total_clasificaciones[$clasificacion]) && $total_clasificaciones[$clasificacion] > 0) ? $total_clasificaciones[$clasificacion] : 0; ?>
                                             <?php }?>
                                             <th class="text-center"><?= $total;?></th>
                                         </tr>
@@ -160,7 +191,7 @@
                                 </table>
                             </div>
                         </div>
-                                                        
+
                     </div>
                 </div>
             </div>
@@ -170,10 +201,10 @@
                         <h5 class="mb-4 text-center">Gráfico de Avance</h5>
                         <div class="row mb-4">
                             <div class="col-md-12">
-                                <button class="btn btn-success"><i class="fa fa fa-download"></i> Descargar (Imagen)</button>
+                                <button id="imprimir-chart-oficina" class="btn btn-success"><i class="fa fa fa-download"></i> Descargar (Imagen)</button>
                             </div>
-                        </div>                        
-                        <div id="avance_oficina" style="width: 100%; height: 750px;"></div>                        
+                        </div>
+                        <div id="avance_oficina" style="width: 100%; height: 750px;"></div>
                     </div>
                 </div>
             </div>
