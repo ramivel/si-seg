@@ -1516,7 +1516,7 @@ class Documentos extends BaseController
                 $oficina = $this->request->getPost('oficina');
                 $usuario = $this->request->getPost('usuario');
                 if(!empty($oficina))
-                    $usuarios = $usuarios + $this->obtenerUsuariosOficina($oficina);
+                    $usuarios = $usuarios + $this->obtenerUsuariosOficina($oficina, $idTramite);
                 $camposValidacion = array(
                     'oficina' => [
                         'rules' => 'required',
@@ -1573,6 +1573,7 @@ class Documentos extends BaseController
                             );
                             $builder = $db->table('documentos AS doc')
                             ->select($campos)
+                            ->join('public.tipo_documento as td', 'doc.fk_tipo_documento = td.id', 'left')
                             ->join('mineria_ilegal.hoja_ruta AS hr', 'doc.fk_hoja_ruta = hr.id', 'left')
                             ->join('mineria_ilegal.denuncias AS den', 'hr.fk_denuncia = den.id', 'left')
                             ->join('usuarios as u', 'doc.fk_usuario_creador = u.id', 'left')
@@ -1613,7 +1614,7 @@ class Documentos extends BaseController
             echo view('templates/template', $data);
         }
     }
-    private function obtenerUsuariosOficina($oficina){
+    private function obtenerUsuariosOficina($oficina, $id_tramite){
         $db = \Config\Database::connect();
         $campos = array('u.id', "CONCAT(u.nombre_completo, ' - ', p.nombre) as usuario");
         $where = array(
@@ -1624,6 +1625,7 @@ class Documentos extends BaseController
         ->select($campos)
         ->join('public.perfiles AS p', 'u.fk_perfil = p.id', 'left')
         ->where($where)
+        ->like('u.tramites', $id_tramite)
         ->orderBy('usuario','ASC');
         $resultado = array();
         if($tmpUsuarios = $builder->get()->getResultArray()){

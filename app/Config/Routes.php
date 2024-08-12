@@ -289,7 +289,9 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('historico_sincobol', 'MineriaIlegal::historicoSincobol');
 
         $routes->add('reporte_denuncias_fechas', 'MineriaIlegal::reporteDenunciasFechas');
-        $routes->add('reporte', 'MineriaIlegal::reporte');
+        $routes->add('reporte', 'MineriaIlegal::reporte');        
+        $routes->add('reporte_mis_tramites', 'MineriaIlegal::reporteMisTramites');
+        $routes->add('reporte_fecha_mecanizada', 'MineriaIlegal::reporteFechaMecanizada');
         
     });
 

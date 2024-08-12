@@ -30,7 +30,7 @@
                                 <div class="col-sm-4">
                                     <?php
                                         $campo = 'oficina';
-                                        echo form_dropdown($campo, $oficinas, set_value($campo), array('id' => 'oficina-reporte', 'data-idtramite'=> $id_tramite, 'class' => 'form-control'));
+                                        echo form_dropdown($campo, $oficinas, set_value($campo), array('id' => 'oficina-reporte', 'data-idtramite'=> $idtramite, 'class' => 'form-control'));
                                     ?>
                                     <?php if(isset($validation) && $validation->hasError($campo)){?>
                                         <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
@@ -68,11 +68,28 @@
                                             <?php for($i=0;$i<count($campos_reales);$i++){?>
                                             <td class="text-center">
                                             <?php
-                                                if($campos_reales[$i]=='doc_digital'){
-                                                    if(isset($fila['doc_digital']) && $fila['doc_digital'])
-                                                        echo "<a href='".base_url($fila['doc_digital'])."' target='_blank' title='Ver Documento'><i class='feather icon-file'></i> Ver Documento</a>";
-                                                    else
-                                                        echo "";
+                                                if($campos_reales[$i]=='ultimo_estado'){
+                                                    $style = '';
+                                                    switch($fila[$campos_reales[$i]]){
+                                                        case 'REGULARIZACIÓN':
+                                                            $style = 'btn btn-sm btn-danger btn-round';
+                                                            break;
+                                                        case 'RECIBIDO':
+                                                            $style = 'btn btn-sm btn-primary btn-round';
+                                                            break;
+                                                        case 'DEVUELTO':
+                                                            $style = 'btn btn-sm btn-warning btn-round';
+                                                            break;
+                                                        case 'DERIVADO':
+                                                            $style = 'btn btn-sm btn-inverse btn-round';
+                                                            break;
+                                                        case 'ANEXADO':
+                                                            $style = 'btn btn-sm btn-info btn-round';
+                                                            break;
+                                                    }
+                                                    echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';
+                                                }elseif($campos_reales[$i]=='denunciante' || $campos_reales[$i]=='remitente' || $campos_reales[$i]=='destinatario' || $campos_reales[$i]=='responsable'){
+                                                    echo str_replace(' || ', '<br>', $fila[$campos_reales[$i]]);
                                                 }else{
                                                     echo $fila[$campos_reales[$i]];
                                                 }

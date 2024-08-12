@@ -5802,6 +5802,74 @@ class MineriaIlegal extends BaseController
         $data['alertas'] = $this->alertasTramites();
         echo view('templates/template', $data);
     }
+    /* Reportes Administración */
+    public function reporteMisTramites()
+    {
+        $oficinaModel = new OficinasModel();
+        $tmpOficinas = $oficinaModel->findAll();
+        $oficinas = array('' => 'SELECCIONE UNA DIRECCIÓN');
+        $usuarios = array('' => 'SELECCIONE UN USUARIO');
+        foreach($tmpOficinas as $row)
+            $oficinas[$row['id']] = $row['nombre'];
+        $datos = array();
+        $campos_listar=array(
+            'Estado','Fecha','Días<br>Pasados','Hoja de Ruta','Remitente','Destinatario','Instrucción','Estado Trámite','Fecha Denuncia','Denuncia','Tipo','Denunciante','Departamento'
+        );
+        $campos_reales=array(
+            'ultimo_estado','fecha_derivacion','dias','correlativo_hoja_ruta','remitente','destinatario','instruccion','estado_tramite','fecha_denuncia','correlativo_denuncia','tipo_denuncia','denunciante','departamento'
+        );
+
+        if ($this->request->getPost()) {
+            $oficina = $this->request->getPost('oficina');
+            $usuario = $this->request->getPost('usuario');
+            if(!empty($oficina))
+                $usuarios = $usuarios + $this->obtenerUsuariosOficina($oficina);
+            $camposValidacion = array(
+                'oficina' => [
+                    'rules' => 'required',
+                ],
+                'usuario' => [
+                    'rules' => 'required',
+                ],
+            );
+            if(!$this->validate($camposValidacion)){
+                $contenido['validation'] = $this->validator;
+            }else{
+                $db = \Config\Database::connect();
+                $where = array(
+                    'fk_usuario_actual' => $usuario,
+                );
+                $builder = $db->table('mineria_ilegal.vista_buscador')
+                ->select($campos_reales)
+                ->where($where)
+                ->orderBY('id_denuncia', 'DESC');
+                $datos = $builder->get()->getResultArray();
+                if ($this->request->getPost('enviar')=='excel') {
+                    helper('security');
+                    $file_name = sanitize_filename(mb_strtolower($usuarios[$usuario])).' - bandeja - '.date('YmdHis').'.xlsx';
+                    $this->exportarXLS($campos_listar, $campos_reales, $datos, $file_name, 'Reporte de Trámites por Bandeja', $usuarios[$usuario].' '.date('d/m/Y'));
+                }
+            }
+        }
+        $cabera['titulo'] = $this->titulo;
+        $cabera['navegador'] = true;
+        $cabera['subtitulo'] = 'Reporte de Trámites por Bandeja';
+        $contenido['title'] = view('templates/title',$cabera);
+        $contenido['oficinas'] = $oficinas;
+        $contenido['usuarios'] = $usuarios;
+        $contenido['subtitulo'] = 'Reporte de Trámites por Bandeja';
+        $contenido['datos'] = $datos;
+        $contenido['campos_listar'] = $campos_listar;
+        $contenido['campos_reales'] = $campos_reales;
+        $contenido['controlador'] = $this->controlador;
+        $contenido['accion'] = $this->controlador.'reporte_mis_tramites';
+        $contenido['idtramite'] = $this->idTramite;
+        $data['content'] = view($this->carpeta.'reporte_mis_tramites', $contenido);
+        $data['menu_actual'] = $this->menuActual.'reporte_mis_tramites';
+        $data['tramites_menu'] = $this->tramitesMenu();
+        $data['alertas'] = $this->alertasTramites();
+        echo view('templates/template', $data);
+    }
 
     public function exportarReporteGeneral($estados, $oficinas, $datos, $titulo, $subtitulo){
         $file_name = 'reporte_general-'.date('YmdHis').'.xlsx';
@@ -6401,6 +6469,27 @@ class MineriaIlegal extends BaseController
             return $result['id'];
         else
             return NULL;
+    }
+
+    private function obtenerUsuariosOficina($oficina){
+        $db = \Config\Database::connect();
+        $campos = array('u.id', "CONCAT(u.nombre_completo, ' - ', p.nombre) as usuario");
+        $where = array(
+            'u.fk_oficina' => $oficina,
+            'u.deleted_at' => NULL,
+        );
+        $builder = $db->table('public.usuarios as u')
+        ->select($campos)
+        ->join('public.perfiles AS p', 'u.fk_perfil = p.id', 'left')
+        ->where($where)
+        ->like('u.tramites', $this->idTramite)
+        ->orderBy('usuario','ASC');
+        $resultado = array();
+        if($tmpUsuarios = $builder->get()->getResultArray()){
+            foreach($tmpUsuarios as $row)
+                $resultado[$row['id']] = $row['usuario'];
+        }
+        return $resultado;
     }
 
     public function obtenerHrAnexadas($datos){

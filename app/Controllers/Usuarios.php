@@ -452,7 +452,8 @@ class Usuarios extends BaseController
 
     public function ajaxDireccionUsuarios(){
         $fk_oficina = $this->request->getPost('fk_oficina');
-        if(!empty($fk_oficina) && session()->get('registroUser')){
+        $id_tramite = $this->request->getPost('id_tramite');
+        if(!empty($fk_oficina) && !empty($id_tramite) && session()->get('registroUser')){
             $html = '<option value="">SELECCIONE UN USUARIO</option>';
             $db = \Config\Database::connect();
             $campos = array('u.id', "CONCAT(u.nombre_completo, ' - ', p.nombre) as usuario");
@@ -464,6 +465,7 @@ class Usuarios extends BaseController
             ->select($campos)
             ->join('public.perfiles AS p', 'u.fk_perfil = p.id', 'left')
             ->where($where)
+            ->like('u.tramites', $id_tramite)
             ->orderBy('usuario','ASC');
             $tmpUsuarios = $builder->get()->getResultArray();
             foreach($tmpUsuarios as $row)

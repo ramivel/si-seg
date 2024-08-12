@@ -30,7 +30,7 @@
                                 <div class="col-sm-4">
                                     <?php
                                         $campo = 'oficina';
-                                        echo form_dropdown($campo, $oficinas, set_value($campo), array('id' => 'oficina-reporte', 'class' => 'form-control'));
+                                        echo form_dropdown($campo, $oficinas, set_value($campo), array('id' => 'oficina-reporte', 'data-idtramite'=> $idtramite, 'class' => 'form-control'));
                                     ?>
                                     <?php if(isset($validation) && $validation->hasError($campo)){?>
                                         <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>

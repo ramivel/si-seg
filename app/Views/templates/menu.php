@@ -46,7 +46,7 @@
                             </a>
                         </li>
                     </ul>
-                </li>                
+                </li>
                 <li class="pcoded-hasmenu <?= (isset($menu_actual) && ($menu_actual === 'documentos/buscador' || $menu_actual === 'documentos/buscador_sincobol') ) ? 'pcoded-trigger' : '';?>">
                     <a href="javascript:void(0)">
                         <span class="pcoded-micon"><i class="feather icon-file-minus"></i></span>
@@ -129,14 +129,14 @@
                             <a href="<?= base_url('mineria_ilegal/mis_ingresos');?>">
                                 <span class="pcoded-mtext">Denuncias Ingresadas</span>
                             </a>
-                        </li>                        
+                        </li>
                     </ul>
                 </li>
             </ul>
 
         <?php }?>
 
-        <?php if(count($tramites_menu) > 0){?>
+        <?php if(isset($tramites_menu) && count($tramites_menu) > 0){?>
             <div class="pcoded-navigatio-lavel">Trámites</div>
             <?php foreach($tramites_menu as $row){ ?>
                 <ul class="pcoded-item pcoded-left-item">
@@ -364,6 +364,26 @@
                                         <a href="<?= base_url($row['controlador'].'reporte');?>">
                                             <span class="pcoded-mtext">Reporte Ejecutivo</span>
                                         </a>
+                                    </li>
+                                <?php }?>
+
+                                <?php if(in_array(16, session()->get('registroPermisos'))){?>
+                                    <li class="pcoded-hasmenu <?= (isset($menu_actual) && ($menu_actual == $row['controlador'].'reporte_responsable' || $menu_actual == $row['controlador'].'reporte_mis_tramites' || $menu_actual == $row['controlador'].'reporte_documentos') ) ? 'pcoded-trigger' : '';?> ">
+                                        <a href="javascript:void(0)">
+                                            <span class="pcoded-mtext">Reportes Administración</span>
+                                        </a>
+                                        <ul class="pcoded-submenu">                                            
+                                            <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'reporte_mis_tramites') ? 'active' : '';?>">
+                                                <a href="<?= base_url($row['controlador'].'reporte_mis_tramites');?>">
+                                                    <span class="pcoded-mtext">Bandeja de Trámites</span>
+                                                </a>
+                                            </li>
+                                            <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'reporte_documentos') ? 'active' : '';?>">
+                                                <a href="<?= base_url('documentos/reporte_documentos/'.$row['id']);?>">
+                                                    <span class="pcoded-mtext">Documentos por Usuario</span>
+                                                </a>
+                                            </li>
+                                        </ul>
                                     </li>
                                 <?php }?>
 

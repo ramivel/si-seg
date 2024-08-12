@@ -916,7 +916,7 @@ $(document).ready(function () {
   /* FIN TIPO MINERIA ILEGAL MANUAL*/
 
   /* Reporte Administracion Usuarios */
-  $("#oficina-reporte").on("change", function () {
+  $("#oficina-reporte").on("change", function () {    
     $("#usuario-reporte").html('<option value="">SELECCIONE UN USUARIO</option>');
     if (this.value.length > 0) {
       $.ajax({
@@ -924,6 +924,7 @@ $(document).ready(function () {
         url: baseUrl + "usuarios/ajax_direccion_usuarios",
         data: {
           fk_oficina: this.value,
+          id_tramite: $(this).data('idtramite'),
         },
         error: function () {
           console.log("error ajax.");

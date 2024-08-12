@@ -5175,6 +5175,7 @@ class Cam extends BaseController
         $contenido['campos_reales'] = $campos_reales;
         $contenido['controlador'] = $this->controlador;
         $contenido['accion'] = $this->controlador.'reporte_responsable';
+        $contenido['idtramite'] = $this->idTramite;
         $data['content'] = view($this->carpeta.'reporte_responsable', $contenido);
         $data['menu_actual'] = $this->menuActual.'reporte_responsable';
         $data['tramites_menu'] = $this->tramitesMenu();
@@ -5258,6 +5259,7 @@ class Cam extends BaseController
         $contenido['campos_reales'] = $campos_reales;
         $contenido['controlador'] = $this->controlador;
         $contenido['accion'] = $this->controlador.'reporte_mis_tramites';
+        $contenido['idtramite'] = $this->idTramite;
         $data['content'] = view($this->carpeta.'reporte_mis_tramites', $contenido);
         $data['menu_actual'] = $this->menuActual.'reporte_mis_tramites';
         $data['tramites_menu'] = $this->tramitesMenu();
@@ -5390,6 +5392,7 @@ class Cam extends BaseController
         ->select($campos)
         ->join('public.perfiles AS p', 'u.fk_perfil = p.id', 'left')
         ->where($where)
+        ->like('u.tramites', $this->idTramite)
         ->orderBy('usuario','ASC');
         $resultado = array();
         if($tmpUsuarios = $builder->get()->getResultArray()){
