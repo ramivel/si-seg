@@ -53,6 +53,11 @@
                                                     echo '<span class="text-success"><i class="ti-check"></i> Activo</span>';
                                                 else
                                                     echo '<span class="text-danger"><i class="ti-close"></i> Inactivo</span>';
+                                            }elseif($campos_reales[$i]=='derivacion'){
+                                                if($fila[$campos_reales[$i]]=='t')
+                                                    echo '<span class="text-success"><i class="ti-check"></i> Activo</span>';
+                                                else
+                                                    echo '<span class="text-danger"><i class="ti-close"></i> Inactivo</span>';
                                             }elseif($campos_reales[$i]=='tramites'){
                                                 if($fila['tramites']){
                                                     $tmp = explode(',', $fila['tramites']);
@@ -71,6 +76,12 @@
                                                 <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                     <?php echo anchor('usuarios/editar/'.$fila['id'], 'Editar',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                     <?php echo anchor('usuarios/cambiar_contraseña/'.$fila['id'], 'Cambiar Contraseña',array('class' =>'dropdown-item waves-light waves-effect'));?>
+                                                    <?php
+                                                    if($fila['derivacion']=='t')
+                                                        echo anchor('usuarios/desactivar_derivacion/'.$fila['id'], 'Desactivar Derivación',array('class' =>'dropdown-item waves-light waves-effect cambiar_estado'));
+                                                    else
+                                                        echo anchor('usuarios/activar_derivacion/'.$fila['id'], 'Activar Derivación',array('class' =>'dropdown-item waves-light waves-effect cambiar_estado'));
+                                                    ?>
                                                     <?php
                                                     if($fila['activo']=='t')
                                                         echo anchor('usuarios/desactivar/'.$fila['id'], 'Desactivar Usuario',array('class' =>'dropdown-item waves-light waves-effect cambiar_estado'));

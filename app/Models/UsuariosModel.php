@@ -13,7 +13,7 @@ class UsuariosModel extends Model{
     protected $useSoftDeletes = true;
 
     protected $allowedFields = [
-        'nombre_completo','email','fk_oficina','usuario', 'pass', 'activo', 'fk_perfil', 'tramites', 'permisos', 'atencion'
+        'nombre_completo','email','fk_oficina','usuario', 'pass', 'activo', 'fk_perfil', 'tramites', 'permisos', 'atencion', 'derivacion'
     ];
 
     protected $useTimestamps = true;

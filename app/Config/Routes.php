@@ -97,6 +97,8 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->post('guardar_editar', 'Usuarios::guardar_editar');
         $routes->add('activar/(:num)', 'Usuarios::activar/$1');
         $routes->add('desactivar/(:num)', 'Usuarios::desactivar/$1');
+        $routes->add('activar_derivacion/(:num)', 'Usuarios::activarDerivacion/$1');
+        $routes->add('desactivar_derivacion/(:num)', 'Usuarios::desactivarDerivacion/$1');
         $routes->add('eliminar/(:num)', 'Usuarios::eliminar/$1');
         $routes->add('cambiar_contraseña_usuario', 'Usuarios::cambiarContraseñaUsuario');
         $routes->post('guardar_cambiar_contraseña_usuario', 'Usuarios::guardarCambiarContraseñaUsuario');

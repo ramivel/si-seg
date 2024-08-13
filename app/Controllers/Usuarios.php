@@ -47,7 +47,7 @@ class Usuarios extends BaseController
     public function index()
     {
         $db = \Config\Database::connect();
-        $campos = array('u.id', 'u.nombre_completo', 'p.nombre as cargo', 'u.usuario', 'u.activo', 'o.nombre as oficina', 'u.tramites');
+        $campos = array('u.id', 'u.nombre_completo', 'p.nombre as cargo', 'u.usuario', 'u.derivacion', 'u.activo', 'o.nombre as oficina', 'u.tramites');
         $query = $db->table('usuarios as u')
         ->select($campos)
         ->join('oficinas as o', 'u.fk_oficina = o.id', 'left')
@@ -55,8 +55,8 @@ class Usuarios extends BaseController
         ->where('u.deleted_at IS NULL')
         ->orderBy('u.nombre_completo', 'asc');
         $datos = $query->get()->getResultArray();
-        $campos_listar=array('Nombre Completo','Cargo','Oficina','Usuario','Tramites','Estado');
-        $campos_reales=array('nombre_completo','cargo','oficina','usuario','tramites','activo');
+        $campos_listar=array('Nombre Completo','Cargo','Oficina','Usuario','Tramites','Estado','Derivación');
+        $campos_reales=array('nombre_completo','cargo','oficina','usuario','tramites','activo','derivacion');
         $cabera['titulo'] = $this->titulo;
         $cabera['navegador'] = true;
         $cabera['subtitulo'] = 'Listado';
@@ -428,6 +428,40 @@ class Usuarios extends BaseController
             $data = array(
                 'id' => $fila['id'],
                 'activo' => 'false',
+            );
+            if($usuariosModel->save($data) === false)
+                session()->setFlashdata('fail', $usuariosModel->errors());
+            else
+                session()->setFlashdata('success', 'Se actualizo correctamente la información.');
+        }else{
+            session()->setFlashdata('fail', 'El usuario no existe.');
+        }
+        return redirect()->to('usuarios');
+    }
+    public function activarDerivacion($id){
+        $usuariosModel = new UsuariosModel();
+        $fila = $usuariosModel->find($id);
+        if($fila){
+            $data = array(
+                'id' => $fila['id'],
+                'derivacion' => 'true',
+            );
+            if($usuariosModel->save($data) === false)
+                session()->setFlashdata('fail', $usuariosModel->errors());
+            else
+                session()->setFlashdata('success', 'Se actualizo correctamente la información.');
+        }else{
+            session()->setFlashdata('fail', 'El usuario no existe.');
+        }
+        return redirect()->to('usuarios');
+    }
+    public function desactivarDerivacion($id){
+        $usuariosModel = new UsuariosModel();
+        $fila = $usuariosModel->find($id);
+        if($fila){
+            $data = array(
+                'id' => $fila['id'],
+                'derivacion' => 'false',
             );
             if($usuariosModel->save($data) === false)
                 session()->setFlashdata('fail', $usuariosModel->errors());
