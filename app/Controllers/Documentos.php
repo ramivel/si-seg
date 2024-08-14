@@ -1345,9 +1345,16 @@ class Documentos extends BaseController
     public function reporte($idTramite)
     {
         $tramiteModel = new TramitesModel();
+        $oficinaModel = new OficinasModel();
+        $tmpOficinas = $oficinaModel->findAll();
+        $oficinas = array('' => 'TODAS LAS DIRECCIONES');
+        foreach($tmpOficinas as $row)
+            $oficinas[$row['id']] = $row['nombre'];
+        
         if($tramite = $tramiteModel->find($idTramite)){
             $tipos_documentos = $this->tipoDocumentoReporte($tramite['id']);
             if ($this->request->getPost()) {
+                $oficina = $this->request->getPost('oficina');
                 $validation = $this->validate([
                     'fecha_inicio' => [
                         'rules' => 'required',
@@ -1370,32 +1377,60 @@ class Documentos extends BaseController
                 ]);
                 if(!$validation){
                     $contenido['validation'] = $this->validator;
-                }else{
+                }else{                    
                     $db = \Config\Database::connect();
-                    $campos_listar=array(
-                        'Fecha', 'Correlativo', 'Referencia', 'Fecha Notificación', 'Usuario', 'Cargo', 'Oficina', 'Estado', 'Motivo Anulación', 'H.R. Madre','Código Único','Denominación'
-                    );
-                    $campos_reales=array(
-                        'fecha','correlativo','referencia', 'fecha_notificacion', 'nombre_completo','cargo','oficina','estado','motivo_anulacion','hr_madre','codigo_unico','denominacion',
-                    );
-                    $campos = array("to_char(d.fecha, 'DD/MM/YYYY') as fecha", 'd.correlativo', 'd.referencia', "to_char(d.fecha_notificacion, 'DD/MM/YYYY') as fecha_notificacion", 'u.nombre_completo', 'p.nombre as cargo', 'o.nombre as oficina', 'd.motivo_anulacion', 'd.estado', 'dam.codigo_unico', 'dam.denominacion', 'ad.correlativo as hr_madre');
                     $where = array(
                         'd.fk_tipo_documento' => $this->request->getPost('id_tipo_documento'),
-                        'd.fk_tramite' => $idTramite,
-                        //'ad.fk_oficina' => session()->get('registroOficina'),
+                        'd.fk_tramite' => $idTramite,                                
                         "d.fecha >=" => $this->request->getPost('fecha_inicio'),
                         "d.fecha <=" => $this->request->getPost('fecha_fin')
                     );
-                    $builder = $db->table('public.documentos as d')
-                    ->select($campos)
-                    ->join('public.acto_administrativo as ad', 'd.fk_acto_administrativo = ad.id', 'left')
-                    ->join('public.datos_area_minera as dam', 'ad.id = dam.fk_acto_administrativo', 'left')
-                    ->join('public.usuarios as u', 'd.fk_usuario_creador = u.id', 'left')
-                    ->join('public.perfiles as p', 'u.fk_perfil = p.id', 'left')
-                    ->join('public.oficinas as o', 'u.fk_oficina = o.id', 'left')
-                    ->where($where)
-                    ->orderBY('d.created_at', 'ASC');
-                    $datos = $builder->get()->getResultArray();
+
+                    if(is_numeric($oficina) && $oficina > 0)
+                        $where['o.id'] = $oficina;
+
+                    switch($tramite['controlador']){
+                        case 'cam/':
+                            $campos_listar=array(
+                                'Fecha', 'Correlativo', 'Referencia', 'Fecha Notificación', 'Usuario', 'Cargo', 'Oficina', 'Estado', 'Motivo Anulación', 'H.R. Madre','Código Único','Denominación'
+                            );
+                            $campos_reales=array(
+                                'fecha','correlativo','referencia', 'fecha_notificacion', 'nombre_completo','cargo','oficina','estado','motivo_anulacion','hr_madre','codigo_unico','denominacion',
+                            );
+                            $campos = array("to_char(d.fecha, 'DD/MM/YYYY') as fecha", 'd.correlativo', 'd.referencia', "to_char(d.fecha_notificacion, 'DD/MM/YYYY') as fecha_notificacion", 'u.nombre_completo', 'p.nombre as cargo', 'o.nombre as oficina', 'd.motivo_anulacion', 'd.estado', 'dam.codigo_unico', 'dam.denominacion', 'ad.correlativo as hr_madre');                            
+                            $builder = $db->table('public.documentos as d')
+                            ->select($campos)
+                            ->join('public.acto_administrativo as ad', 'd.fk_acto_administrativo = ad.id', 'left')
+                            ->join('public.datos_area_minera as dam', 'ad.id = dam.fk_acto_administrativo', 'left')
+                            ->join('public.usuarios as u', 'd.fk_usuario_creador = u.id', 'left')
+                            ->join('public.perfiles as p', 'u.fk_perfil = p.id', 'left')
+                            ->join('public.oficinas as o', 'u.fk_oficina = o.id', 'left')
+                            ->where($where)
+                            ->orderBY('d.created_at', 'ASC');
+                            $datos = $builder->get()->getResultArray();
+                            break;
+                        case 'mineria_ilegal/':
+                            $campos_listar=array(
+                                'Fecha', 'Correlativo', 'Referencia', 'Fecha Notificación', 'Usuario', 'Cargo', 'Oficina', 'Estado', 'Motivo Anulación', 'Hoja de Ruta','Formulario Minería Ilegal',
+                            );
+                            $campos_reales=array(
+                                'fecha','correlativo','referencia', 'fecha_notificacion', 'nombre_completo','cargo','oficina','estado','motivo_anulacion','hoja_ruta','fmi',
+                            );
+                            $campos = array("to_char(d.fecha, 'DD/MM/YYYY') as fecha", 'd.correlativo', 'd.referencia', "to_char(d.fecha_notificacion, 'DD/MM/YYYY') as fecha_notificacion", 'u.nombre_completo', 'p.nombre as cargo', 'o.nombre as oficina', 'd.estado', 'd.motivo_anulacion', 'hr.correlativo as hoja_ruta', 'den.correlativo as fmi',);
+                            
+                            $builder = $db->table('public.documentos as d')
+                            ->select($campos)
+                            ->join('mineria_ilegal.hoja_ruta AS hr', 'd.fk_hoja_ruta = hr.id', 'left')
+                            ->join('mineria_ilegal.denuncias AS den', 'hr.fk_denuncia = den.id', 'left')
+                            ->join('public.usuarios as u', 'd.fk_usuario_creador = u.id', 'left')
+                            ->join('public.perfiles as p', 'u.fk_perfil = p.id', 'left')
+                            ->join('public.oficinas as o', 'u.fk_oficina = o.id', 'left')
+                            ->where($where)
+                            ->orderBY('d.created_at', 'ASC');
+                            $datos = $builder->get()->getResultArray();
+                            break;
+                    }
+                    
                     $contenido['datos'] = $datos;
                     $contenido['campos_listar'] = $campos_listar;
                     $contenido['campos_reales'] = $campos_reales;
@@ -1412,6 +1447,7 @@ class Documentos extends BaseController
             $cabera['subtitulo'] = 'Reporte Documentos Generados';
             $contenido['title'] = view('templates/title',$cabera);
             $contenido['tipos_documentos'] = $tipos_documentos;
+            $contenido['oficinas'] = $oficinas;
             $contenido['subtitulo'] = 'Reporte Documentos Generados';
             $contenido['accion'] = $this->controlador.'reporte/'.$tramite['id'];
             $contenido['controlador'] = $this->controlador;

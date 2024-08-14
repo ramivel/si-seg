@@ -25,14 +25,10 @@
                         <span>Debe seleccionar los campos requeridos para la busqueda.</span>
                     </div>
                     <div class="card-block">
-                        <?= form_open($accion);?>
-                            <div class="form-group row mb-0 text-center">
-                                <label class="col-sm-2 col-form-label">Fecha Inicio*</label>
-                                <label class="col-sm-2 col-form-label">Fecha Fin*</label>
-                                <label class="col-sm-4 col-form-label">Tipo Documento*</label>                                                                
-                            </div>
+                        <?= form_open($accion);?>                            
                             <div class="form-group row">
                                 <div class="col-sm-2">
+                                    <label class="col-form-label">Fecha Inicio:</label>
                                     <?php
                                         $campo = 'fecha_inicio';
                                         echo form_input(array(
@@ -48,6 +44,7 @@
                                     <?php }?>
                                 </div>
                                 <div class="col-sm-2">
+                                    <label class="col-form-label">Fecha Fin:</label>
                                     <?php
                                         $campo = 'fecha_fin';
                                         echo form_input(array(
@@ -63,6 +60,7 @@
                                     <?php }?>
                                 </div>
                                 <div class="col-sm-4">
+                                    <label class="col-form-label">Tipo Documento:</label>
                                     <?php
                                         $campo = 'id_tipo_documento';
                                         echo form_dropdown($campo, $tipos_documentos, set_value($campo), array('class' => 'form-control'));
@@ -71,7 +69,21 @@
                                         <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
                                     <?php }?>
                                 </div>
-                                <div class="col-sm-3">
+                                <?php if(in_array(100, session()->get('registroPermisos')) || in_array(19, session()->get('registroPermisos'))){?>
+                                <div class="col-sm-4">
+                                    <label class="col-form-label">Oficina:</label>
+                                    <?php
+                                        $campo = 'oficina';
+                                        echo form_dropdown($campo, $oficinas, set_value($campo), array('class' => 'form-control'));
+                                    ?>
+                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                    <?php }?>
+                                </div>
+                                <?php }else{?>
+                                    <?= form_hidden('oficina', set_value('oficina', session()->get('registroOficina'), false));?>
+                                <?php }?>
+                                <div class="col-sm-12 mt-3">
                                     <button name="enviar" class="btn btn-info" type="submit" value="buscar"><i class="fa fa-search"></i> Buscar</button>
                                     <button name="enviar" class="btn btn-inverse" type="submit" value="excel"><i class="fa fa-file-excel-o"></i> Excel</button>
                                 </div>

@@ -351,6 +351,14 @@
                                     </a>
                                 </li>
 
+                                <?php if(in_array(7, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documentos/reporte') ? 'active' : '';?>">
+                                        <a href="<?= base_url('documentos/reporte/'.$row['id']);?>">
+                                            <span class="pcoded-mtext">Reporte Documentos</span>
+                                        </a>
+                                    </li>
+                                <?php }?>
+
                                 <?php if(in_array(18, session()->get('registroPermisos')) || in_array(19, session()->get('registroPermisos'))){?>
                                     <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'reporte_denuncias_fechas') ? 'active' : '';?>">
                                         <a href="<?= base_url($row['controlador'].'reporte_denuncias_fechas');?>">
