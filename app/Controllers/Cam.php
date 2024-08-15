@@ -1788,92 +1788,78 @@ class Cam extends BaseController
 
     public function buscadorMisTramites()
     {
-        $db = \Config\Database::connect();
-        $campos = array('ac.id', 'ac.ultimo_estado', 'ac.correlativo', 'dam.codigo_unico', 'dam.denominacion', 'dam.extension', 'dam.departamentos', 'dam.provincias', 'dam.municipios', 'dam.area_protegida',
-        "CONCAT(ur.nombre_completo, '<br><b>',pr.nombre,'</b>') as remitente", "CONCAT(ud.nombre_completo,'<br><b>',pd.nombre,'<b>') as destinatario", 'ac.ultimo_instruccion', "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion",
-        "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite");
-        $where = array(
-            'ac.deleted_at' => NULL,
-            'ac.ultimo_fk_usuario_responsable' => session()->get('registroUser'),
-        );
-        $builder = $db->table('public.acto_administrativo as ac')
-        ->select($campos)
-        ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
-        ->join('usuarios as ur', 'ac.ultimo_fk_usuario_remitente = ur.id', 'left')
-        ->join('perfiles as pr', 'ur.fk_perfil=pr.id', 'left')
-        ->join('usuarios as ud', 'ac.ultimo_fk_usuario_destinatario = ud.id', 'left')
-        ->join('perfiles as pd', 'ud.fk_perfil = pd.id', 'left')
-        ->join('estado_tramite as etp', 'ac.ultimo_fk_estado_tramite_padre = etp.id', 'left')
-        ->join('estado_tramite as eth', 'ac.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
-        ->where($where)
-        ->orderBY('ac.id', 'DESC');
-        if ($this->request->getPost() && $this->request->getPost('enviar')=='buscar') {
-            if(mb_strtoupper(trim($this->request->getPost('texto')))){
-                $validation = $this->validate([
-                    'texto' => [
-                        'rules' => 'required',
-                    ],
-                    'campo' => [
-                        'rules' => 'required',
-                        'errors' => [
-                            'required' => 'Debe seleccionar el campo a filtrar.',
-                        ]
-                    ],
-                ]);
-                if(!$validation){
-                    $contenido['validation'] = $this->validator;
-                }else{
-                    $texto = mb_strtoupper(trim($this->request->getPost('texto')));
-                    switch($this->request->getPost('campo')){
-                        case 'correlativo':
-                            $query = $builder->like('ac.correlativo', $texto);
-                            break;
-                        case 'codigo_unico':
-                            $where['dam.codigo_unico'] = $texto;
-                            $query = $builder->where($where);
-                            break;
-                        case 'denominacion':
-                            $query = $builder->like('dam.denominacion', $texto);
-                            break;
-                        case 'remitente':
-                            $query = $builder->like('ur.nombre_completo', $texto);
-                            break;
-                    }
-                }
-            }else{
-                $query = $builder;
-            }
-        }else{
-            $query = $builder;
+        $estado = $this->request->getPost('estado');
+        $subestado = $this->request->getPost('subestado');
+        $estadosTramites = $this->obtenerEstadosTramites($this->idTramite);
+        $estados = array('' => 'TODOS LOS ESTADOS');
+        foreach($estadosTramites as $row){
+            if(is_numeric($row['id']) && $row['id'] > 0)
+                $estados[$row['id']] = $row['texto'];
         }
-        $datos = $query->get()->getResultArray();
-
-        $campos_buscar=array(
-            'correlativo' => 'H.R. Madre',
-            'codigo_unico' => 'Código Único',
-            'denominacion' => 'Denominación',
-            'remitente' => 'Remitente',
-        );
+        $subestados = array('' => 'TODOS LOS SUBESTADOS');
+        if($estadosTramitesHijo = $this->obtenerEstadosTramitesHijo($estado)){
+            foreach($estadosTramitesHijo as $row){
+                if(is_numeric($row['id']) && $row['id'] > 0)
+                    $subestados[$row['id']] = $row['texto'];
+            }
+        }
+        $datos = array();
         $campos_listar=array(
-            ' ', 'Fecha Derivación/Devolución', 'H.R. Madre', 'Remitente', 'Destinatario', 'Instrucción','Estado Trámite', 'Código Único','Denominación','Extensión','Departamento(s)','Provincia(s)','Municipio(s)','Área Protegida',
+            ' ', 'Fecha Mecanizada','H.R. Madre','Fecha Derivación/Devolución', 'Remitente', 'Destinatario', 'Instrucción','Estado Trámite', 'Código Único','Denominación','Extensión',
+            'Representante Legal','Nacionalidad','Solicitante','Clasificación APM','Departamento(s)','Provincia(s)','Municipio(s)','Área Protegida',
         );
         $campos_reales=array(
-            'ultimo_estado','ultimo_fecha_derivacion','correlativo', 'remitente', 'destinatario', 'ultimo_instruccion', 'estado_tramite', 'codigo_unico','denominacion','extension','departamentos','provincias','municipios','area_protegida',
+            'ultimo_estado','fecha_mecanizada','correlativo','ultimo_fecha_derivacion','remitente', 'destinatario', 'ultimo_instruccion', 'estado_tramite', 'codigo_unico','denominacion','extension',
+            'representante_legal','nacionalidad','titular','clasificacion_titular','departamentos','provincias','municipios','area_protegida',
         );
 
-        if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
-            $file_name = 'reporte_mis_tramites-'.date('YmdHis').'.xlsx';
-            $this->exportarXLS($campos_listar, $campos_reales, $datos, $file_name);
+        if ($this->request->getPost()) {
+            $db = \Config\Database::connect();
+            $campos = array('ac.id', 'ac.ultimo_estado',"to_char(ac.fecha_mecanizada, 'DD/MM/YYYY') as fecha_mecanizada",
+            'ac.correlativo', 'dam.codigo_unico', 'dam.denominacion', 'dam.extension', 'dam.departamentos', 'dam.provincias', 'dam.municipios', 'dam.area_protegida',
+            'dam.representante_legal','dam.nacionalidad','dam.titular','dam.clasificacion_titular',
+            "CONCAT(ur.nombre_completo, '<br><b>',pr.nombre,'</b>') as remitente", "CONCAT(ud.nombre_completo,'<br><b>',pd.nombre,'<b>') as destinatario", 'ac.ultimo_instruccion', "to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion",
+            "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite");
+            $where = array(
+                'ac.deleted_at' => NULL,
+                'ac.ultimo_fk_usuario_responsable' => session()->get('registroUser'),
+            );
+            if($this->request->getPost('fecha_inicio') && $this->request->getPost('fecha_fin')){
+                $where['ac.fecha_mecanizada >='] = $this->request->getPost('fecha_inicio');
+                $where['ac.fecha_mecanizada <='] = $this->request->getPost('fecha_fin');
+            }            
+            if(is_numeric($estado) && $estado > 0)
+                $where['ac.ultimo_fk_estado_tramite_padre'] = $estado;
+            if(is_numeric($subestado) && $subestado > 0)
+                $where['ac.ultimo_fk_estado_tramite_hijo'] = $subestado;
+
+            $builder = $db->table('public.acto_administrativo as ac')
+            ->select($campos)
+            ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+            ->join('usuarios as ur', 'ac.ultimo_fk_usuario_remitente = ur.id', 'left')
+            ->join('perfiles as pr', 'ur.fk_perfil=pr.id', 'left')
+            ->join('usuarios as ud', 'ac.ultimo_fk_usuario_destinatario = ud.id', 'left')
+            ->join('perfiles as pd', 'ud.fk_perfil = pd.id', 'left')
+            ->join('estado_tramite as etp', 'ac.ultimo_fk_estado_tramite_padre = etp.id', 'left')
+            ->join('estado_tramite as eth', 'ac.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
+            ->where($where)
+            ->orderBY('ac.id', 'DESC');
+            $datos = $builder->get()->getResultArray();
+            if ($this->request->getPost('enviar')=='excel') {
+                $file_name = 'reporte_mis_tramites-'.date('YmdHis').'.xlsx';
+                $this->exportarXLS($campos_listar, $campos_reales, $datos, $file_name);
+            }
         }
 
         $cabera['titulo'] = $this->titulo;
         $cabera['navegador'] = true;
         $cabera['subtitulo'] = 'Reporte de Mis Tramites como Responsable';
         $contenido['title'] = view('templates/title',$cabera);
+        $contenido['estados'] = $estados;
+        $contenido['subestados'] = $subestados;
         $contenido['datos'] = $datos;
         $contenido['campos_listar'] = $campos_listar;
         $contenido['campos_reales'] = $campos_reales;
-        $contenido['campos_buscar'] = $campos_buscar;
         $contenido['subtitulo'] = 'Reporte de Mis Tramites como Responsable';
         $contenido['accion'] = $this->controlador.'buscador_mis_tramites';
         $contenido['controlador'] = $this->controlador;
@@ -3245,7 +3231,7 @@ class Cam extends BaseController
             if(!$this->validate($camposValidacion)){
                 $contenido['validation'] = $this->validator;
             }else{
-                $db = \Config\Database::connect();                
+                $db = \Config\Database::connect();
                 if($oficina > 0){
                     /* consulta de oficina */
                     $campos = array('dam.clasificacion_titular', "CONCAT(etp.orden,'. ', etp.nombre) as estado_padre", 'count(ad.correlativo) as n');
@@ -3263,7 +3249,7 @@ class Cam extends BaseController
                     ->where($where)
                     ->groupBy(array('dam.clasificacion_titular', 'etp.orden', 'estado_padre'))
                     ->orderBY('dam.clasificacion_titular ASC, etp.orden ASC');
-                    $datos = $builder->get()->getResultArray();                    
+                    $datos = $builder->get()->getResultArray();
                     $resultado = array();
                     $total_clasificaciones = array();
                     if($datos){
@@ -3274,7 +3260,7 @@ class Cam extends BaseController
                                 $total_clasificaciones[$row['clasificacion_titular']] += $row['n'];
                             $resultado[$row['clasificacion_titular']][$row['estado_padre']] = $row['n'];
                         }
-                    }                    
+                    }
 
                     /* Datos JSON*/
                     $data_js = array();

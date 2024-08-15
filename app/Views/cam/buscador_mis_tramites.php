@@ -27,14 +27,15 @@
                     <div class="card-block">
                         <?= form_open($accion);?>
                         <div class="form-group row">
-                            <div class="col-sm-4">
+                            <div class="col-sm-2">
+                                <label class="col-form-label">Fecha Mecanizada Inicio:</label>
                                 <?php
-                                    $campo = 'texto';
+                                    $campo = 'fecha_inicio';
                                     echo form_input(array(
                                         'name' => $campo,
                                         'id' => $campo,
-                                        'placeholder' => 'Escriba el texto a buscar',
-                                        'class' => 'form-control form-control-uppercase',
+                                        'type' => 'date',
+                                        'class' => 'form-control',
                                         'value' => set_value($campo,'',false)
                                     ));
                                 ?>
@@ -43,32 +44,66 @@
                                 <?php }?>
                             </div>
                             <div class="col-sm-2">
+                                <label class="col-form-label">Fecha Mecanizada Fin:</label>
                                 <?php
-                                    $campo = 'campo';
-                                    echo form_dropdown($campo, $campos_buscar, set_value($campo), array('class' => 'form-control'));
+                                    $campo = 'fecha_fin';
+                                    echo form_input(array(
+                                        'name' => $campo,
+                                        'id' => $campo,
+                                        'type' => 'date',
+                                        'class' => 'form-control',
+                                        'value' => set_value($campo,'',false)
+                                    ));
                                 ?>
+                                <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                <?php }?>
                             </div>
-                            <div class="col-sm-3">
-                                <button name="enviar" class="btn btn-info" type="submit" value="buscar"><i class="fa fa-search"></i> Buscar</button>
+                            <div class="col-sm-2">
+                                <label class="col-form-label">Estado:</label>
+                                <?php
+                                    $campo = 'estado';
+                                    echo form_dropdown($campo, $estados, set_value($campo), array('id' => 'estado-reporte','class' => 'form-control'));
+                                ?>
+                                <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                <?php }?>
+                            </div>
+                            <div class="col-sm-2">
+                                <label class="col-form-label">SubEstado:</label>
+                                <?php
+                                    $campo = 'subestado';
+                                    echo form_dropdown($campo, $subestados, set_value($campo), array('id' => 'subestado-reporte','class' => 'form-control'));
+                                ?>
+                                <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                <?php }?>
+                            </div>
+                            <div class="col-sm-12 mt-3">
+                                <button name="enviar" class="btn btn-info" type="submit" value="buscar"><i class="fa fa-search"></i> Generar</button>
                                 <button name="enviar" class="btn btn-inverse" type="submit" value="excel"><i class="fa fa-file-excel-o"></i> Excel</button>
                             </div>
                         </div>
                         <?= form_close();?>
-                        <?php if(isset($datos)){ ?>
+
+                        <?php if(isset($datos) && count($datos) > 0){ ?>
                             <div class="dt-responsive table-responsive">
-                                <table id="tabla-buscador" class="table table-striped table-bordered nowrap" style="font-size: small;">
+                                <table id="tabla-listado" class="table table-striped table-bordered nowrap" style="font-size: small;">
                                     <thead>
                                         <tr>
+                                            <th class="nosort"></th>
                                             <?php for($i=0;$i<count($campos_listar);$i++){?>
                                             <th class="text-center"><?php echo $campos_listar[$i];?></th>
                                             <?php }?>
-                                            <th class="nosort"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                     <?php if(!empty($datos) && count($datos)>0){?>
                                         <?php foreach ($datos as $fila){?>
                                         <tr>
+                                            <td class="text-center">
+                                                <?php echo anchor($controlador.'ver/3/'.$fila['id'], '<i class="fa fa-eye"></i> Ver',array('class' =>'btn btn-sm btn-info'));?>
+                                            </td>
                                             <?php for($i=0;$i<count($campos_reales);$i++){?>
                                             <td class="text-center">
                                             <?php
@@ -101,9 +136,6 @@
                                             ?>
                                             </td>
                                             <?php }?>
-                                            <td class="text-center">
-                                                <?php echo anchor($controlador.'ver/3/'.$fila['id'], '<i class="fa fa-eye"></i> Ver',array('class' =>'btn btn-sm btn-info'));?>
-                                            </td>
                                         </tr>
                                         <?php }?>
                                     <?php }?>
