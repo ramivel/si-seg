@@ -25,12 +25,14 @@ class HojaRutaMineriaIlegalModel extends Model{
         'ultimo_fk_usuario_destinatario',
         'ultimo_fk_documentos',
         'fk_usuario_creador',
-        'fk_usuario_destino',
-        'fojas',
+        'fk_usuario_destino',        
         'adjuntos',
         'editar',
         'fecha_hoja_ruta',
         'fk_hoja_ruta_anexada',
+        'fojas',
+        'caja_documental',
+        'gestion_archivo',
     ];
 
     protected $useTimestamps = true;

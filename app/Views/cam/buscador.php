@@ -77,9 +77,6 @@
                                                         case 'MIGRADO':
                                                             $style = 'btn btn-sm btn-danger btn-round';
                                                             break;
-                                                        case 'ATENDIDO':
-                                                            $style = 'btn btn-sm btn-success btn-round';
-                                                            break;
                                                         case 'RECIBIDO':
                                                             $style = 'btn btn-sm btn-primary btn-round';
                                                             break;
@@ -91,6 +88,9 @@
                                                             break;
                                                         case 'EN ESPERA':
                                                             $style = 'btn btn-sm btn-info btn-round';
+                                                            break;
+                                                        case 'FINALIZADO':
+                                                            $style = 'btn btn-sm btn-success btn-round';
                                                             break;
                                                     }
                                                     echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';

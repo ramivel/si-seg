@@ -241,6 +241,8 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->post('guardar_editar', 'MineriaIlegal::guardarEditar');
         $routes->add('anexar/(:num)', 'MineriaIlegal::anexar/$1');
         $routes->post('guardar_anexar', 'MineriaIlegal::guardarAnexar');
+        $routes->add('finalizar/(:num)', 'MineriaIlegal::finalizar/$1');
+        $routes->post('guardar_finalizar', 'MineriaIlegal::guardarFinalizar');
         $routes->add('ajax_area_minera_mineria_ilegal', 'MineriaIlegal::ajaxAreaMineraMineriaIlegal');
         $routes->add('ajax_datos_area_minera_mineria_ilegal', 'MineriaIlegal::ajaxDatosAreaMineraMineriaIlegal');
         $routes->add('ajax_area_minera_geom', 'MineriaIlegal::ajaxAreaMineraGeom');        

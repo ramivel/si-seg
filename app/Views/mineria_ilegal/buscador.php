@@ -101,6 +101,9 @@
                                                             case 'ANEXADO':
                                                                 $style = 'btn btn-sm btn-info btn-round';
                                                                 break;
+                                                            case 'FINALIZADO':
+                                                                $style = 'btn btn-sm btn-success btn-round';
+                                                                break;
                                                         }
                                                         echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';
                                                     }elseif($campos_reales[$i]=='denunciante' || $campos_reales[$i]=='remitente' || $campos_reales[$i]=='destinatario' || $campos_reales[$i]=='responsable'){
