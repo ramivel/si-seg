@@ -17,21 +17,39 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
-        id:{
-            presence: false,
+        areas_mineras_anexadas: {
+            presence: {
+                message: "^Debe seleccionar al menos un Área Minera"
+            },
         },
-        nombre: {
+        cite: {
             presence: true,
         },
-        menu: {
+        fecha_cite: {
             presence: true,
         },
-        controlador: {
+        fk_persona_externa: {
+            presence: {
+                message: "^Debe seleccionar el Remitente"
+            },
+        },
+        referencia: {
             presence: true,
         },
-        correlativo: {
+        fk_usuario_destinatario: {
+            presence: {
+                message: "^Debe seleccionar el Destinatario"
+            },
+        },
+        fojas: {
             presence: true,
-        },        
+        },
+        adjuntos: {
+            presence: true,
+        },
+        doc_digital: {
+            presence: true,
+        },
     };
 
     // Hook up the form so we can prevent it from being posted
@@ -60,13 +78,15 @@ $(document).ready(function () {
         showErrors(form, errors || {});
         if (!errors) {
             showSuccess();
+        }else{
+            swal("Error de Validación", "Existe errores en el formulario.", "error");
         }
     }
 
     // Updates the inputs with the validation errors
     function showErrors(form, errors) {
         // We loop through all the inputs and show the errors for that input
-        _.each(form.querySelectorAll("input[name], select[name]"), function (input) {
+        _.each(form.querySelectorAll("input[name], select[name], textarea[name]"), function (input) {
             // Since the errors can be null if no errors were found we need to handle
             // that
             showErrorsForInput(input, errors && errors[input.name]);
@@ -150,4 +170,22 @@ $(document).ready(function () {
             }
         });
     }
+
+    function errorDocumento(){
+        var anexar_documentos = $('#anexar_documentos').val();
+        var fk_estado_tramite_padre = $('#fk_estado_tramite').val();
+        var ultimo_fk_estado_tramite_padre = $('#ultimo_fk_estado_tramite_padre').val();
+        var fk_estado_tramite_hijo = $('#fk_estado_tramite_hijo').val();
+        var ultimo_fk_estado_tramite_hijo = $('#ultimo_fk_estado_tramite_hijo').val();
+        if(ultimo_fk_estado_tramite_padre == fk_estado_tramite_padre && ultimo_fk_estado_tramite_hijo == fk_estado_tramite_hijo){
+            return false;
+        }else if(ultimo_fk_estado_tramite_padre == fk_estado_tramite_padre){
+            return false;
+        }else if (anexar_documentos == 'NO'){
+            return false;
+        }
+
+        return true;
+    }
+
 });

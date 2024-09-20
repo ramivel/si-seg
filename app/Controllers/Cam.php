@@ -839,7 +839,7 @@ class Cam extends BaseController
                             'fecha_atencion' => date('Y-m-d H:i:s'),
                         );
                         if($derivacionModel->save($dataDerivacionActualizacion) === false)
-                            session()->setFlashdata('fail', $documentosModel->errors());
+                            session()->setFlashdata('fail', $derivacionModel->errors());
                         else
                             session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información.');
                     }
@@ -1827,7 +1827,7 @@ class Cam extends BaseController
             if($this->request->getPost('fecha_inicio') && $this->request->getPost('fecha_fin')){
                 $where['ac.fecha_mecanizada >='] = $this->request->getPost('fecha_inicio');
                 $where['ac.fecha_mecanizada <='] = $this->request->getPost('fecha_fin');
-            }            
+            }
             if(is_numeric($estado) && $estado > 0)
                 $where['ac.ultimo_fk_estado_tramite_padre'] = $estado;
             if(is_numeric($subestado) && $subestado > 0)
@@ -5527,6 +5527,75 @@ class Cam extends BaseController
         $pdf->MultiCell(44, 0, '', 1, 'L', false, 0);
         $pdf->MultiCell(46, 0, 'CON COPIA A:', 1, 'R', true, 0);
         $pdf->MultiCell(50, 0, '', 1, 'C', false, 1);
+    }
+
+    public function derivarTramites()
+    {
+        $actoAdministrativoModel = new ActoAdministrativoModel();
+        $derivacionModel = new DerivacionModel();
+        //$id_usuario_original = 100;
+        $id_usuario_destino = 180;
+        $estado = 'DERIVADO';
+        $instruccion = 'REASIGNADO A SOLICITUD DE LA DIR. DEPARTAMENTAL LA PAZ (MARIA LAYME)';
+        $tramites = array();
+
+        if(count($tramites) > 0){
+            foreach($tramites as $id_acto_administrativo){
+                if($cam = $actoAdministrativoModel->find($id_acto_administrativo)){
+                    $ultima_derivacion = $derivacionModel->where(array('fk_acto_administrativo' => $cam['id']))->orderBy('id','DESC')->first();
+                    $dataDerivacion = array(
+                        'fk_acto_administrativo' => $id_acto_administrativo,
+                        'domicilio_legal' => $ultima_derivacion['domicilio_legal'],
+                        'domicilio_procesal' => $ultima_derivacion['domicilio_procesal'],
+                        'telefono_solicitante' => $ultima_derivacion['telefono_solicitante'],
+                        'fk_estado_tramite_padre' => $ultima_derivacion['fk_estado_tramite_padre'],
+                        'fk_estado_tramite_hijo' => $ultima_derivacion['fk_estado_tramite_hijo'],
+                        'observaciones' => $ultima_derivacion['observaciones'],
+                        'instruccion' => $instruccion,
+                        'recurso_jerarquico' => $ultima_derivacion['recurso_jerarquico'],
+                        'recurso_revocatoria' => $ultima_derivacion['recurso_revocatoria'],
+                        'oposicion' => $ultima_derivacion['oposicion'],
+                        'fk_usuario_remitente' => $ultima_derivacion['fk_usuario_destinatario'],
+                        'fk_usuario_destinatario' => $id_usuario_destino,
+                        'estado' => $estado,
+                        'fk_usuario_creador' => $ultima_derivacion['fk_usuario_destinatario'],
+                        'fk_usuario_responsable' => $id_usuario_destino,
+                    );
+                    if($derivacionModel->insert($dataDerivacion) === false){
+                        echo 'Error en '.$cam['correlativo'].' <br>';
+                    }else{
+                        $dataActoAdministrativo = array(
+                            'id' => $cam['id'],
+                            'ultimo_estado' => $estado,
+                            'ultimo_fecha_derivacion' => date('Y-m-d H:i:s'),
+                            'ultimo_instruccion' => $instruccion,
+                            'ultimo_fk_usuario_remitente' => $ultima_derivacion['fk_usuario_destinatario'],
+                            'ultimo_fk_usuario_destinatario' => $id_usuario_destino,
+                            'ultimo_fk_usuario_responsable' => $id_usuario_destino,
+                            'ultimo_recurso_jerarquico' => $cam['ultimo_recurso_jerarquico'],
+                            'ultimo_recurso_revocatoria' => $cam['ultimo_recurso_revocatoria'],
+                            'ultimo_oposicion' => $cam['ultimo_oposicion'],
+                        );
+
+                        if($actoAdministrativoModel->save($dataActoAdministrativo) === false){
+                            echo 'Error en '.$cam['correlativo'].' <br>';
+                        }else{
+                            $dataDerivacionActualizacion = array(
+                                'id' => $ultima_derivacion['id'],
+                                'estado' => 'ATENDIDO',
+                                'fecha_atencion' => date('Y-m-d H:i:s'),
+                            );
+                            if($derivacionModel->save($dataDerivacionActualizacion) === false)
+                                echo 'Error en '.$cam['correlativo'].' <br>';
+                            else
+                                echo 'Reasignado correctamente '.$cam['correlativo'].' <br>';
+                        }
+
+                    }
+                }
+            }
+        }
+
     }
 
     /*public function actualizarPoligonoAreaMinera(){

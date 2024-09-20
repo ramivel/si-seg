@@ -155,7 +155,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_area_minera_cmn_cmc', 'Cam::ajaxAreaMineraCmnCmc');
         $routes->add('ajax_datos_area_minera_cmn_cmc', 'Cam::ajaxDatosAreaMineraCmnCmc');
         $routes->add('ajax_estado_tramite_hijo', 'Cam::ajaxEstadoTramiteHijo');
-        $routes->add('ajax_estado_tramite_hijo_reporte', 'Cam::ajaxEstadoTramiteHijoReporte');        
+        $routes->add('ajax_estado_tramite_hijo_reporte', 'Cam::ajaxEstadoTramiteHijoReporte');
         $routes->add('ajax_analista_destinario', 'Cam::ajaxAnalistaDestinatario');
         $routes->add('ajax_hr_in_ex', 'Cam::ajaxHrInEx');
         $routes->add('ajax_datos_hr_in_ex', 'Cam::ajaxDatosHrInEx');
@@ -189,6 +189,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
 
         $routes->add('hoja_ruta_pdf/(:num)', 'Cam::hojaRutaPdf/$1');
 
+        $routes->add('derivar_tramites', 'Cam::derivarTramites');
         //$routes->add('actualizar_poligono_area_minera', 'Cam::actualizarPoligonoAreaMinera');
 
     });
@@ -241,11 +242,13 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->post('guardar_editar', 'MineriaIlegal::guardarEditar');
         $routes->add('anexar/(:num)', 'MineriaIlegal::anexar/$1');
         $routes->post('guardar_anexar', 'MineriaIlegal::guardarAnexar');
+        $routes->add('anexar_sincobol/(:num)', 'MineriaIlegal::anexarSincobol/$1');
+        $routes->post('guardar_anexar_sincobol', 'MineriaIlegal::guardarAnexarSincobol');
         $routes->add('finalizar/(:num)', 'MineriaIlegal::finalizar/$1');
         $routes->post('guardar_finalizar', 'MineriaIlegal::guardarFinalizar');
         $routes->add('ajax_area_minera_mineria_ilegal', 'MineriaIlegal::ajaxAreaMineraMineriaIlegal');
         $routes->add('ajax_datos_area_minera_mineria_ilegal', 'MineriaIlegal::ajaxDatosAreaMineraMineriaIlegal');
-        $routes->add('ajax_area_minera_geom', 'MineriaIlegal::ajaxAreaMineraGeom');        
+        $routes->add('ajax_area_minera_geom', 'MineriaIlegal::ajaxAreaMineraGeom');
         $routes->add('ajax_analista_destinario', 'MineriaIlegal::ajaxAnalistaDestinatario');
         $routes->add('ajax_guardar_devolver', 'MineriaIlegal::ajaxGuardarDevolver');
 
@@ -293,10 +296,32 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('historico_sincobol', 'MineriaIlegal::historicoSincobol');
 
         $routes->add('reporte_denuncias_fechas', 'MineriaIlegal::reporteDenunciasFechas');
-        $routes->add('reporte', 'MineriaIlegal::reporte');        
+        $routes->add('reporte', 'MineriaIlegal::reporte');
         $routes->add('reporte_mis_tramites', 'MineriaIlegal::reporteMisTramites');
         $routes->add('reporte_fecha_mecanizada', 'MineriaIlegal::reporteFechaMecanizada');
-        
+
+    });
+
+    $routes->group('derecho_preferente', function($routes){
+        $routes->add('mis_ingresos', 'DerechoPreferente::misIngresos');
+
+        $routes->add('agregar_ventanilla', 'DerechoPreferente::agregarVentanilla');
+
+        $routes->add('hoja_ruta_solicitud_pdf/(:num)', 'DerechoPreferente::hojaRutaSolicitudPdf/$1');
+
+        $routes->add('ajax_area_minera', 'DerechoPreferente::ajaxAreaMinera');
+        $routes->add('ajax_datos_area_minera', 'DerechoPreferente::ajaxDatosAreaMinera');
+        $routes->add('ajax_analista_destinario', 'DerechoPreferente::ajaxAnalistaDestinatario');
+    });
+
+    $routes->group('licencia_comercializacion', function($routes){
+        $routes->add('mis_ingresos', 'LicenciaComercializacion::misIngresos');
+
+        $routes->add('agregar_ventanilla', 'LicenciaComercializacion::agregarVentanilla');
+
+        $routes->add('hoja_ruta_pdf/(:num)', 'LicenciaComercializacion::hojaRutaPdf/$1');
+
+        $routes->add('ajax_analista_destinario', 'LicenciaComercializacion::ajaxAnalistaDestinatario');
     });
 
     /*$routes->group('acto_administrativo', function($routes){

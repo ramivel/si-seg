@@ -3240,9 +3240,9 @@ class MineriaIlegal extends BaseController
 
             $cabera['titulo'] = $this->titulo;
             $cabera['navegador'] = true;
-            $cabera['subtitulo'] = 'Anexar Hoja de Ruta de Minería Ilegal';
+            $cabera['subtitulo'] = 'Anexar a Hoja de Ruta de Minería Ilegal';
             $contenido['title'] = view('templates/title',$cabera);
-            $contenido['subtitulo'] = 'Anexar Hoja de Ruta de Minería Ilegal';
+            $contenido['subtitulo'] = 'Anexar a Hoja de Ruta de Minería Ilegal';
             $contenido['accion'] = $this->controlador.'guardar_anexar';
             $contenido['controlador'] = $this->controlador;
             $contenido['hoja_ruta'] = $hoja_ruta;
@@ -3289,9 +3289,9 @@ class MineriaIlegal extends BaseController
             if(!$this->validate($camposValidacion)){
                 $cabera['titulo'] = $this->titulo;
                 $cabera['navegador'] = true;
-                $cabera['subtitulo'] = 'Anexar Hoja de Ruta de Minería Ilegal';
+                $cabera['subtitulo'] = 'Anexar a Hoja de Ruta de Minería Ilegal';
                 $contenido['title'] = view('templates/title',$cabera);
-                $contenido['subtitulo'] = 'Anexar Hoja de Ruta de Minería Ilegal';
+                $contenido['subtitulo'] = 'Anexar a Hoja de Ruta de Minería Ilegal';
                 $contenido['accion'] = $this->controlador.'guardar_anexar';
                 $contenido['controlador'] = $this->controlador;
                 $contenido['denuncia'] = $denunciasMineriaIlegalModel->select("*, correlativo as correlativo_denuncia, to_char(fecha_denuncia, 'DD/MM/YYYY HH24:MI') as fecha_denuncia")->find($id_denuncia);
@@ -3331,6 +3331,120 @@ class MineriaIlegal extends BaseController
                     session()->setFlashdata('fail', $hojaRutaMineriaIlegalModel->errors());
 
                 session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información.');
+                return redirect()->to($this->controlador.'mis_tramites');
+            }
+        }
+    }
+    public function anexarSincobol($id_hoja_ruta){
+        $hojaRutaMineriaIlegalModel = new HojaRutaMineriaIlegalModel();
+        $campos = array('*', 'fk_denuncia', 'correlativo as correlativo_hr', "to_char(fecha_hoja_ruta, 'DD/MM/YYYY HH24:MI') as fecha_hr");
+        if($hoja_ruta = $hojaRutaMineriaIlegalModel->select($campos)->find($id_hoja_ruta)){
+            $db = \Config\Database::connect();
+            $derivacionMineriaIlegalModel = new DerivacionMineriaIlegalModel();
+            $denunciasMineriaIlegalModel = new DenunciasMineriaIlegalModel();
+            $denuncia = $denunciasMineriaIlegalModel->select("*, correlativo as correlativo_denuncia, to_char(fecha_denuncia, 'DD/MM/YYYY HH24:MI') as fecha_denuncia")->find($hoja_ruta['fk_denuncia']);
+
+            $campos = array('de.id', 'de.nombres', 'de.apellidos', 'de.documento_identidad', 'de.expedido', "de.telefonos", "de.email", 'de.direccion', 'de.documento_identidad_digital');
+            $where = array(
+                'dd.fk_denuncia' => $hoja_ruta['fk_denuncia'],
+            );
+            $builder = $db->table('mineria_ilegal.denuncias_denunciantes AS dd')
+            ->select($campos)
+            ->join('mineria_ilegal.denunciantes AS de', 'dd.fk_denunciante = de.id', 'left')
+            ->where($where)
+            ->orderBY('dd.id', 'ASC');
+            $denunciantes = $builder->get()->getResultArray();
+
+            $cabera['titulo'] = $this->titulo;
+            $cabera['navegador'] = true;
+            $cabera['subtitulo'] = 'Anexar Hoja de Ruta Interna o Externa del SINCOBOL';
+            $contenido['title'] = view('templates/title',$cabera);
+            $contenido['subtitulo'] = 'Anexar Hoja de Ruta Interna o Externa del SINCOBOL';
+            $contenido['accion'] = $this->controlador.'guardar_anexar_sincobol';
+            $contenido['controlador'] = $this->controlador;
+            $contenido['hoja_ruta'] = $hoja_ruta;
+            $contenido['ultima_derivacion'] = $derivacionMineriaIlegalModel->where(array('fk_hoja_ruta' => $hoja_ruta['id']))->orderBy('id', 'DESC')->first();
+            $contenido['denuncia'] = $denuncia;
+            $contenido['id_hoja_ruta'] = $hoja_ruta['id'];
+            $contenido['denunciantes'] = $denunciantes;
+            $contenido['tipo_denuncias'] = $this->tipoDenuncias;
+            $contenido['tipos_origen_oficio'] = array_merge(array(''=>'SELECCIONE UNA OPCIÓN'), $this->tiposOrigenOficio);
+            $contenido['id_tramite'] = $this->idTramite;
+            $contenido['url_atras'] = base_url($this->controlador.'mis_tramites');
+            $data['content'] = view($this->carpeta.'anexar_sincobol', $contenido);
+            $data['menu_actual'] = $this->menuActual.'mis_tramites';
+            $data['validacion_js'] = 'mineria-ilegal-anexar-sincobol-validation.js';
+            $data['tramites_menu'] = $this->tramitesMenu();
+            $data['alertas'] = $this->alertasTramites();
+            echo view('templates/template', $data);
+        }else{
+            session()->setFlashdata('fail', 'El registro no existe.');
+            return redirect()->to($this->controlador);
+        }
+    }
+    public function guardarAnexarSincobol(){
+        if ($this->request->getPost()) {
+            $denunciasMineriaIlegalModel = new DenunciasMineriaIlegalModel();
+            $id_hoja_ruta = $this->request->getPost('id_hoja_ruta');
+            $id_derivacion = $this->request->getPost('id_derivacion');
+            $id_denuncia = $this->request->getPost('id_denuncia');
+            $anexar_hr = $this->request->getPost('anexar_hr');
+            $camposValidacion = array(
+                'id_hoja_ruta' => [
+                    'rules' => 'required',
+                ],
+                'id_derivacion' => [
+                    'rules' => 'required',
+                ],
+                'id_denuncia' => [
+                    'rules' => 'required',
+                ],
+                'motivo_anexo' => [
+                    'rules' => 'required',
+                ],
+            );
+
+            if(!$this->validate($camposValidacion)){
+                if(isset($anexar_hr) && count($anexar_hr) > 0){
+                    $hojas_ruta_anexadas = array();
+                    foreach($anexar_hr as $id_hoja_ruta)
+                        $hojas_ruta_anexadas[] = $this->obtnerDatosSelectHrInExSincobol($id_hoja_ruta);
+                    $contenido['hojas_ruta_anexadas'] = $hojas_ruta_anexadas;
+                }
+                $cabera['titulo'] = $this->titulo;
+                $cabera['navegador'] = true;
+                $cabera['subtitulo'] = 'Anexar Hoja de Ruta Interna o Externa del SINCOBOL';
+                $contenido['title'] = view('templates/title',$cabera);
+                $contenido['subtitulo'] = 'Anexar Hoja de Ruta Interna o Externa del SINCOBOL';
+                $contenido['accion'] = $this->controlador.'guardar_anexar_sincobol';
+                $contenido['controlador'] = $this->controlador;
+                $contenido['denuncia'] = $denunciasMineriaIlegalModel->select("*, correlativo as correlativo_denuncia, to_char(fecha_denuncia, 'DD/MM/YYYY HH24:MI') as fecha_denuncia")->find($id_denuncia);
+                $contenido['tipo_denuncias'] = $this->tipoDenuncias;
+                $contenido['tipos_origen_oficio'] = array_merge(array(''=>'SELECCIONE UNA OPCIÓN'), $this->tiposOrigenOficio);
+                $contenido['id_tramite'] = $this->idTramite;
+                $contenido['url_atras'] = base_url($this->controlador.'mis_tramites');
+                $data['content'] = view($this->carpeta.'anexar_sincobol', $contenido);
+                $data['menu_actual'] = $this->menuActual.'mis_tramites';
+                $data['validacion_js'] = 'mineria-ilegal-anexar-sincobol-validation.js';
+                $data['tramites_menu'] = $this->tramitesMenu();
+                $data['alertas'] = $this->alertasTramites();
+                echo view('templates/template', $data);
+            }else{
+                $hojasRutaAnexadasMineriaIlegalModel = new HojasRutaAnexadasMineriaIlegalModel();
+                if($anexar_hr){
+                    foreach($anexar_hr as $fk_hoja_ruta){
+                        if($this->archivarHrSincobolMejorado($fk_hoja_ruta, $id_denuncia, session()->get('registroUserName'))){
+                            $dataDerivacion = array(
+                                'fk_hoja_ruta' => $id_hoja_ruta,
+                                'fk_hoja_ruta_sincobol' => $fk_hoja_ruta,
+                                'fk_usuario_creador' => session()->get('registroUser'),
+                            );
+                            if($hojasRutaAnexadasMineriaIlegalModel->save($dataDerivacion) === false)
+                                session()->setFlashdata('fail', $hojasRutaAnexadasMineriaIlegalModel->errors());
+                        }
+                    }
+                    session()->setFlashdata('success', 'Se Anexo Correctamente la(s) Hoja(s) de Ruta(s) del sistema SINCOBOL.');
+                }
                 return redirect()->to($this->controlador.'mis_tramites');
             }
         }
@@ -4762,7 +4876,8 @@ class MineriaIlegal extends BaseController
         if($this->archivarHrSincobolMejorado($fk_hoja_ruta, $fk_denuncia, $usuario)){
             $dataDerivacion = array(
                 'fk_derivacion' => $id_derivacion,
-                'fk_hoja_ruta' => $fk_hoja_ruta,
+                'fk_hoja_ruta_sincobol' => $fk_hoja_ruta,
+                'fk_usuario_creador' => session()->get('registroUser'),
             );
             if($hojasRutaAnexadasMineriaIlegalModel->save($dataDerivacion) === false)
                 session()->setFlashdata('fail', $hojasRutaAnexadasMineriaIlegalModel->errors());

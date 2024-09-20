@@ -28,7 +28,7 @@
                         </div>
                     </div>
                     <div class="card-block">
-                        <div class="dt-responsive table-responsive" style="min-height: 300px;">
+                        <div class="dt-responsive table-responsive">
                             <!--div class="bg-color-box color-warning waves-effect waves-light" style="background-color: #FEEDB9;color:black !important;">TRÁMITES A PUNTO DE VENCER SU PLAZO</!--div>
                             <div-- class="bg-color-box color-danger waves-effect waves-light" style="background-color: #F2C4C9; color:black !important;">TRÁMITES QUE VENCIERON SU PLAZO</div-->
                             <table id="tabla-listado" class="table table-striped table-bordered nowrap" style="font-size: small;">
@@ -58,52 +58,14 @@
                                             <div class="dropdown-info dropdown open">
                                                 <button class="btn btn-sm btn-info dropdown-toggle waves-effect waves-light " type="button" id="dropdown-4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Acciones</button>
                                                 <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                    <?php echo anchor($controlador.'ver/2/'.$fila['id_hoja_ruta'], 'Ver',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                     <?php
-                                                    switch($fila['ultimo_estado']){
-                                                        case 'REGULARIZACIÓN':
-                                                            echo anchor('documentos/agregar/'.$id_tramite.'/'.$fila['id_hoja_ruta'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            echo anchor($controlador.'atender/'.$fila['id_hoja_ruta'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            echo anchor($controlador.'anexar/'.$fila['id_hoja_ruta'], 'Anexar a H.R. Míneria Ilegal',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            echo anchor($controlador.'anexar_sincobol/'.$fila['id_hoja_ruta'], 'Anexar H.R. SINCOBOL',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            if($fila['editar'] == 't')
-                                                                echo anchor($controlador.'editar/'.$fila['id_hoja_ruta'], 'Editar Regularización',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            if(in_array(20, session()->get('registroPermisos')) && $fila['finalizar'] == 'SI')
-                                                                echo anchor($controlador.'finalizar/'.$fila['id_hoja_ruta'], 'Finalizar',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            break;
-                                                        case 'RECIBIDO':
-                                                        case 'DEVUELTO':
-                                                            echo anchor('documentos/agregar/'.$id_tramite.'/'.$fila['id_hoja_ruta'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            echo anchor($controlador.'atender/'.$fila['id_hoja_ruta'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            echo anchor($controlador.'anexar/'.$fila['id_hoja_ruta'], 'Anexar a H.R. Míneria Ilegal',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            echo anchor($controlador.'anexar_sincobol/'.$fila['id_hoja_ruta'], 'Anexar H.R. SINCOBOL',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            if(in_array(20, session()->get('registroPermisos')) && $fila['finalizar'] == 'SI')
-                                                                echo anchor($controlador.'finalizar/'.$fila['id_hoja_ruta'], 'Finalizar',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            break;
-                                                        case 'DERIVADO':
-                                                        case 'MIGRADO':
-                                                            if($fila['editar'] == 't')
-                                                                echo anchor($controlador.'editar/'.$fila['id_hoja_ruta'], 'Editar Derivación',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            break;
-                                                        case 'EN ESPERA':
-                                                            echo anchor($controlador.'atender/'.$fila['id_hoja_ruta'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            break;
-                                                    }
+                                                    echo anchor($controlador.'ver/2/'.$fila['id'], 'Ver',array('class' =>'dropdown-item waves-light waves-effect'));
+                                                    echo anchor($controlador.'hoja_ruta_solicitud_pdf/'.$fila['id'], 'Imprimir H.R.',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));
+                                                    if($fila['editar'] == 't')
+                                                        echo anchor($controlador.'editar_ventanilla/'.$fila['id'], 'Editar Derivación',array('class' =>'dropdown-item waves-light waves-effect'));
                                                     ?>
-                                                    <?php 
-                                                    if($fila['id_denuncia_web']){
-                                                        echo anchor('pdf_formulario_denuncia/'.$fila['id_denuncia_web'], 'Imprimir Formulario de Denuncia Web',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));
-                                                    }                                                    
-                                                    ?>
-                                                    <?php echo anchor($controlador.'formulario_denuncia_pdf/'.$fila['id_denuncia'], 'Imprimir Formulario de Minería Ilegal',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
-                                                    <?php echo anchor($controlador.'hoja_ruta_pdf/'.$fila['id_hoja_ruta'], 'Imprimir Hoja de Ruta',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
-                                                    
                                                 </div>
                                             </div>
-                                            <?php if($fila['n_correspondencia_externa'] > 0){?>
-                                                <br>
-                                                <?= anchor($controlador.'correspondencia_externa/'.$fila['id_hoja_ruta'], 'Correspondencia Externa <span class="badge">'.$fila['n_correspondencia_externa'].'</span>',array('class' =>'btn btn-sm btn-primary mt-1'));?>
-                                            <?php }?>
                                         </td>
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>
                                         <td class="text-center" >
@@ -111,7 +73,7 @@
                                                 if($campos_reales[$i]=='ultimo_estado'){
                                                     $style = '';
                                                     switch($fila[$campos_reales[$i]]){
-                                                        case 'REGULARIZACIÓN':
+                                                        case 'MIGRADO':
                                                             $style = 'btn btn-sm btn-danger btn-round';
                                                             break;
                                                         case 'ATENDIDO':
@@ -131,8 +93,8 @@
                                                             break;
                                                     }
                                                     echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';
-                                                }elseif($campos_reales[$i]=='fk_tipo_denuncia'){
-                                                    echo $tipo_denuncias[$fila[$campos_reales[$i]]];
+                                                }elseif($campos_reales[$i]=='doc_digital'){
+                                                    echo '<a href="'.base_url($fila[$campos_reales[$i]]).'" target="_blank" title="Ver Documento"><i class="feather icon-file"></i> Ver Documento</a>';
                                                 }else{
                                                     echo $fila[$campos_reales[$i]];
                                                 }

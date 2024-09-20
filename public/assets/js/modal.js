@@ -5,7 +5,7 @@ $(document).ready(function () {
         e.preventDefault();
         var link = $(this).attr('href');
         swal({
-            title: "Esta seguro de CAMBIAR EL ESTADO?",            
+            title: "Esta seguro de CAMBIAR EL ESTADO?",
             type: "warning",
             showCancelButton: true,
             confirmButtonClass: "btn-danger",
@@ -159,6 +159,22 @@ $(document).ready(function () {
         },
         function(){
             window.location.href = link;
+        });
+    });
+
+    $('.guardar-form').on('click',function(e){
+        e.preventDefault();
+        var form = $(this).parents('form');
+        swal({
+            title: "Esta seguro de Guardar?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Si, Guardar!",
+            cancelButtonText: "No, Cancelar!",
+            closeOnConfirm: false
+        },
+        function(){
+            form.submit();
         });
     });
 

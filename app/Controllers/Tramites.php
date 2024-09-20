@@ -45,7 +45,9 @@ class Tramites extends BaseController
     }
 
     public function agregar(){
-        $tipos_hr = array();
+        $tipos_hr = array(
+            '' => 'NUEVA HOJA DE RUTA',
+        );
         foreach($this->tipo_hoja_ruta() as $row)
             $tipos_hr[$row['id']] = $row['nombre'];
         if ($this->request->getPost()) {
@@ -61,33 +63,18 @@ class Tramites extends BaseController
                 ],
                 'correlativo' => [
                     'rules' => 'required',
-                ],
-                'fk_tipo_hoja_ruta' => [
-                    'rules' => 'required|is_natural',
-                ],
+                ],                
             ]);
             if(!$validation){
-                $cabera['titulo'] = $this->titulo;
-                $cabera['navegador'] = true;
-                $cabera['subtitulo'] = 'Agregar Nuevo';
-                $contenido['title'] = view('templates/title',$cabera);
-                $contenido['tipos_hr'] = $tipos_hr;
-                $contenido['subtitulo'] = 'Agregar Nuevo';
-                $contenido['accion'] = $this->controlador.'agregar';
                 $contenido['validation'] = $this->validator;
-                $data['content'] = view($this->carpeta.'agregar', $contenido);
-                $data['menu_actual'] = $this->menuActual;
-                $data['tramites_menu'] = $this->tramitesMenu();
-                $data['validacion_js'] = 'tramites-validation.js';
-                echo view('templates/template', $data);
             }else{
                 $tramitesModel = new TramitesModel();
                 $data = array(
                     'nombre' => $this->request->getPost('nombre'),
                     'menu' => $this->request->getPost('menu'),
                     'controlador' => $this->request->getPost('controlador'),
-                    'correlativo' => mb_strtoupper($this->request->getPost('correlativo')),
-                    'fk_tipo_hoja_ruta' => $this->request->getPost('fk_tipo_hoja_ruta'),
+                    'correlativo' => mb_strtoupper($this->request->getPost('correlativo')),                    
+                    'fk_tipo_hoja_ruta' => ((!empty($this->request->getPost('fk_tipo_hoja_ruta'))) ? $this->request->getPost('fk_tipo_hoja_ruta') : NULL),
                     'fk_usuario_creador' => session()->get('registroUser'),
                 );
                 if($tramitesModel->save($data) === false)
@@ -96,22 +83,21 @@ class Tramites extends BaseController
                     session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información.');
                 return redirect()->to($this->controlador);
             }
-        }else{
-            $cabera['titulo'] = $this->titulo;
-            $cabera['navegador'] = true;
-            $cabera['subtitulo'] = 'Agregar Nuevo';
-            $contenido['title'] = view('templates/title',$cabera);
-            $contenido['subtitulo'] = 'Agregar Nuevo';
-            $contenido['accion'] = $this->controlador.'agregar';
-            $contenido['validation'] = $this->validator;
-            $contenido['tipos_hr'] = $tipos_hr;
-            $contenido['controlador'] = $this->controlador;
-            $data['content'] = view($this->carpeta.'agregar', $contenido);
-            $data['menu_actual'] = $this->menuActual;
-            $data['tramites_menu'] = $this->tramitesMenu();
-            $data['validacion_js'] = 'tramites-validation.js';
-            echo view('templates/template', $data);
         }
+        $cabera['titulo'] = $this->titulo;
+        $cabera['navegador'] = true;
+        $cabera['subtitulo'] = 'Agregar Nuevo';
+        $contenido['title'] = view('templates/title',$cabera);
+        $contenido['subtitulo'] = 'Agregar Nuevo';
+        $contenido['accion'] = $this->controlador.'agregar';
+        $contenido['validation'] = $this->validator;
+        $contenido['tipos_hr'] = $tipos_hr;
+        $contenido['controlador'] = $this->controlador;
+        $data['content'] = view($this->carpeta.'agregar', $contenido);
+        $data['menu_actual'] = $this->menuActual;
+        $data['tramites_menu'] = $this->tramitesMenu();
+        $data['validacion_js'] = 'tramites-validation.js';
+        echo view('templates/template', $data);        
     }
 
     public function editar($id){

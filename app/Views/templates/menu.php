@@ -132,6 +132,52 @@
                         </li>
                     </ul>
                 </li>
+                <li class="pcoded-hasmenu <?= (isset($menu_actual) && strpos($menu_actual, 'derecho_preferente/') !== false ) ? 'pcoded-trigger' : '';?>">
+                    <a href="javascript:void(0)">
+                        <span class="pcoded-micon"><i class="feather icon-layers"></i></span>
+                        <span class="pcoded-mtext">CAM Derecho Preferente</span>
+                    </a>
+                    <ul class="pcoded-submenu">
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'derecho_preferente/buscador_ventanilla') ? 'active' : '';?>">
+                            <a href="<?= base_url('derecho_preferente/buscador_ventanilla');?>">
+                                <span class="pcoded-mtext">Buscador</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'derecho_preferente/agregar_ventanilla') ? 'active' : '';?>">
+                            <a href="<?= base_url('derecho_preferente/agregar_ventanilla');?>">
+                                <span class="pcoded-mtext">Nueva Solicitud</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'derecho_preferente/mis_ingresos') ? 'active' : '';?>">
+                            <a href="<?= base_url('derecho_preferente/mis_ingresos');?>">
+                                <span class="pcoded-mtext">Mis Ingresos</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="pcoded-hasmenu <?= (isset($menu_actual) && strpos($menu_actual, 'licencia_comercializacion/') !== false ) ? 'pcoded-trigger' : '';?>">
+                    <a href="javascript:void(0)">
+                        <span class="pcoded-micon"><i class="feather icon-layers"></i></span>
+                        <span class="pcoded-mtext">Licencia Comercialización</span>
+                    </a>
+                    <ul class="pcoded-submenu">
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'licencia_comercializacion/buscador_tramites_cam') ? 'active' : '';?>">
+                            <a href="<?= base_url('licencia_comercializacion/buscador_ventanilla');?>">
+                                <span class="pcoded-mtext">Buscador</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'licencia_comercializacion/agregar_ventanilla') ? 'active' : '';?>">
+                            <a href="<?= base_url('licencia_comercializacion/agregar_ventanilla');?>">
+                                <span class="pcoded-mtext">Nueva Solicitud</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'licencia_comercializacion/mis_ingresos') ? 'active' : '';?>">
+                            <a href="<?= base_url('licencia_comercializacion/mis_ingresos');?>">
+                                <span class="pcoded-mtext">Mis Ingresos</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
 
         <?php }?>
@@ -380,7 +426,7 @@
                                         <a href="javascript:void(0)">
                                             <span class="pcoded-mtext">Reportes Administración</span>
                                         </a>
-                                        <ul class="pcoded-submenu">                                            
+                                        <ul class="pcoded-submenu">
                                             <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'reporte_mis_tramites') ? 'active' : '';?>">
                                                 <a href="<?= base_url($row['controlador'].'reporte_mis_tramites');?>">
                                                     <span class="pcoded-mtext">Bandeja de Trámites</span>

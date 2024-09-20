@@ -7,6 +7,7 @@ use CodeIgniter\Validation\FileRules;
 use CodeIgniter\Validation\FormatRules;
 use CodeIgniter\Validation\Rules;
 use App\Validation\ValidarMineriaIlegal;
+use App\Validation\ValidarDerechoPreferente;
 
 class Validation
 {
@@ -26,6 +27,7 @@ class Validation
         FileRules::class,
         CreditCardRules::class,
         ValidarMineriaIlegal::class,
+        ValidarDerechoPreferente::class,
     ];
 
     /**

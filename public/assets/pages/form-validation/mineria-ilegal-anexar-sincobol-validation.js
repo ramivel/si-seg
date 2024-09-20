@@ -17,21 +17,23 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
-        id:{
-            presence: false,
-        },
-        nombre: {
+        id_hoja_ruta: {
             presence: true,
         },
-        menu: {
+        id_derivacion: {
             presence: true,
         },
-        controlador: {
+        id_denuncia: {
             presence: true,
         },
-        correlativo: {
+        "anexar_hr[]": {
+            presence: {
+                message: "^Debe seleccionar alguna Hoja de Ruta Interna/Externa del SINCOBOL que Anexará."
+            },
+        },
+        motivo_anexo: {
             presence: true,
-        },        
+        },
     };
 
     // Hook up the form so we can prevent it from being posted
@@ -60,13 +62,15 @@ $(document).ready(function () {
         showErrors(form, errors || {});
         if (!errors) {
             showSuccess();
+        }else{
+            swal("Error de Validación", "Existe errores en el formulario.", "error");
         }
     }
 
     // Updates the inputs with the validation errors
     function showErrors(form, errors) {
         // We loop through all the inputs and show the errors for that input
-        _.each(form.querySelectorAll("input[name], select[name]"), function (input) {
+        _.each(form.querySelectorAll("input[name], select[name], textarea[name]"), function (input) {
             // Since the errors can be null if no errors were found we need to handle
             // that
             showErrorsForInput(input, errors && errors[input.name]);
@@ -136,11 +140,11 @@ $(document).ready(function () {
     function showSuccess() {
         // We made it \:D/
         swal({
-            title: "Esta seguro de Guardar?",
+            title: "Esta seguro de ANEXAR?",
             //text: "You will not be able to recover this imaginary file!",
             type: "warning",
             showCancelButton: true,
-            confirmButtonText: "Si, Guardar!",
+            confirmButtonText: "Si, Anexar!",
             cancelButtonText: "No, Cancelar!",
             closeOnConfirm: false
         },
@@ -150,4 +154,5 @@ $(document).ready(function () {
             }
         });
     }
+
 });

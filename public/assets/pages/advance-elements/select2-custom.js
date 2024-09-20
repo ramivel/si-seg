@@ -316,6 +316,52 @@ $(document).ready(function () {
     },
   });
 
+  $(".analista-destinatario-dp-ajax").select2({
+    language: "es",
+    placeholder: "Escriba el Nombre o Cargo...",
+    minimumInputLength: 3,
+    ajax: {
+      url: baseUrl + "derecho_preferente/ajax_analista_destinario",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+
+  $(".analista-destinatario-lc-ajax").select2({
+    language: "es",
+    placeholder: "Escriba el Nombre o Cargo...",
+    minimumInputLength: 3,
+    ajax: {
+      url: baseUrl + "licencia_comercializacion/ajax_analista_destinario",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+
   $(".documentos-limpiar").click(function () {
     $(".documentos-ajax").val("").trigger("change");
   });
@@ -837,6 +883,59 @@ $(document).ready(function () {
   });
   /* FIN MINERIA ILEGAL AREAS MINERAS */
 
+  /* BUSCADOR AREA MINERA DERECHO PREFERENTE */
+  $(".area-minera-cam-dp-ajax").select2({
+    language: "es",
+    placeholder: "Escriba el Código Único o Denominación del Área Minera",
+    minimumInputLength: 3,
+    ajax: {
+      url: baseUrl + "derecho_preferente/ajax_area_minera",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+  $(".agregar_area_minera_cam_dp").click(function () {
+    var fk_area_minera = $("#fk_area_minera").val();
+    if (fk_area_minera.length > 0) {
+      $.ajax({
+        url: baseUrl + "derecho_preferente/ajax_datos_area_minera",
+        type: "POST",
+        data: {
+          id: fk_area_minera,
+        },
+        dataType: "json",
+        success: function (result) {
+          var markup = "<tr id='am"+result.id_area_minera+"'>"+
+            "<td class='text-center form-group'><input type='hidden' name='id_areas_mineras[]' value='"+result.id_area_minera+"' /><span class='messages'></span>"+result.codigo_unico+"</td>"+
+            "<td class='text-center'>"+result.denominacion+"</td>"+
+            "<td class='text-center'>LICENCIA DE PROSPECCIÓN Y EXPLORACIÓN</td>"+
+            "<td class='text-center'>"+result.titular+"</td>"+
+            "<td class='text-center'>"+result.clasificacion+"</td>"+
+            "<td class='text-center'>"+result.representante_legal+"</td>"+
+            "<td class='text-center'><select name='extensiones[]' class='form-control'><option value='TOTAL'>TOTAL</option><option value='PARCIAL'>PARCIAL</option></select></td>"+
+            "<td class='text-center'><button type='button' class='btn btn-sm btn-danger waves-effect waves-light' title='Desanexar Área Minera' onclick='desanexar_area_minera_mineria_ilegal("+result.id_area_minera+");'><span class='icofont icofont-ui-delete'></span></button></td>"+
+          "</tr>";
+          $("#tabla_areas_mineras tbody").append(markup);
+          $(".area-minera-cam-dp-ajax").val('').trigger('change');
+          $("#areas_mineras_anexadas").val('SI');          
+        },
+      });
+    }
+  });
+  /* FIN BUSCADOR AREA MINERA DERECHO PREFERENTE */
+
   /* LIBRO DE REGISTRO */
   $(".libro-registro-ajax").select2({
     language: "es",
@@ -916,7 +1015,7 @@ $(document).ready(function () {
   /* FIN TIPO MINERIA ILEGAL MANUAL*/
 
   /* Reporte Administracion Usuarios */
-  $("#oficina-reporte").on("change", function () {    
+  $("#oficina-reporte").on("change", function () {
     $("#usuario-reporte").html('<option value="">SELECCIONE UN USUARIO</option>');
     if (this.value.length > 0) {
       $.ajax({
@@ -929,7 +1028,7 @@ $(document).ready(function () {
         error: function () {
           console.log("error ajax.");
         },
-        success: function (html) {          
+        success: function (html) {
           $("#usuario-reporte").html(html);
         },
       });
@@ -950,7 +1049,7 @@ $(document).ready(function () {
         error: function () {
           console.log("error ajax.");
         },
-        success: function (html) {          
+        success: function (html) {
           $("#subestado-reporte").html(html);
         },
       });

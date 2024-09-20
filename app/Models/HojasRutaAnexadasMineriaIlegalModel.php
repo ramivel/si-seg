@@ -10,15 +10,15 @@ class HojasRutaAnexadasMineriaIlegalModel extends Model{
     //protected $useAutoIncrement = true;
 
     protected $returnType     = 'array';
-    protected $useSoftDeletes = false;
+    protected $useSoftDeletes = true;
 
     protected $allowedFields = [
-        'fk_derivacion', 'fk_hoja_ruta'
+        'fk_derivacion', 'fk_hoja_ruta', 'fk_hoja_ruta_sincobol', 'fk_usuario_creador', 'observaciones'
     ];
 
-    /*protected $useTimestamps = true;
+    protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
-    protected $deletedField  = 'deleted_at';*/
+    protected $deletedField  = 'deleted_at';
 
 }
