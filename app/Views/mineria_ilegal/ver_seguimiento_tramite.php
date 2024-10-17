@@ -3,6 +3,11 @@
     <!-- Tab panes -->
     <div class="tab-content tabs card-block" style="background-color:#fff; border-left: 1px solid #ddd; border-right: 1px solid #ddd; border-bottom: 1px solid #ddd;">
         <div class="tab-pane active">
+            <div class="row mb-3">
+                <div class="col-sm-12 text-right">
+                    <a href="<?= base_url($descargar);?>" class="btn btn-sm btn-inverse" target="_blank" title="Descargar Seguimiento"><i class="fa fa-file-excel-o"></i> Descargar Seguimiento</a>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
@@ -42,6 +47,21 @@
                                                 break;
                                             case 'ANEXADO':
                                                 $style = 'btn btn-sm btn-info btn-round';
+                                                break;
+                                        }
+                                        echo '<button class="'.$style.'">'.$row[$campos_listado[$i]].'</button>';
+                                        ?>
+                                    </td>
+                                <?php }elseif($campos_listado[$i]=='tipo_documento_derivado'){?>
+                                    <td class="text-center">
+                                        <?php
+                                        $style = '';
+                                        switch($row[$campos_listado[$i]]){
+                                            case 'ORIGINAL':
+                                                $style = 'btn btn-out btn-sm btn-success btn-square';
+                                                break;
+                                            case 'COPIA':
+                                                $style = 'btn btn-out btn-sm btn-info btn-square';
                                                 break;
                                         }
                                         echo '<button class="'.$style.'">'.$row[$campos_listado[$i]].'</button>';

@@ -17,49 +17,20 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
-        id_hoja_ruta: {
+        id:{
             presence: true,
         },
-        id_derivacion: {
-            presence: true,
-        },
-        id_denuncia: {
-            presence: true,
-        },
-        denunciantes_anexados: {
-            presence: {
-                message: "^Debe anexar a un denunciante al menos."
-            },
-        },
-        departamento:{
-            presence: {
-                message: "^Debe seleccionar un Departamento."
-            },
-        },
-        provincia:{
-            presence: {
-                message: "^Debe seleccionar una Provincia."
-            },
-        },
-        fk_municipio:{
-            presence: {
-                message: "^Debe seleccionar un Municipio."
-            },
-        },
-        comunidad_localidad: {
-            presence: true,
-        },
-        descripcion_lugar: {
-            presence: true,
-        },
-        fk_estado_tramite: {
-            presence: {
-                message: "^Debe seleccionar el Estado del Tramite."
-            },
-        },
-        fk_estado_tramite_hijo:{
+        "fecha_notificacion[]": {
             presence: function(){
-                if($('#fk_estado_tramite').children('option:selected').data('padre') == 't')
+                if($('#validacion_fecha_notificacion').val() == 'SI')
+                    return true;
+                else
+                    return false;
+            }
+        },
+        "documentos[]": {
+            presence: function(){
+                if($('#validacion_documento').val() == 'SI')
                     return true;
                 else
                     return false;
@@ -192,6 +163,20 @@ $(document).ready(function () {
                 document.getElementById("formulario").submit();
             }
         });
+    }
+
+    function errorDocumento(){
+        var fk_estado_tramite_padre = $('#fk_estado_tramite').val();
+        var ultimo_fk_estado_tramite_padre = $('#ultimo_fk_estado_tramite_padre').val();
+        var fk_estado_tramite_hijo = $('#fk_estado_tramite_hijo').val();
+        var ultimo_fk_estado_tramite_hijo = $('#ultimo_fk_estado_tramite_hijo').val();
+        if(ultimo_fk_estado_tramite_padre == fk_estado_tramite_padre && ultimo_fk_estado_tramite_hijo == fk_estado_tramite_hijo){
+            return false;
+        }else if(ultimo_fk_estado_tramite_padre == fk_estado_tramite_padre){
+            return false;
+        }
+
+        return true;
     }
 
 });

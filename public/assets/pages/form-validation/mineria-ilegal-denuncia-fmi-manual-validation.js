@@ -17,14 +17,6 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
-        fk_oficina:{
-            presence: {
-                message: "^Debe seleccionar una opción."
-            },
-        },
-        fk_usuario_destino: {
-            presence: true,
-        },
         fecha_denuncia: {
             presence: true,
         },

@@ -148,6 +148,8 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->post('guardar_finalizar', 'Cam::guardarFinalizar');
         $routes->add('espera/(:num)', 'Cam::Espera/$1');
         $routes->post('guardar_espera', 'Cam::guardarEspera');
+        $routes->add('anexar_sincobol/(:num)', 'Cam::anexarSincobol/$1');
+        $routes->post('guardar_anexar_sincobol', 'Cam::guardarAnexarSincobol');
         $routes->add('ajax_hoja_ruta', 'Cam::ajaxHojaRutaMadre');
         $routes->add('ajax_datos_hr', 'Cam::ajaxDatosHR');
         $routes->add('ajax_hoja_ruta_cmn_cmc', 'Cam::ajaxHojaRutaCmnCmc');
@@ -236,7 +238,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('listado_recepcion', 'MineriaIlegal::listadoRecepcion');
         $routes->add('recibir/(:num)', 'MineriaIlegal::recibir/$1');
         $routes->post('recibir_multiple', 'MineriaIlegal::recibirMultiple');
-        $routes->add('atender/(:num)', 'MineriaIlegal::atender/$1');
+        $routes->add('atender/(:num)/(:num)', 'MineriaIlegal::atender/$1/$2');
         $routes->post('guardar_atender', 'MineriaIlegal::guardarAtender');
         $routes->add('editar/(:num)', 'MineriaIlegal::editar/$1');
         $routes->post('guardar_editar', 'MineriaIlegal::guardarEditar');
@@ -274,7 +276,12 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('hoja_ruta_pdf/(:num)', 'MineriaIlegal::hojaRutaPdf/$1');
         $routes->add('ajax_provincias', 'MineriaIlegal::ajaxProvincias');
         $routes->add('ajax_municipios', 'MineriaIlegal::ajaxMunicipios');
+        $routes->add('ajax_provincias_reporte', 'MineriaIlegal::ajaxProvinciasReporte');
+        $routes->add('ajax_municipios_reporte', 'MineriaIlegal::ajaxMunicipiosReporte');
         $routes->add('ajax_geom_municipio', 'MineriaIlegal::ajaxGeomMunicipio');
+        $routes->add('ajax_municipio_direccion', 'MineriaIlegal::ajaxMunicipioDireccion');
+        $routes->add('ajax_verficar_denuncia_municipio', 'MineriaIlegal::ajaxVerficarDenunciaMunicipio');
+        $routes->add('ajax_verficar_denuncia_denunciante', 'MineriaIlegal::ajaxVerficarDenunciaDenunciante');
 
         $routes->add('denuncia_manual', 'MineriaIlegal::denunciaManual');
         $routes->add('denuncia_manual_fmi', 'MineriaIlegal::denunciaManualFmi');
@@ -299,19 +306,30 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('reporte', 'MineriaIlegal::reporte');
         $routes->add('reporte_mis_tramites', 'MineriaIlegal::reporteMisTramites');
         $routes->add('reporte_fecha_mecanizada', 'MineriaIlegal::reporteFechaMecanizada');
+        $routes->add('exportar_seguimiento/(:num)', 'MineriaIlegal::exportarSeguimiento/$1');
 
     });
 
     $routes->group('derecho_preferente', function($routes){
         $routes->add('mis_ingresos', 'DerechoPreferente::misIngresos');
+        $routes->add('listado_recepcion', 'DerechoPreferente::listadoRecepcion');
+        $routes->add('mis_tramites', 'DerechoPreferente::misTramites');
 
         $routes->add('agregar_ventanilla', 'DerechoPreferente::agregarVentanilla');
+
+        $routes->add('recibir/(:num)', 'DerechoPreferente::recibir/$1');
+        $routes->post('recibir_multiple', 'DerechoPreferente::recibirMultiple');
+        $routes->add('atender/(:num)', 'DerechoPreferente::atender/$1');
+        $routes->post('guardar_atender', 'DerechoPreferente::guardarAtender');
+        $routes->add('editar/(:num)', 'DerechoPreferente::editar/$1');
+        $routes->post('guardar_editar', 'DerechoPreferente::guardarEditar');
 
         $routes->add('hoja_ruta_solicitud_pdf/(:num)', 'DerechoPreferente::hojaRutaSolicitudPdf/$1');
 
         $routes->add('ajax_area_minera', 'DerechoPreferente::ajaxAreaMinera');
         $routes->add('ajax_datos_area_minera', 'DerechoPreferente::ajaxDatosAreaMinera');
         $routes->add('ajax_analista_destinario', 'DerechoPreferente::ajaxAnalistaDestinatario');
+        $routes->add('ajax_guardar_devolver', 'DerechoPreferente::ajaxGuardarDevolver');
     });
 
     $routes->group('licencia_comercializacion', function($routes){
@@ -339,7 +357,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
     });*/
 
     $routes->group('documentos', function($routes){
-        $routes->add('agregar/(:num)/(:num)', 'Documentos::agregar/$1/$2');
+        $routes->add('agregar/(:any)', 'Documentos::agregar/$1');
         $routes->add('editar/(:num)/(:num)', 'Documentos::editar/$1/$2');
         $routes->post('guardar_editar', 'Documentos::guardarEditar');
         $routes->add('subir/(:num)/(:num)', 'Documentos::subir/$1/$2');
@@ -360,9 +378,12 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('reporte_documentos/(:num)', 'Documentos::reporteDocumentos/$1');
 
         $routes->add('buscador', 'Documentos::buscador');
+        $routes->add('buscador_ventanilla/(:num)', 'Documentos::buscadorVentanilla/$1');
         $routes->add('desanexar/(:num)', 'Documentos::desanexar/$1');
         $routes->add('buscador_sincobol', 'Documentos::buscadorSincobol');
         $routes->add('desanexar_sincobol/(:num)/(:num)/(:num)/(:num)', 'Documentos::desanexarSincobol/$1/$2/$3/$4');
+
+        $routes->add('mis_documentos_excel/(:num)', 'Documentos::misDocumentosExcel/$1');
 
         //$routes->add('actualizar_path', 'Documentos::actualizarPath');
 

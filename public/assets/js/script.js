@@ -292,6 +292,7 @@ $(document).ready(function() {
 
     /* DEVOLVER TRAMITE */
     $(".devolver_correspondencia").on('click', function() {
+        $("#accion").val($(this).data('direccion'));
         $("#idtra").val($(this).data('idtra'));
         $("#hr").html($(this).data('hr'));
         $("#motivo_devolucion").val('');
@@ -300,6 +301,7 @@ $(document).ready(function() {
     $(".guardar-devolucion").on('click', function() {
         var validate = true;
         var idtra = $("#idtra").val();
+        var accion = $("#accion").val();
         var motivo_devolucion = $("#motivo_devolucion").val();
         var msj_error = '<p class="text-danger error">Este campo es obligatorio.</p>';
         if(!motivo_devolucion){
@@ -313,45 +315,7 @@ $(document).ready(function() {
             formData.append('id',idtra);
             formData.append('motivo_devolucion',motivo_devolucion);
             $.ajax({
-                url: '/garnet/cam/ajax_guardar_devolver',
-                type: 'post',
-                data: formData,
-                contentType: false,
-                processData: false,
-                dataType: 'json',
-                success: function(resultado) {
-                    if(resultado.idtra > 0){
-                        $('#hr'+resultado.idtra).remove();
-                        $('#devolver-modal').modal('toggle');
-                        $("#motivo_devolucion").val('');
-                        swal({
-                            title: "Se ha guardado correctamente la información.",
-                            type: "success",
-                        });
-                    }else{
-                        console.log(resultado);
-                    }
-                }
-            });
-        }
-    });
-    $(".guardar-devolucion-mineria-ilegal").on('click', function() {
-        var validate = true;
-        var idtra = $("#idtra").val();
-        var motivo_devolucion = $("#motivo_devolucion").val();
-        var msj_error = '<p class="text-danger error">Este campo es obligatorio.</p>';
-        if(!motivo_devolucion){
-            validate = false;
-            $("#error_motivo_devolucion").html(msj_error);
-        }else{
-            $("#error_motivo_devolucion").html('');
-        }
-        if(validate){
-            var formData = new FormData();
-            formData.append('id',idtra);
-            formData.append('motivo_devolucion',motivo_devolucion);
-            $.ajax({
-                url: '/garnet/mineria_ilegal/ajax_guardar_devolver',
+                url: accion,
                 type: 'post',
                 data: formData,
                 contentType: false,
@@ -552,7 +516,7 @@ $(document).ready(function() {
         $("#hoja_ruta").html($(this).data('hr'));
         $("#documento_externo").html($(this).data('de'));
         $("#fecha_ingreso").html($(this).data('fecha'));
-        $("#dias_pasados").html($(this).data('dias'));        
+        $("#dias_pasados").html($(this).data('dias'));
         $("#observacion_atencion").val('SIN OBSERVACIONES');
         $('#atender-correspondencia-externa-modal').modal('toggle');
     });

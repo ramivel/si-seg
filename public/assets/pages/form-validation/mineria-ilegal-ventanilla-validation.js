@@ -49,14 +49,6 @@ $(document).ready(function () {
         documento_digital: {
             presence: true,
         },
-        fk_usuario_destinatario:{
-            presence: {
-                message: "^Debe seleccionar el Destinatario."
-            },
-        },
-        instruccion: {
-            presence: true,
-        },
     };
 
     // Hook up the form so we can prevent it from being posted

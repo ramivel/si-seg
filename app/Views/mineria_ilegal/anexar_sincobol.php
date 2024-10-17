@@ -256,7 +256,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         <div class="form-group row d-none">
                             <div class="col-sm-10">
                                 <?= form_input(array('type'=>'hidden','name'=>'id_hoja_ruta','id'=>'id_hoja_ruta','value'=>set_value('id_hoja_ruta', (isset($id_hoja_ruta) ? $id_hoja_ruta : ''), false)));?>
@@ -319,7 +319,7 @@
                                     <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
                                 <?php }?>
                             </div>
-                        </div>                        
+                        </div>
                         <div class="form-group row">
                             <label class="col-sm-2"></label>
                             <div class="col-sm-4 text-left">

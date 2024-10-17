@@ -17,60 +17,15 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
-        id_hoja_ruta: {
+        id:{
             presence: true,
         },
-        id_derivacion: {
-            presence: true,
-        },
-        id_denuncia: {
-            presence: true,
-        },
-        denunciantes_anexados: {
+        "anexar_hr[]": {
             presence: {
-                message: "^Debe anexar a un denunciante al menos."
+                message: "^Debe seleccionar alguna Hoja de Ruta Interna/Externa del SINCOBOL que Anexará."
             },
         },
-        departamento:{
-            presence: {
-                message: "^Debe seleccionar un Departamento."
-            },
-        },
-        provincia:{
-            presence: {
-                message: "^Debe seleccionar una Provincia."
-            },
-        },
-        fk_municipio:{
-            presence: {
-                message: "^Debe seleccionar un Municipio."
-            },
-        },
-        comunidad_localidad: {
-            presence: true,
-        },
-        descripcion_lugar: {
-            presence: true,
-        },
-        fk_estado_tramite: {
-            presence: {
-                message: "^Debe seleccionar el Estado del Tramite."
-            },
-        },
-        fk_estado_tramite_hijo:{
-            presence: function(){
-                if($('#fk_estado_tramite').children('option:selected').data('padre') == 't')
-                    return true;
-                else
-                    return false;
-            }
-        },
-        fk_usuario_destinatario:{
-            presence: {
-                message: "^Debe seleccionar el Destinatario."
-            },
-        },
-        instruccion: {
+        motivo_anexo: {
             presence: true,
         },
     };
@@ -179,11 +134,11 @@ $(document).ready(function () {
     function showSuccess() {
         // We made it \:D/
         swal({
-            title: "Esta seguro de Guardar?",
+            title: "Esta seguro de ANEXAR?",
             //text: "You will not be able to recover this imaginary file!",
             type: "warning",
             showCancelButton: true,
-            confirmButtonText: "Si, Guardar!",
+            confirmButtonText: "Si, Anexar!",
             cancelButtonText: "No, Cancelar!",
             closeOnConfirm: false
         },
@@ -193,5 +148,4 @@ $(document).ready(function () {
             }
         });
     }
-
 });

@@ -28,9 +28,6 @@
                                     <li class="nav-item">
                                         <a class="nav-link " data-toggle="tab" href="#adjuntos" role="tab"><strong>Adjunto(s)</strong></a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#derivacion" role="tab"><strong>Derivación</strong></a>
-                                    </li>
                                 </ul>
                                 <!-- Tab panes -->
                                 <div class="tab-content tabs card-block">
@@ -378,45 +375,6 @@
                                                         <?php } ?>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tab-pane " id="derivacion" role="tabpanel">
-                                        <p><strong>Nota.</strong> En caso de la ventanilla única de la Oficina Nacional se debe remitir al Director(a) Ejecutivo Nacional, de ser una ventanilla de las Direcciones Departamentales o Regional se debe derivar al Director(a) de su Departamental o Regional.</p>
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Destinatario * :</label>
-                                            <div class="col-sm-10">
-                                                <?php $campo = 'fk_usuario_destinatario';?>
-                                                <select id="<?= $campo;?>" name="<?= $campo;?>" class="analista-destinatario-mineria-ilegal-ajax col-sm-12">
-                                                    <?php if(isset($usu_destinatario)){ ?>
-                                                        <option value="<?= $usu_destinatario['id'];?>"><?= $usu_destinatario['nombre'];?></option>
-                                                    <?php }else{ ?>
-                                                        <option value="">Escriba el Nombre o Cargo...</option>
-                                                    <?php } ?>
-                                                </select>
-                                                <span class="messages"></span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Instrucción * :</label>
-                                            <div class="col-sm-10">
-                                                <?php
-                                                    $campo = 'instruccion';
-                                                    echo form_textarea(array(
-                                                        'name' => $campo,
-                                                        'id' => $campo,
-                                                        'rows' => '3',
-                                                        'class' => 'form-control form-control-uppercase',
-                                                        'value' => set_value($campo,'',false)
-                                                    ));
-                                                ?>
-                                                <span class="messages"></span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
                                             </div>
                                         </div>
                                     </div>

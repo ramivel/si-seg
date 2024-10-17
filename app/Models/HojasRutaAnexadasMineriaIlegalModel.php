@@ -13,7 +13,7 @@ class HojasRutaAnexadasMineriaIlegalModel extends Model{
     protected $useSoftDeletes = true;
 
     protected $allowedFields = [
-        'fk_derivacion', 'fk_hoja_ruta', 'fk_hoja_ruta_sincobol', 'fk_usuario_creador', 'observaciones'
+        'fk_derivacion', 'fk_hoja_ruta', 'fk_hoja_ruta_sincobol', 'fk_usuario_creador', 'motivo_anexo'
     ];
 
     protected $useTimestamps = true;

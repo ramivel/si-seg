@@ -4,12 +4,47 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header text-center">
+                        <h3 class="mb-3"><?= $correlativo;?></h3>
+                        <table class="table table-bordered mb-0">
+                            <tbody>
+                                <tr>
+                                    <th class="text-nowrap text-right" width="200px" scope="row">Código Único:</th>
+                                    <td><?= $codigo_unico;?></td>
+                                    <th class="text-nowrap text-right" width="200px" scope="row">Denominación:</th>
+                                    <td><?= $denominacion;?></td>
+                                    <th class="text-nowrap text-right" width="200px" scope="row">Fecha Mecanizada:</th>
+                                    <td><?= $fecha_mecanizada;?></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th class="text-nowrap text-right" width="200px" scope="row">Responsable del Trámite:</th>
+                                    <td><?= $responsable_tramite;?></td>
+                                    <th class="text-nowrap text-right" width="200px" scope="row">Estado actual del Trámite:</th>
+                                    <td><?= $estado_actual_tramite;?></td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <h5>Formulario</h5>
                         <span>Los campos con <code>*</code> son obligatorios.</span>
                     </div>
                     <div class="card-block">
                         <?= form_open_multipart($accion, ['id'=>'formulario']);?>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'correlativo','value'=>set_value('correlativo', (isset($correlativo) ? $correlativo : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'fecha_mecanizada','value'=>set_value('fecha_mecanizada', (isset($fecha_mecanizada) ? $fecha_mecanizada : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
                         <div class="form-group row d-none">
                             <div class="col-sm-10">
                                 <?= form_input(array('type'=>'hidden','name'=>'id','id'=>'id_acto_administrativo','value'=>set_value('id', (isset($id) ? $id : ''), false)));?>
@@ -19,12 +54,6 @@
                         <div class="form-group row d-none">
                             <div class="col-sm-10">
                                 <?= form_hidden('fk_hoja_ruta_solicitud', set_value('fk_hoja_ruta_solicitud', (isset($fila['fk_hoja_ruta']) ? $fila['fk_hoja_ruta'] : ''), false));?>
-                                <span class="messages"></span>
-                            </div>
-                        </div>
-                        <div class="form-group row d-none">
-                            <div class="col-sm-10">
-                                <?= form_hidden('fk_tipo_hoja_ruta', set_value('fk_tipo_hoja_ruta', (isset($fila['fk_tipo_hoja_ruta']) ? $fila['fk_tipo_hoja_ruta'] : ''), false));?>
                                 <span class="messages"></span>
                             </div>
                         </div>
@@ -46,25 +75,16 @@
                                 <span class="messages"></span>
                             </div>
                         </div>
-                        <div class="form-group row d-none">
-                            <div class="col-sm-10">
-                                <?= form_input(array('type'=>'hidden','name'=>'id_hojas_ruta_anexadas_ant','id'=>'id_hojas_ruta_anexadas_ant','value'=>set_value('id_hojas_ruta_anexadas_ant', (isset($id_hojas_ruta_anexadas_ant) ? $id_hojas_ruta_anexadas_ant : ''), false)));?>
-                                <span class="messages"></span>
-                            </div>
-                        </div>
                         <!-- Row start -->
                         <div class="row">
                             <div class="col-lg-12 col-xl-12">
                                 <!-- Nav tabs -->
                                 <ul class="nav nav-tabs  tabs" role="tablist">
                                     <li class="nav-item">
-                                        <a class="nav-link active" data-toggle="tab" href="#hoja_ruta" role="tab"><strong>Hoja de Ruta Madre</strong></a>
+                                        <a class="nav-link active" data-toggle="tab" href="#apm" role="tab"><strong>Actor Productivo Minero</strong></a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#apm" role="tab"><strong>Actor Productivo Minero</strong></a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link " data-toggle="tab" href="#acto_administrativo" role="tab"><strong>Estado del Trámite</strong></a>
+                                        <a class="nav-link " data-toggle="tab" href="#acto_administrativo" role="tab"><strong>Estado del Trámite y Documento(s) Generado(s)</strong></a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" data-toggle="tab" href="#derivacion" role="tab"><strong>Derivación del Tramite</strong></a>
@@ -72,52 +92,7 @@
                                 </ul>
                                 <!-- Tab panes -->
                                 <div class="tab-content tabs card-block">
-                                    <div class="tab-pane active" id="hoja_ruta" role="tabpanel">
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Hoja de Ruta Madre:</label>
-                                            <div class="col-sm-5">
-                                                <?php
-                                                    $campo = 'correlativo';
-                                                    echo form_input(array(
-                                                        'name' => $campo,
-                                                        'id' => $campo,
-                                                        'class' => 'form-control',
-                                                        'readonly' => true,
-                                                        'value' => set_value($campo, (isset($fila[$campo]) ? $fila[$campo] : ''),false)
-                                                    ));
-                                                ?>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-sm-1 col-form-label">Referencia:</label>
-                                            <div class="col-sm-7">
-                                                <?php
-                                                    $campo = 'referencia';
-                                                    echo form_input(array(
-                                                        'name' => $campo,
-                                                        'id' => $campo,
-                                                        'class' => 'form-control',
-                                                        'readonly' => true,
-                                                        'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''), false)
-                                                    ));
-                                                ?>
-                                            </div>
-                                            <label class="col-sm-2 col-form-label">Fecha Mecanizada:</label>
-                                            <div class="col-sm-2">
-                                                <?php
-                                                    $campo = 'fecha_mecanizada';
-                                                    echo form_input(array(
-                                                        'name' => $campo,
-                                                        'id' => $campo,
-                                                        'class' => 'form-control',
-                                                        'readonly' => true,
-                                                        'value' => set_value($campo, (isset($datos[$campo]) ? $datos[$campo] : ''),false)
-                                                    ));
-                                                ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tab-pane" id="apm" role="tabpanel">
+                                    <div class="tab-pane active" id="apm" role="tabpanel">
                                         <div class="form-group row">
                                             <label class="col-sm-2 col-form-label">Código Único:</label>
                                             <div class="col-sm-3">
@@ -232,51 +207,26 @@
                                                 </div>
                                             </div>
                                         <?php }?>
-
                                         <?php $campo = 'area_protegida_adicional';?>
-                                        <?php if(in_array(9, session()->get('registroPermisos'))){ ?>
-                                            <div class="form-group row">
-                                                <label class="col-sm-2 col-form-label">Restricción(es) Adicional(es):</label>
-                                                <div class="col-sm-10">
-                                                    <?php
-                                                        $campo = 'area_protegida_adicional';
-                                                        echo form_textarea(array(
-                                                            'name' => $campo,
-                                                            'id' => $campo,
-                                                            'rows' => '2',
-                                                            'class' => 'form-control form-control-uppercase',
-                                                            'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
-                                                        ));
-                                                    ?>
-                                                    <span class="messages"></span>
-                                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                    <?php }?>
-                                                </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-2 col-form-label">Restricción(es) Adicional(es):</label>
+                                            <div class="col-sm-10">
+                                                <?php
+                                                    $campo = 'area_protegida_adicional';
+                                                    echo form_textarea(array(
+                                                        'name' => $campo,
+                                                        'id' => $campo,
+                                                        'rows' => '2',
+                                                        'class' => 'form-control form-control-uppercase',
+                                                        'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
+                                                    ));
+                                                ?>
+                                                <span class="messages"></span>
+                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                <?php }?>
                                             </div>
-                                        <?php }elseif(isset($fila[$campo]) && !empty($fila[$campo])){?>
-                                            <div class="form-group row">
-                                                <label class="col-sm-2 col-form-label">Restricción(es) Adicional(es):</label>
-                                                <div class="col-sm-10">
-                                                    <?php
-                                                        $campo = 'area_protegida_adicional';
-                                                        echo form_textarea(array(
-                                                            'name' => $campo,
-                                                            'id' => $campo,
-                                                            'rows' => '2',
-                                                            'readonly' => true,
-                                                            'class' => 'form-control form-control-uppercase',
-                                                            'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
-                                                        ));
-                                                    ?>
-                                                    <span class="messages"></span>
-                                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                    <?php }?>
-                                                </div>
-                                            </div>
-                                        <?php }?>
-
+                                        </div>
                                         <div class="row">
                                             <div class="col-sm-12 col-md-8">
                                                 <div class="form-group row">
@@ -284,22 +234,12 @@
                                                     <div class="col-sm-9">
                                                         <?php
                                                             $campo = 'representante_legal';
-                                                            if($fk_tipo_hoja_ruta == 1){
-                                                                echo form_input(array(
-                                                                    'name' => $campo,
-                                                                    'id' => $campo,
-                                                                    'class' => 'form-control form-control-uppercase',
-                                                                    'readonly' => true,
-                                                                    'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
-                                                                ));
-                                                            }else{
-                                                                echo form_input(array(
-                                                                    'name' => $campo,
-                                                                    'id' => $campo,
-                                                                    'class' => 'form-control form-control-uppercase',
-                                                                    'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
-                                                                ));
-                                                            }
+                                                            echo form_input(array(
+                                                                'name' => $campo,
+                                                                'id' => $campo,
+                                                                'class' => 'form-control form-control-uppercase',
+                                                                'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
+                                                            ));
                                                         ?>
                                                         <span class="messages"></span>
                                                         <?php if(isset($validation) && $validation->hasError($campo)){?>
@@ -314,22 +254,12 @@
                                                     <div class="col-sm-8">
                                                         <?php
                                                             $campo = 'nacionalidad';
-                                                            if($fk_tipo_hoja_ruta == 1){
-                                                                echo form_input(array(
-                                                                    'name' => $campo,
-                                                                    'id' => $campo,
-                                                                    'class' => 'form-control form-control-uppercase',
-                                                                    'readonly' => true,
-                                                                    'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
-                                                                ));
-                                                            }else{
-                                                                echo form_input(array(
-                                                                    'name' => $campo,
-                                                                    'id' => $campo,
-                                                                    'class' => 'form-control form-control-uppercase',
-                                                                    'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
-                                                                ));
-                                                            }
+                                                            echo form_input(array(
+                                                                'name' => $campo,
+                                                                'id' => $campo,
+                                                                'class' => 'form-control form-control-uppercase',
+                                                                'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
+                                                            ));
                                                         ?>
                                                         <span class="messages"></span>
                                                         <?php if(isset($validation) && $validation->hasError($campo)){?>
@@ -368,7 +298,7 @@
                                             </div>
                                         </div>
                                         <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Domicilio Legal:</label>
+                                            <label class="col-sm-2 col-form-label">Domicilio Legal*:</label>
                                             <div class="col-sm-10">
                                                 <?php
                                                     $campo = 'domicilio_legal';
@@ -502,9 +432,28 @@
                                                 <?php }?>
                                             </div>
                                         </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-2 col-form-label">Observaciones:</label>
+                                            <div class="col-sm-10">
+                                                <?php
+                                                    $campo = 'observaciones';
+                                                    echo form_textarea(array(
+                                                        'name' => $campo,
+                                                        'id' => $campo,
+                                                        'rows' => '3',
+                                                        'class' => 'form-control form-control-uppercase',
+                                                        'value' => set_value($campo,(isset($derivacion[$campo]) ? $derivacion[$campo] : ''), false)
+                                                    ));
+                                                ?>
+                                                <span class="messages"></span>
+                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                <?php }?>
+                                            </div>
+                                        </div>
                                         <?php if(count($documentos)>0){?>
+                                            <h4 class="sub-title mt-2 mb-2">DOCUMENTO(S) GENERADO(S)</h4>
                                             <div class="form-group row">
-                                                <label class="col-sm-12 col-form-label">Documento(s) Generado(s) : </label>
                                                 <div class="col-sm-12">
                                                     <table id="tabla_documentos" class="table table-bordered">
                                                         <thead>
@@ -547,26 +496,7 @@
                                                     </table>
                                                 </div>
                                             </div>
-                                        <?php }?>                                        
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Observaciones*:</label>
-                                            <div class="col-sm-10">
-                                                <?php
-                                                    $campo = 'observaciones';
-                                                    echo form_textarea(array(
-                                                        'name' => $campo,
-                                                        'id' => $campo,
-                                                        'rows' => '3',
-                                                        'class' => 'form-control form-control-uppercase',
-                                                        'value' => set_value($campo,(isset($derivacion[$campo]) ? $derivacion[$campo] : ''), false)
-                                                    ));
-                                                ?>
-                                                <span class="messages"></span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
-                                            </div>
-                                        </div>
+                                        <?php }?>
                                     </div>
                                     <div class="tab-pane" id="derivacion" role="tabpanel">
                                         <div class="form-group row">
@@ -610,50 +540,6 @@
                                             <div class="col-sm-10">
                                                 <?php
                                                     $campo = 'instruccion';
-                                                    echo form_textarea(array(
-                                                        'name' => $campo,
-                                                        'id' => $campo,
-                                                        'rows' => '3',
-                                                        'class' => 'form-control form-control-uppercase',
-                                                        'value' => set_value($campo,(isset($derivacion[$campo]) ? $derivacion[$campo] : ''),false)
-                                                    ));
-                                                ?>
-                                                <span class="messages"></span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Anexar H.R. SINCOBOL <span class="mytooltip tooltip-effect-5">
-                                                <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
-                                                <span class="tooltip-content clearfix">
-                                                    <span class="tooltip-text">Debe escribir el(los) correlativo(s) de la Hoja de Ruta Interna o Externa que desea anexar al Tramite.</span>
-                                                </span>
-                                            </span> : </label>
-                                            <div class="col-sm-10">
-                                                <?php $campo = 'anexar_hr';?>
-                                                <select id="<?= $campo;?>" name="<?= $campo;?>[]" data-controlador="<?= $controlador;?>" class="hr-in-ex-mejorado-ajax col-sm-12" multiple="multiple">
-                                                    <?php if(isset($hojas_ruta_anexadas)){ ?>
-                                                        <?php foreach($hojas_ruta_anexadas as $hoja_ruta_anexada){?>
-                                                            <option value="<?= $hoja_ruta_anexada['id'];?>" selected><?= $hoja_ruta_anexada['nombre'];?></option>
-                                                        <?php }?>
-                                                    <?php }else{ ?>
-                                                        <option value="">Escriba el correlativo de la Hoja de Ruta Interna o Externa...</option>
-                                                    <?php } ?>
-                                                </select>
-                                                <span class="messages"></span>
-                                                <span class="form-bar"><b>Nota.</b> La(s) H.R. no deben estar archivadas o anexadas en el SINCOBOL caso contrario no aparecera para su selección.</span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Motivo de Anexar:</label>
-                                            <div class="col-sm-10">
-                                                <?php
-                                                    $campo = 'motivo_anexo';
                                                     echo form_textarea(array(
                                                         'name' => $campo,
                                                         'id' => $campo,

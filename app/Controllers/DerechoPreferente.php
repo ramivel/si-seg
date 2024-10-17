@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Libraries\HojaRutaPdf;
 use App\Models\CorrelativosDerechoPreferenteModel;
+use App\Models\DocumentosModel;
 use App\Models\OficinasModel;
 use App\Models\PersonaExternaModel;
 use App\Models\SolicitudDatosAreaMineraModel;
@@ -73,7 +74,7 @@ class DerechoPreferente extends BaseController
         ->join('cam_dp.solicitud_documento_externo as sde', 'sdp.id = sde.fk_solicitud_derecho_preferente', 'left')
         ->join('public.persona_externa AS pe', 'sde.fk_persona_externa = pe.id', 'left')
         ->where($where)
-        ->whereIn('sdp.ultimo_estado',array('DERIVADO'))
+        ->whereIn('sdp.ultimo_estado',array('DERIVADO','DEVUELTO'))
         ->orderBY('sdp.id', 'ASC');
         $datos = $builder->get()->getResult('array');
 
@@ -101,8 +102,112 @@ class DerechoPreferente extends BaseController
         echo view('templates/template', $data);
     }
 
-    public function agregarVentanilla(){
+    public function listadoRecepcion()
+    {
+        $db = \Config\Database::connect();
+        $campos = array(
+            "sdp.id", "to_char(sdp.ultimo_fecha_derivacion, 'DD/MM/YYYY') as fecha_derivacion", "(CURRENT_DATE - sdp.ultimo_fecha_derivacion::date) as dias", "sdp.correlativo",
+            "CONCAT(urem.nombre_completo,'<br><b>',prem.nombre,'<b>') as remitente", "sdp.ultimo_instruccion",
+            "CONCAT('CITE: ',sde.cite,'<br>Fecha: ',to_char(sde.fecha_cite, 'DD/MM/YYYY'),'<br>Remitente: ',CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')'),'<br>Referencia: ',sde.referencia) as documento_externo",
+            "sde.doc_digital",
+        );
+        $where = array(
+            'sdp.deleted_at' => NULL,
+            'sdp.ultimo_fk_usuario_destinatario' => session()->get('registroUser'),
+        );
+        $builder = $db->table('cam_dp.solicitud_derecho_preferente as sdp')
+        ->select($campos)
+        ->join('usuarios as urem', 'sdp.ultimo_fk_usuario_remitente = urem.id', 'left')
+        ->join('perfiles as prem', 'urem.fk_perfil = prem.id', 'left')
+        ->join('usuarios as udes', 'sdp.ultimo_fk_usuario_destinatario = udes.id', 'left')
+        ->join('perfiles as pdes', 'udes.fk_perfil = pdes.id', 'left')
+        ->join('cam_dp.solicitud_documento_externo as sde', 'sdp.id = sde.fk_solicitud_derecho_preferente', 'left')
+        ->join('public.persona_externa AS pe', 'sde.fk_persona_externa = pe.id', 'left')
+        ->where($where)
+        ->whereIn('sdp.ultimo_estado',array('DERIVADO'))
+        ->orderBY('sdp.id', 'DESC');
+        $datos = $builder->get()->getResult('array');
 
+        //$datos = $this->obtenerUltimosDocumentos($builder->get()->getResult('array'));
+        //$datos = $this->obtenerCorrespondenciaExterna($datos);
+        $campos_listar=array(
+            'Fecha', 'Días<br>Pasados', 'Hoja de Ruta', 'Remitente', 'Instrucción', 'Documento Externo','Doc. Digital',
+        );
+        $campos_reales=array(
+            'fecha_derivacion','dias', 'correlativo', 'remitente', 'ultimo_instruccion', 'documento_externo', 'doc_digital'
+        );
+
+        $cabera['titulo'] = $this->titulo;
+        $cabera['navegador'] = true;
+        $cabera['subtitulo'] = 'Listado de Tramites Derivados';
+        $contenido['title'] = view('templates/title',$cabera);
+        $contenido['datos'] = $datos;
+        $contenido['campos_listar'] = $campos_listar;
+        $contenido['campos_reales'] = $campos_reales;
+        $contenido['subtitulo'] = 'Listado de Tramites Derivados';
+        $contenido['controlador'] = $this->controlador;
+        $contenido['id_tramite'] = $this->idTramite;
+        $data['content'] = view($this->carpeta.'listado_recepcion', $contenido);
+        $data['menu_actual'] = $this->menuActual.'listado_recepcion';
+        $data['tramites_menu'] = $this->tramitesMenu();
+        $data['alertas'] = $this->alertasTramites();
+        echo view('templates/template', $data);
+    }
+
+    public function misTramites()
+    {
+        $db = \Config\Database::connect();
+        $campos = array(
+            "sdp.id", "sdp.ultimo_estado", "to_char(sdp.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultimo_fecha_derivacion", "(CURRENT_DATE - sdp.ultimo_fecha_derivacion::date) as dias", "sdp.correlativo",
+            "CONCAT(urem.nombre_completo,'<br><b>',prem.nombre,'<b>') as remitente", "CONCAT(udes.nombre_completo,'<br><b>',pdes.nombre,'<b>') as destinatario", "sdp.ultimo_instruccion",
+            "CONCAT(ures.nombre_completo,'<br><b>',pres.nombre,'<b>') as responsable",
+            "CONCAT('CITE: ',sde.cite,'<br>Fecha: ',to_char(sde.fecha_cite, 'DD/MM/YYYY'),'<br>Remitente: ',CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')'),'<br>Referencia: ',sde.referencia) as documento_externo",
+            "sde.doc_digital", "sdp.editar", "'NO' as finalizar",
+        );
+        $where = array(
+            'sdp.deleted_at' => NULL,
+            'sdp.fk_usuario_actual' => session()->get('registroUser'),
+        );
+        $builder = $db->table('cam_dp.solicitud_derecho_preferente as sdp')
+        ->select($campos)
+        ->join('usuarios as urem', 'sdp.ultimo_fk_usuario_remitente = urem.id', 'left')
+        ->join('perfiles as prem', 'urem.fk_perfil = prem.id', 'left')
+        ->join('usuarios as udes', 'sdp.ultimo_fk_usuario_destinatario = udes.id', 'left')
+        ->join('perfiles as pdes', 'udes.fk_perfil = pdes.id', 'left')
+        ->join('usuarios as ures', 'sdp.ultimo_fk_usuario_responsable = ures.id', 'left')
+        ->join('perfiles as pres', 'ures.fk_perfil = pres.id', 'left')
+        ->join('cam_dp.solicitud_documento_externo as sde', 'sdp.id = sde.fk_solicitud_derecho_preferente', 'left')
+        ->join('public.persona_externa AS pe', 'sde.fk_persona_externa = pe.id', 'left')
+        ->where($where)
+        ->whereIn('sdp.ultimo_estado',array('MIGRADO', 'DERIVADO', 'RECIBIDO', 'EN ESPERA', 'DEVUELTO'))
+        ->orderBY('sdp.id', 'DESC');
+        $datos = $builder->get()->getResult('array');
+
+        $campos_listar=array(
+            'Estado','Fecha','Días<br>Pasados','Hoja de Ruta', 'Remitente', 'Destinatario', 'Responsable Trámite', 'Instrucción', 'Documento Externo','Doc. Digital',
+        );
+        $campos_reales=array(
+            'ultimo_estado','ultimo_fecha_derivacion','dias','correlativo', 'remitente', 'destinatario', 'responsable', 'ultimo_instruccion', 'documento_externo', 'doc_digital',
+        );
+
+        $cabera['titulo'] = $this->titulo;
+        $cabera['navegador'] = true;
+        $cabera['subtitulo'] = 'Listado de Mis Hojas de Rutas';
+        $contenido['title'] = view('templates/title',$cabera);
+        $contenido['datos'] = $datos;
+        $contenido['campos_listar'] = $campos_listar;
+        $contenido['campos_reales'] = $campos_reales;
+        $contenido['subtitulo'] = 'Listado de Mis Hojas de Rutas';
+        $contenido['controlador'] = $this->controlador;
+        $contenido['id_tramite'] = $this->idTramite;
+        $data['content'] = view($this->carpeta.'index', $contenido);
+        $data['menu_actual'] = $this->menuActual.'mis_tramites';
+        $data['tramites_menu'] = $this->tramitesMenu();
+        $data['alertas'] = $this->alertasTramites();
+        echo view('templates/template', $data);
+    }
+
+    public function agregarVentanilla(){
         if ($this->request->getPost()) {
             $id_areas_mineras = $this->request->getPost('id_areas_mineras');
             $extensiones = $this->request->getPost('extensiones');
@@ -266,6 +371,521 @@ class DerechoPreferente extends BaseController
         $data['tramites_menu'] = $this->tramitesMenu();
         //$data['validacion_js'] = 'derecho-preferente-agregar-ventanilla.js';
         echo view('templates/template', $data);
+    }
+
+    public function atender($id){
+        $db = \Config\Database::connect();
+        $campos = array(
+            'sdp.id','sdp.correlativo',"to_char(sdp.created_at, 'DD/MM/YYYY HH24:MI') as fecha_solicitud","sde.cite","to_char(fecha_cite, 'DD/MM/YYYY') as fecha_cite",
+            "sde.doc_digital", "CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')') as remitente", "sde.referencia", "CONCAT(ures.nombre_completo,' - ',pres.nombre) as usuario_responsable",
+            "sdp.ultimo_fk_usuario_responsable"
+        );
+        $where = array(
+            'sdp.deleted_at' => NULL,
+            'sdp.fk_usuario_actual' => session()->get('registroUser'),
+            'sdp.id' => $id
+        );
+        $builder = $db->table('cam_dp.solicitud_derecho_preferente as sdp')
+        ->select($campos)
+        ->join('cam_dp.solicitud_documento_externo as sde', 'sdp.id = sde.fk_solicitud_derecho_preferente', 'left')
+        ->join('public.persona_externa AS pe', 'sde.fk_persona_externa = pe.id', 'left')
+        ->join('usuarios as ures', 'sdp.ultimo_fk_usuario_responsable = ures.id', 'left')
+        ->join('perfiles as pres', 'ures.fk_perfil = pres.id', 'left')
+        ->where($where);
+        if($fila = $builder->get()->getRowArray()){
+            $solicitudDerivacionModel = new SolicitudDerivacionModel();
+            $solicitudDatosAreaMineraModel = new SolicitudDatosAreaMineraModel();
+            $where = array(
+                'fk_solicitud_derecho_preferente' => $fila['id']
+            );
+            $ultima_derivacion = $solicitudDerivacionModel->where($where)->orderBy('id', 'DESC')->first();
+            $areas_mineras = $solicitudDatosAreaMineraModel->where($where)->findAll();            
+
+            $cabera['titulo'] = $this->titulo;
+            $cabera['navegador'] = true;
+            $cabera['subtitulo'] = 'Atender Tramite';
+            $contenido['title'] = view('templates/title',$cabera);
+            $contenido['fila'] = $fila;
+            $contenido['ultima_derivacion'] = $ultima_derivacion;
+            $contenido['areas_mineras'] = $areas_mineras;
+            $contenido['documentos'] = $this->obtenerDocumentosAtender($fila['id']);
+            $contenido['subtitulo'] = 'Atender Tramite';
+            $contenido['accion'] = $this->controlador.'guardar_atender';
+            $contenido['controlador'] = $this->controlador;
+            $data['content'] = view($this->carpeta.'atender', $contenido);
+            $data['menu_actual'] = $this->menuActual.'mis_tramites';
+            $data['tramites_menu'] = $this->tramitesMenu();
+            $data['alertas'] = $this->alertasTramites();
+            $data['validacion_js'] = 'derecho-preferente-atender-validation.js';
+            echo view('templates/template', $data);
+        }else{
+            session()->setFlashdata('fail', 'El registro no existe.');
+            return redirect()->to($this->controlador);
+        }
+    }
+    public function guardarAtender(){
+        if ($this->request->getPost()) {
+            $db = \Config\Database::connect();
+            $solicitudDerechoPreferenteModel = new SolicitudDerechoPreferenteModel();
+            $solicitudDatosAreaMineraModel = new SolicitudDatosAreaMineraModel();
+            $solicitudDerivacionModel = new SolicitudDerivacionModel();
+            $id = $this->request->getPost('id');
+            $validation = $this->validate([
+                'id' => [
+                    'rules' => 'required',
+                ],
+                'id_derivacion' => [
+                    'rules' => 'required',
+                ],
+                'ultimo_fk_usuario_responsable' => [
+                    'rules' => 'required',
+                ],
+                'fk_usuario_destinatario' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'Debe seleccionar el Destinatario.'
+                    ]
+                ],
+                'instruccion' => [
+                    'rules' => 'required',
+                ],
+            ]);
+            if(!$validation){
+                $campos = array(
+                    'sdp.id','sdp.correlativo',"to_char(sdp.created_at, 'DD/MM/YYYY HH24:MI') as fecha_solicitud","sde.cite","to_char(fecha_cite, 'DD/MM/YYYY') as fecha_cite",
+                    "sde.doc_digital", "CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')') as remitente", "sde.referencia", "CONCAT(ures.nombre_completo,' - ',pres.nombre) as usuario_responsable",
+                    "sdp.ultimo_fk_usuario_responsable"
+                );
+                $where = array(
+                    'sdp.deleted_at' => NULL,
+                    'sdp.fk_usuario_actual' => session()->get('registroUser'),
+                    'sdp.id' => $id
+                );
+                $builder = $db->table('cam_dp.solicitud_derecho_preferente as sdp')
+                ->select($campos)
+                ->join('cam_dp.solicitud_documento_externo as sde', 'sdp.id = sde.fk_solicitud_derecho_preferente', 'left')
+                ->join('public.persona_externa AS pe', 'sde.fk_persona_externa = pe.id', 'left')
+                ->join('usuarios as ures', 'sdp.ultimo_fk_usuario_responsable = ures.id', 'left')
+                ->join('perfiles as pres', 'ures.fk_perfil = pres.id', 'left')
+                ->where($where);
+                $fila = $builder->get()->getRowArray();
+                $where = array(
+                    'fk_solicitud_derecho_preferente' => $fila['id']
+                );
+                $areas_mineras = $solicitudDatosAreaMineraModel->where($where)->findAll();
+
+                $cabera['titulo'] = $this->titulo;
+                $cabera['navegador'] = true;
+                $cabera['subtitulo'] = 'Atender Tramite';
+                $contenido['fila'] = $fila;
+                $contenido['areas_mineras'] = $areas_mineras;
+                $contenido['usu_destinatario'] = $this->obtenerUsuario($this->request->getPost('fk_usuario_destinatario'));
+                $contenido['title'] = view('templates/title',$cabera);
+                $contenido['subtitulo'] = 'Atender Tramite';
+                $contenido['accion'] = $this->controlador.'guardar_atender';
+                $contenido['validation'] = $this->validator;
+                $contenido['controlador'] = $this->controlador;
+                $data['content'] = view($this->carpeta.'atender', $contenido);
+                $data['menu_actual'] = $this->menuActual.'mis_tramites';
+                $data['tramites_menu'] = $this->tramitesMenu();
+                $data['alertas'] = $this->alertasTramites();
+                $data['validacion_js'] = 'derecho-preferente-atender-validation.js';
+                echo view('templates/template', $data);
+            }else{
+                $estado = 'DERIVADO';
+                $dataDerechoPreferente = array(
+                    'id' => $id,
+                    'ultimo_estado' => $estado,
+                    'ultimo_fecha_derivacion' => date('Y-m-d H:i:s'),
+                    'ultimo_instruccion' => mb_strtoupper($this->request->getPost('instruccion')),
+                    'ultimo_fk_usuario_remitente' => session()->get('registroUser'),
+                    'ultimo_fk_usuario_destinatario' => $this->request->getPost('fk_usuario_destinatario'),
+                    'ultimo_fk_usuario_responsable'=>($this->request->getPost('responsable') ? $this->request->getPost('fk_usuario_destinatario') : $this->request->getPost('ultimo_fk_usuario_responsable')),
+                    'editar' => 'true',
+                );
+                if($solicitudDerechoPreferenteModel->save($dataDerechoPreferente) === false){
+                    session()->setFlashdata('fail', $solicitudDerechoPreferenteModel->errors());
+                }else{
+                    $dataDerivacion = array(
+                        'fk_solicitud_derecho_preferente' => $id,
+                        'fk_estado_tramite_padre' => 0,
+                        'instruccion' => mb_strtoupper($this->request->getPost('instruccion')),
+                        'estado' => $estado,
+                        'fk_usuario_responsable' => ($this->request->getPost('responsable') ? $this->request->getPost('fk_usuario_destinatario') : $this->request->getPost('ultimo_fk_usuario_responsable')),
+                        'fk_usuario_remitente' => session()->get('registroUser'),
+                        'fk_usuario_destinatario' => $this->request->getPost('fk_usuario_destinatario'),
+                        'fk_usuario_creador' => session()->get('registroUser'),
+                    );
+                    if($solicitudDerivacionModel->insert($dataDerivacion) === false){
+                        session()->setFlashdata('fail', $solicitudDerivacionModel->errors());
+                    }else{
+                        $dataDerivacionActualizacion = array(
+                            'id' => $this->request->getPost('id_derivacion'),
+                            'estado' => 'ATENDIDO',
+                            'fecha_atencion' => date('Y-m-d H:i:s'),
+                        );
+                        if($solicitudDerivacionModel->save($dataDerivacionActualizacion) === false)
+                            session()->setFlashdata('fail', $solicitudDerivacionModel->errors());
+                        else
+                            session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información.');
+                    }
+                }
+                return redirect()->to($this->controlador.'mis_tramites');
+            }
+        }
+    }
+    public function editar($id){
+        $db = \Config\Database::connect();
+        $campos = array(
+            'sdp.id','sdp.correlativo',"to_char(sdp.created_at, 'DD/MM/YYYY HH24:MI') as fecha_solicitud","sde.cite","to_char(fecha_cite, 'DD/MM/YYYY') as fecha_cite",
+            "sde.doc_digital", "CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')') as remitente", "sde.referencia", "CONCAT(ures.nombre_completo,' - ',pres.nombre) as usuario_responsable",
+            "sdp.ultimo_fk_usuario_responsable"
+        );
+        $where = array(
+            'sdp.deleted_at' => NULL,
+            'sdp.fk_usuario_actual' => session()->get('registroUser'),
+            'sdp.id' => $id,
+            'sdp.editar' => TRUE,
+        );
+        $builder = $db->table('cam_dp.solicitud_derecho_preferente as sdp')
+        ->select($campos)
+        ->join('cam_dp.solicitud_documento_externo as sde', 'sdp.id = sde.fk_solicitud_derecho_preferente', 'left')
+        ->join('public.persona_externa AS pe', 'sde.fk_persona_externa = pe.id', 'left')
+        ->join('usuarios as ures', 'sdp.ultimo_fk_usuario_responsable = ures.id', 'left')
+        ->join('perfiles as pres', 'ures.fk_perfil = pres.id', 'left')
+        ->where($where);
+        if($fila = $builder->get()->getRowArray()){
+            $solicitudDerivacionModel = new SolicitudDerivacionModel();
+            $solicitudDatosAreaMineraModel = new SolicitudDatosAreaMineraModel();
+            $where = array(
+                'fk_solicitud_derecho_preferente' => $fila['id']
+            );
+            $derivacion = $solicitudDerivacionModel->where($where)->orderBy('id', 'DESC')->first();
+            $areas_mineras = $solicitudDatosAreaMineraModel->where($where)->findAll();
+
+            $cabera['titulo'] = $this->titulo;
+            $cabera['navegador'] = true;
+            $cabera['subtitulo'] = 'Editar Derivación';
+            $contenido['title'] = view('templates/title',$cabera);
+            $contenido['fila'] = $fila;
+            $contenido['derivacion'] = $derivacion;
+            $contenido['areas_mineras'] = $areas_mineras;
+            $contenido['usu_destinatario'] = $this->obtenerUsuario($derivacion['fk_usuario_destinatario']);
+            $contenido['subtitulo'] = 'Editar Derivación';
+            $contenido['accion'] = $this->controlador.'guardar_editar';
+            $contenido['controlador'] = $this->controlador;
+            $data['content'] = view($this->carpeta.'editar', $contenido);
+            $data['menu_actual'] = $this->menuActual.'mis_tramites';
+            $data['tramites_menu'] = $this->tramitesMenu();
+            $data['alertas'] = $this->alertasTramites();
+            $data['validacion_js'] = 'derecho-preferente-editar-validation.js';
+            echo view('templates/template', $data);
+        }else{
+            session()->setFlashdata('fail', 'El registro no existe.');
+            return redirect()->to($this->controlador);
+        }
+    }
+    public function guardarEditar(){
+        if ($this->request->getPost()) {
+            $db = \Config\Database::connect();
+            $solicitudDerechoPreferenteModel = new SolicitudDerechoPreferenteModel();
+            $solicitudDatosAreaMineraModel = new SolicitudDatosAreaMineraModel();
+            $solicitudDerivacionModel = new SolicitudDerivacionModel();
+            $id = $this->request->getPost('id');
+            $id_derivacion = $this->request->getPost('id_derivacion');
+            $validation = $this->validate([
+                'id' => [
+                    'rules' => 'required',
+                ],
+                'id_derivacion' => [
+                    'rules' => 'required',
+                ],
+                'fk_usuario_destinatario' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'Debe seleccionar el Destinatario.'
+                    ]
+                ],
+                'ultimo_fk_usuario_responsable' => [
+                    'rules' => 'required',
+                ],
+                'instruccion' => [
+                    'rules' => 'required',
+                ],
+            ]);
+            if(!$validation){
+                $campos = array(
+                    'sdp.id','sdp.correlativo',"to_char(sdp.created_at, 'DD/MM/YYYY HH24:MI') as fecha_solicitud","sde.cite","to_char(fecha_cite, 'DD/MM/YYYY') as fecha_cite",
+                    "sde.doc_digital", "CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')') as remitente", "sde.referencia", "CONCAT(ures.nombre_completo,' - ',pres.nombre) as usuario_responsable",
+                    "sdp.ultimo_fk_usuario_responsable"
+                );
+                $where = array(
+                    'sdp.deleted_at' => NULL,
+                    'sdp.fk_usuario_actual' => session()->get('registroUser'),
+                    'sdp.id' => $id,
+                    'sdp.editar' => TRUE,
+                );
+                $builder = $db->table('cam_dp.solicitud_derecho_preferente as sdp')
+                ->select($campos)
+                ->join('cam_dp.solicitud_documento_externo as sde', 'sdp.id = sde.fk_solicitud_derecho_preferente', 'left')
+                ->join('public.persona_externa AS pe', 'sde.fk_persona_externa = pe.id', 'left')
+                ->join('usuarios as ures', 'sdp.ultimo_fk_usuario_responsable = ures.id', 'left')
+                ->join('perfiles as pres', 'ures.fk_perfil = pres.id', 'left')
+                ->where($where);
+                $fila = $builder->get()->getRowArray();
+                $where = array(
+                    'fk_solicitud_derecho_preferente' => $fila['id']
+                );
+                $areas_mineras = $solicitudDatosAreaMineraModel->where($where)->findAll();
+
+                $cabera['titulo'] = $this->titulo;
+                $cabera['navegador'] = true;
+                $cabera['subtitulo'] = 'Editar Derivación';
+                $contenido['fila'] = $fila;
+                $contenido['areas_mineras'] = $areas_mineras;
+                $contenido['usu_destinatario'] = $this->obtenerUsuario($this->request->getPost('fk_usuario_destinatario'));
+                $contenido['title'] = view('templates/title',$cabera);
+                $contenido['subtitulo'] = 'Editar Derivación';
+                $contenido['accion'] = $this->controlador.'guardar_editar';
+                $contenido['validation'] = $this->validator;
+                $contenido['controlador'] = $this->controlador;
+                $data['content'] = view($this->carpeta.'editar', $contenido);
+                $data['menu_actual'] = $this->menuActual.'mis_tramites';
+                $data['tramites_menu'] = $this->tramitesMenu();
+                $data['alertas'] = $this->alertasTramites();
+                $data['validacion_js'] = 'derecho-preferente-editar-validation.js';
+                echo view('templates/template', $data);
+            }else{
+                $dataDerechoPreferente = array(
+                    'id' => $id,
+                    'ultimo_instruccion' => mb_strtoupper($this->request->getPost('instruccion')),
+                    'ultimo_fk_usuario_destinatario' => $this->request->getPost('fk_usuario_destinatario'),
+                    'ultimo_fk_usuario_responsable'=>($this->request->getPost('responsable') ? $this->request->getPost('fk_usuario_destinatario') : $this->request->getPost('ultimo_fk_usuario_responsable')),
+                    'editar' => 'false',
+                );
+                if($solicitudDerechoPreferenteModel->save($dataDerechoPreferente) === false){
+                    session()->setFlashdata('fail', $solicitudDerechoPreferenteModel->errors());
+                }else{
+                    $dataDerivacion = array(
+                        'id' => $id_derivacion,
+                        'instruccion' => mb_strtoupper($this->request->getPost('instruccion')),
+                        'fk_usuario_destinatario' => $this->request->getPost('fk_usuario_destinatario'),
+                        'fk_usuario_responsable' => ($this->request->getPost('responsable') ? $this->request->getPost('fk_usuario_destinatario') : $this->request->getPost('ultimo_fk_usuario_responsable')),
+                    );
+                    if($solicitudDerivacionModel->save($dataDerivacion) === false)
+                        session()->setFlashdata('fail', $solicitudDerivacionModel->errors());
+                    else
+                        session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información.');
+                }
+                return redirect()->to($this->controlador.'mis_tramites');
+            }
+        }
+    }
+
+    public function recibir($id_tramite){
+        $solicitudDerechoPreferenteModel = new SolicitudDerechoPreferenteModel();
+        $solicitudDerivacionModel = new SolicitudDerivacionModel();
+        $where = array(
+            'id' => $id_tramite,
+            'deleted_at' => NULL,
+            'ultimo_fk_usuario_destinatario' => session()->get('registroUser'),
+        );
+        if($fila = $solicitudDerechoPreferenteModel->where($where)->whereIn('ultimo_estado', array('DERIVADO','MIGRADO'))->first()){
+            $estado = 'RECIBIDO';
+            $data = array(
+                'id' => $fila['id'],
+                'ultimo_estado' => $estado,
+                'fk_usuario_actual' => $fila['ultimo_fk_usuario_destinatario'],
+                'editar' => true,
+            );
+
+            if($solicitudDerechoPreferenteModel->save($data) === false)
+                session()->setFlashdata('fail', $solicitudDerechoPreferenteModel->errors());
+
+            $where = array(
+                'fk_solicitud_derecho_preferente' => $fila['id'],
+            );
+            $derivacion = $solicitudDerivacionModel->where($where)->orderBY('id', 'DESC')->first();
+            $dataDerivacion = array(
+                'id' => $derivacion['id'],
+                'estado' => $estado,
+                'fecha_recepcion' => date('Y-m-d H:i:s'),
+            );
+
+            if($solicitudDerivacionModel->save($dataDerivacion) === false)
+                session()->setFlashdata('fail', $solicitudDerivacionModel->errors());
+
+        }
+        return redirect()->to($this->controlador.'listado_recepcion');
+    }
+    public function recibirMultiple(){
+        if ($this->request->getPost()) {
+            if($ids_tramites = $this->request->getPost('recibir')){
+                foreach($ids_tramites as $id_tramite)
+                    $this->recibirTramite($id_tramite);
+                session()->setFlashdata('success', 'Se ha Guardado Correctamente la Información.');
+                return redirect()->to($this->controlador.'listado_recepcion');
+            }
+        }
+        session()->setFlashdata('fail', 'No se pudo recepcionar los trámites.');
+        return redirect()->to($this->controlador.'mis_tramites');
+    }
+    public function recibirTramite($id_tramite){
+        $solicitudDerechoPreferenteModel = new SolicitudDerechoPreferenteModel();
+        $solicitudDerivacionModel = new SolicitudDerivacionModel();
+        $where = array(
+            'id' => $id_tramite,
+            'deleted_at' => NULL,
+            'ultimo_fk_usuario_destinatario' => session()->get('registroUser'),
+        );
+        if($fila = $solicitudDerechoPreferenteModel->where($where)->whereIn('ultimo_estado', array('DERIVADO'))->first()){
+            $estado = 'RECIBIDO';
+            $data = array(
+                'id' => $fila['id'],
+                'ultimo_estado' => $estado,
+                'fk_usuario_actual' => $fila['ultimo_fk_usuario_destinatario'],
+                'editar' => true,
+            );
+
+            if($solicitudDerechoPreferenteModel->save($data) === false){
+                session()->setFlashdata('fail', $solicitudDerechoPreferenteModel->errors());
+            }
+
+            $where = array(
+                'fk_solicitud_derecho_preferente' => $fila['id'],
+            );
+            $derivacion = $solicitudDerivacionModel->where($where)->orderBY('id', 'DESC')->first();
+            $dataDerivacion = array(
+                'id' => $derivacion['id'],
+                'estado' => $estado,
+                'fecha_recepcion' => date('Y-m-d H:i:s'),
+            );
+
+            if($solicitudDerivacionModel->save($dataDerivacion) === false){
+                session()->setFlashdata('fail', $solicitudDerivacionModel->errors());
+            }
+        }
+        return true;
+    }
+    public function ajaxGuardarDevolver(){
+        $solicitudDerechoPreferenteModel = new SolicitudDerechoPreferenteModel();
+        $resultado = array(
+            'error' => 'No se guardo la información',
+        );
+        $where = array(
+            'id' => $this->request->getPost('id'),
+            'ultimo_fk_usuario_destinatario' => session()->get('registroUser'),
+            'deleted_at' => NULL,
+        );
+        if($fila = $solicitudDerechoPreferenteModel->where($where)->first()){
+            $solicitudDerivacionModel = new SolicitudDerivacionModel();
+            $estado = 'DEVUELTO';
+            $motivo_devolucion = mb_strtoupper($this->request->getPost('motivo_devolucion'));
+            $documentosModel = new DocumentosModel();
+            $where = array(
+                'fk_solicitud_derecho_preferente' => $fila['id'],
+            );
+            $derivaciones = $solicitudDerivacionModel->where($where)->orderBy('id', 'DESC')->findAll(2);
+            if(count($derivaciones) > 1){
+                var_dump('hola a'); exit();
+                $derivacion_actual = $derivaciones[0];
+                $derivacion_restaurar = $derivaciones[1];
+                var_dump($derivacion_actual, $derivacion_restaurar); exit();
+                /*$where = array(
+                    'fk_derivacion' => $derivacion_actual['id'],
+                    'fk_acto_administrativo' => $fila['id'],
+                );
+                $documentos_anexados = $documentosModel->where($where)->findAll();*/
+                $data = array(
+                    'id' => $fila['id'],
+                    'ultimo_estado' => $estado,
+                    'ultimo_fk_estado_tramite_padre' => $derivacion_restaurar['fk_estado_tramite_padre'],
+                    'ultimo_fk_estado_tramite_hijo' => $derivacion_restaurar['fk_estado_tramite_hijo'],
+                    'ultimo_fecha_derivacion' => date('Y-m-d H:i:s'),
+                    'ultimo_instruccion' => $motivo_devolucion,
+                    'ultimo_fk_usuario_remitente' => session()->get('registroUser'),
+                    'ultimo_fk_usuario_destinatario' => $derivacion_restaurar['fk_usuario_destinatario'],
+                    'ultimo_fk_documentos' => '',
+                );
+                if($solicitudDerechoPreferenteModel->save($data) === false){
+                    session()->setFlashdata('fail', $solicitudDerechoPreferenteModel->errors());
+                }else{
+                    $dataDerivacion = array(
+                        'fk_solicitud_derecho_preferente' => $fila['id'],
+                        'fk_estado_tramite_padre' => $derivacion_restaurar['fk_estado_tramite_padre'],
+                        'fk_estado_tramite_hijo' => $derivacion_restaurar['fk_estado_tramite_hijo'],
+                        'observaciones' => $derivacion_restaurar['observaciones'],
+                        'fk_usuario_remitente' => session()->get('registroUser'),
+                        'fk_usuario_destinatario' => $derivacion_actual['fk_usuario_remitente'],
+                        'instruccion' => $motivo_devolucion,
+                        'motivo_anexo' => $derivacion_restaurar['motivo_anexo'],
+                        'estado' => $estado,
+                        'fk_usuario_creador' => session()->get('registroUser'),
+                        'fk_usuario_responsable' => $derivacion_actual['fk_usuario_responsable'],
+                    );
+                    if($solicitudDerivacionModel->insert($dataDerivacion) === false){
+                        session()->setFlashdata('fail', $solicitudDerivacionModel->errors());
+                    }else{
+
+                        $dataDerivacionActualizacion = array(
+                            'id' => $derivacion_actual['id'],
+                            'estado' => 'ATENDIDO',
+                            'fecha_devolucion' => date('Y-m-d H:i:s'),
+                        );
+                        if($solicitudDerivacionModel->save($dataDerivacionActualizacion) === false)
+                            session()->setFlashdata('fail', $solicitudDerivacionModel->errors());
+
+                        $resultado = array(
+                            'idtra' => $fila['id']
+                        );
+
+                    }
+                }
+            }else{
+                $derivacion_restaurar = $derivaciones[0];
+                $data = array(
+                    'id' => $fila['id'],
+                    'ultimo_estado' => $estado,
+                    'ultimo_fecha_derivacion' => date('Y-m-d H:i:s'),
+                    'ultimo_instruccion' => $motivo_devolucion,
+                    'ultimo_fk_usuario_remitente' => session()->get('registroUser'),
+                    'ultimo_fk_usuario_destinatario' => $derivacion_restaurar['fk_usuario_destinatario'],
+                );
+                if($solicitudDerechoPreferenteModel->save($data) === false){
+                    session()->setFlashdata('fail', $solicitudDerechoPreferenteModel->errors());
+                }else{
+                    $dataDerivacion = array(
+                        'fk_solicitud_derecho_preferente' => $fila['id'],
+                        'fk_estado_tramite_padre' => $derivacion_restaurar['fk_estado_tramite_padre'],
+                        'fk_estado_tramite_hijo' => $derivacion_restaurar['fk_estado_tramite_hijo'],
+                        'observaciones' => $derivacion_restaurar['observaciones'],
+                        'fk_usuario_remitente' => session()->get('registroUser'),
+                        'fk_usuario_destinatario' => $derivacion_restaurar['fk_usuario_remitente'],
+                        'instruccion' => $motivo_devolucion,
+                        'motivo_anexo' => $derivacion_restaurar['motivo_anexo'],
+                        'estado' => $estado,
+                        'fk_usuario_creador' => session()->get('registroUser'),
+                        'fk_usuario_responsable' => $derivacion_restaurar['fk_usuario_responsable'],
+                    );
+                    if($solicitudDerivacionModel->insert($dataDerivacion) === false){
+                        session()->setFlashdata('fail', $solicitudDerivacionModel->errors());
+                    }else{
+                        $dataDerivacionActualizacion = array(
+                            'id' => $derivacion_restaurar['id'],
+                            'estado' => 'ATENDIDO',
+                            'fecha_devolucion' => date('Y-m-d H:i:s'),
+                        );
+                        if($solicitudDerivacionModel->save($dataDerivacionActualizacion) === false)
+                            session()->setFlashdata('fail', $solicitudDerivacionModel->errors());
+
+                        $resultado = array(
+                            'idtra' => $fila['id']
+                        );
+                    }
+                }
+            }
+        }
+        echo json_encode($resultado);
     }
 
     public function hojaRutaSolicitudPdf($id_solicitud){
@@ -600,24 +1220,22 @@ class DerechoPreferente extends BaseController
         $datos = $builder->get()->getRowArray();
         return $datos;
     }
-
-    private function obtenerUsuarioHR($id){
+    private function obtenerDocumentosAtender($fk_hoja_ruta){
         $db = \Config\Database::connect();
-        $campos = array(
-            'u.id', 'u.nombre_completo as usuario', 'p.nombre as cargo', 'o.nombre as oficina'
-        );
+        $campos = array('doc.id', 'doc.correlativo', "TO_CHAR(doc.fecha, 'DD/MM/YYYY') as fecha", 'td.nombre as tipo_documento', 'td.notificacion');
         $where = array(
-            'u.id' => $id,
+            'doc.fk_tramite' => $this->idTramite,
+            'doc.fk_usuario_creador' => session()->get('registroUser'),            
+            'doc.estado' => 'SUELTO',
+            'doc.fk_hoja_ruta' => $fk_hoja_ruta,
+
         );
-        $builder = $db->table('usuarios as u')
+        $builder = $db->table('public.documentos AS doc')
         ->select($campos)
-        ->join('oficinas as o', 'u.fk_oficina = o.id', 'left')
-        ->join('perfiles as p', 'u.fk_perfil = p.id', 'left')
-        ->where($where);
-        $datos = $builder->get()->getRowArray();
-        return $datos;
+        ->join('public.tipo_documento AS td', 'doc.fk_tipo_documento = td.id', 'left')
+        ->where($where)
+        ->orderBY('doc.id', 'ASC');
+        return $builder->get()->getResultArray();
     }
-
-
 
 }

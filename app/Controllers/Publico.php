@@ -181,6 +181,9 @@ class Publico extends BaseController
                     'uploaded[documento_identidad_digital]',
                     'mime_in[documento_identidad_digital,application/pdf]',
                     'max_size[documento_identidad_digital,5120]',
+                    'errors' => [
+                        'mime_in' => 'El tipo de archivo no es valido.',
+                    ]
                 ],
                 'fk_municipio' => [
                     'rules' => 'required',
@@ -199,7 +202,25 @@ class Publico extends BaseController
                 ],
                 'adjunto_uno' => [
                     'uploaded[adjunto_uno]',
+                    'mime_in[adjunto_uno,image/png,image/jpeg,image/jpg]',
                     'max_size[adjunto_uno,5120]',
+                    'errors' => [
+                        'mime_in' => 'El tipo de archivo no es valido.',
+                    ]
+                ],
+                'adjunto_dos' => [
+                    'mime_in[adjunto_dos,image/png,image/jpeg,image/jpg]',
+                    'max_size[adjunto_dos,5120]',
+                    'errors' => [
+                        'mime_in' => 'El tipo de archivo no es valido.',
+                    ]
+                ],
+                'adjunto_tres' => [
+                    'mime_in[adjunto_tres,image/png,image/jpeg,image/jpg]',
+                    'max_size[adjunto_tres,5120]',
+                    'errors' => [
+                        'mime_in' => 'El tipo de archivo no es valido.',
+                    ]
                 ],
                 'codigo_seguridad' => [
                     'rules' => 'required',
@@ -209,6 +230,7 @@ class Publico extends BaseController
                 $provincias = $this->obtenerProvincias($this->request->getPost('departamento'));
                 $municipios = $this->obtenerMunicipios($this->request->getPost('departamento'), $this->request->getPost('provincia'));
                 $data['validation'] = $this->validator;
+                $data['puntos'] = $this->obtenerCoordenadas($this->request->getPost('coordenadas'));
             }else{
                 $informacion = $this->informacionAgente();
                 $rutaArchivoDenunciante = 'archivos/mineria_ilegal/denunciante/';

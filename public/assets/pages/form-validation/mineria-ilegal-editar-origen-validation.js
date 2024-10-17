@@ -96,18 +96,7 @@ $(document).ready(function () {
         },
         instruccion: {
             presence: true,
-        },
-        anexar_hr:{
-            presence: false,
-        },
-        motivo_anexo: {
-            presence: function(){
-                if($('#anexar_hr').val().length > 0)
-                    return true;
-                else
-                    return false;
-            }
-        },
+        },        
     };
 
     // Hook up the form so we can prevent it from being posted

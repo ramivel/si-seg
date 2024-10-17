@@ -32,9 +32,8 @@
                                     $campo = 'texto';
                                     echo form_input(array(
                                         'name' => $campo,
-                                        'id' => $campo,
-                                        'type' => (isset($campo_buscar) && $campo_buscar == 'fecha_hoja_ruta') ? 'date':'text',
-                                        'placeholder' => 'Escriba el Correlativo',
+                                        'id' => $campo,                                        
+                                        'placeholder' => 'Escriba el texto a buscar.',
                                         'class' => 'form-control form-control-uppercase',
                                         'value' => set_value($campo,'',false)
                                     ));
@@ -42,21 +41,16 @@
                                 <?php if(isset($validation) && $validation->hasError($campo)){?>
                                     <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
                                 <?php }?>
+                                <?php if(isset($error_validation)){?>
+                                    <span class="form-bar text-danger"><?= $error_validation;?></span>
+                                <?php }?>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-4">
                                 <?php
                                     $campo = 'campo';
-                                    echo form_dropdown($campo, $campos_buscar, set_value($campo), array('id' => 'filtro-buscador', 'class' => 'form-control'));
+                                    echo form_dropdown($campo, $campos_buscar, set_value($campo), array('class' => 'form-control'));
                                 ?>
-                            </div>
-                            <!--
-                            <div class="col-sm-2">
-                                <?php
-                                    $campo = 'tipo_denuncia';
-                                    echo form_dropdown($campo, $tipos_denuncias, set_value($campo), array('class' => 'form-control'));
-                                ?>
-                            </div>
-                            -->
+                            </div>                            
                             <div class="col-sm-1">
                                 <button class="btn btn-info"><i class="fa fa-search"></i>Buscar</button>
                             </div>
@@ -106,7 +100,7 @@
                                                                 break;
                                                         }
                                                         echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';
-                                                    }elseif($campos_reales[$i]=='denunciante' || $campos_reales[$i]=='remitente' || $campos_reales[$i]=='destinatario' || $campos_reales[$i]=='responsable'){
+                                                    }elseif($campos_reales[$i]=='denunciante' || $campos_reales[$i]=='remitente' || $campos_reales[$i]=='destinatario' || $campos_reales[$i]=='responsable' || $campos_reales[$i]=='areas_mineras'){
                                                         echo str_replace(' || ', '<br>', $fila[$campos_reales[$i]]);
                                                     }else{
                                                         echo $fila[$campos_reales[$i]];

@@ -58,16 +58,17 @@
                                 <table id="tabla-buscador" class="table table-striped table-bordered nowrap" style="font-size: small;">
                                     <thead>
                                         <tr>
+                                            <th class="nosort"></th>
                                             <?php for($i=0;$i<count($campos_listar);$i++){?>
                                             <th class="text-center"><?php echo $campos_listar[$i];?></th>
-                                            <?php }?>
-                                            <th class="nosort"></th>
+                                            <?php }?>                                            
                                         </tr>
                                     </thead>
                                     <tbody>
                                     <?php if(!empty($datos) && count($datos)>0){?>
                                         <?php foreach ($datos as $fila){?>
                                         <tr>
+                                            <td class="text-center"><?php echo anchor($controlador.'ver/4/'.$fila['id'], '<i class="fa fa-eye"></i> Ver',array('class' =>'btn btn-sm btn-info'));?></td>
                                             <?php for($i=0;$i<count($campos_reales);$i++){?>
                                             <td class="text-center">
                                             <?php
@@ -99,10 +100,7 @@
                                                 }
                                             ?>
                                             </td>
-                                            <?php }?>
-                                            <td class="text-center">
-                                            <?php echo anchor($controlador.'ver/4/'.$fila['id'], '<i class="fa fa-eye"></i> Ver',array('class' =>'btn btn-sm btn-info'));?>
-                                            </td>
+                                            <?php }?>                                            
                                         </tr>
                                         <?php }?>
                                     <?php }?>

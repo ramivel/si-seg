@@ -30,7 +30,7 @@
                     <div class="card-block">
                         <div class="dt-responsive table-responsive">
                             <?= form_open_multipart($controlador.'recibir_multiple');?>
-                            <div class="row">                            
+                            <div class="row">
                                 <div class="col-sm-4 text-left mb-2">
                                     <?php echo form_submit('enviar', 'RECIBIR SELECCIONADOS','class="btn btn-danger recibir-form"');?>
                                 </div>
@@ -52,7 +52,11 @@
                                         <td class="text-center"><input name="recibir[]" value="<?= $fila['id'];?>" type="checkbox" class="seleccionado"/></td>
                                         <td class="text-center">
                                             <?= anchor($controlador.'recibir/'.$fila['id'], '<i class="fa fa-exchange"></i> RECIBIR',array('class' =>'btn btn-sm btn-primary recibir_tramite'));?><br>
-                                            <button type="button" class="btn btn-sm btn-warning devolver_correspondencia mt-1" data-direccion="<?= base_url($controlador.'devolver')?>" data-idtra="<?=$fila['id'];?>" data-hr="<?=$fila['correlativo'];?>"><i class="fa fa-reply"></i> DEVOLVER</button>
+                                            <button type="button" class="btn btn-sm btn-warning devolver_correspondencia mt-1" data-direccion="<?= base_url($controlador.'ajax_guardar_devolver')?>" data-idtra="<?=$fila['id'];?>" data-hr="<?=$fila['correlativo'];?>"><i class="fa fa-reply"></i> DEVOLVER</button>
+                                            <?php if($fila['n_correspondencia_externa'] > 0){?>
+                                                <br>
+                                                <?= anchor($controlador.'correspondencia_externa/'.$fila['id'], 'Correspondencia Externa',array('class' =>'btn btn-sm btn-primary mt-1'));?>
+                                            <?php }?>
                                         </td>
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>
                                         <td class="text-center" >
@@ -109,6 +113,12 @@
                                         <h4 class="modal-title">Devolver Trámite</h4>
                                     </div>
                                     <div class="modal-body">
+                                        <div class="form-group row d-none">
+                                            <div class="col-sm-10">
+                                                <?= form_input(array('type'=>'hidden','name'=>'accion','id'=>'accion'));?>
+                                                <span class="messages"></span>
+                                            </div>
+                                        </div>
                                         <div class="form-group row d-none">
                                             <div class="col-sm-10">
                                                 <?= form_input(array('type'=>'hidden','name'=>'idtra','id'=>'idtra'));?>

@@ -47,7 +47,7 @@ $(document).ready(function () {
                 else
                     return false;
             }
-        },        
+        },
         /*observaciones: {
             presence: errorDocumento,
         },*/
@@ -58,17 +58,6 @@ $(document).ready(function () {
         },
         instruccion: {
             presence: true,
-        },
-        anexar_hr:{
-            presence: false,
-        },
-        motivo_anexo: {
-            presence: function(){
-                if($('#anexar_hr').val().length > 0)
-                    return true;
-                else
-                    return false;
-            }
         },
     };
 
@@ -191,7 +180,7 @@ $(document).ready(function () {
         });
     }
 
-    function errorDocumento(){        
+    function errorDocumento(){
         var fk_estado_tramite_padre = $('#fk_estado_tramite').val();
         var ultimo_fk_estado_tramite_padre = $('#ultimo_fk_estado_tramite_padre').val();
         var fk_estado_tramite_hijo = $('#fk_estado_tramite_hijo').val();

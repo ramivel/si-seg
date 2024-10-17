@@ -29,6 +29,7 @@ class DerivacionMineriaIlegalModel extends Model{
         'motivo_anexo',
         'observaciones',
         'fk_hoja_ruta_anexada',
+        'tipo_documento_derivado',
     ];
 
     protected $useTimestamps = true;

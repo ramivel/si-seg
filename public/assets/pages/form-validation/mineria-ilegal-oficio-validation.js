@@ -70,7 +70,7 @@ $(document).ready(function () {
         coordenadas: {
             presence: false,
         },
-        fk_oficina:{
+        /*fk_oficina:{
             presence: {
                 message: "^Debe seleccionar una opción."
             },
@@ -79,7 +79,7 @@ $(document).ready(function () {
             presence: {
                 message: "^Debe seleccionar el Destinatario."
             },
-        },        
+        },*/
     };
 
     // Hook up the form so we can prevent it from being posted

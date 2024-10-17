@@ -179,14 +179,14 @@
     <script type="text/javascript" src="<?= base_url('assets/bower_components/select2/js/es.js');?>"></script>
 
     <!-- data-table-custom -->
-    <script src="<?= base_url('assets/pages/data-table/js/data-table-custom.js');?>"></script>
+    <script src="<?= base_url('assets/pages/data-table/js/data-table-custom.js?n=1');?>"></script>
 
     <!-- Custom Select 2 -->
-    <script type="text/javascript" src="<?= base_url('assets/pages/advance-elements/select2-custom.js');?>"></script>
+    <script type="text/javascript" src="<?= base_url('assets/pages/advance-elements/select2-custom.js?n=5');?>"></script>
 
     <!-- Custom From Validation -->
     <?php if(isset($validacion_js)){ ?>
-    <script src="<?= base_url('assets/pages/form-validation/'.$validacion_js);?>"></script>
+    <script src="<?= base_url('assets/pages/form-validation/'.$validacion_js.'?n=3');?>"></script>
     <?php }?>
 
     <!-- Custom Graficas -->
@@ -221,7 +221,7 @@
         <script type="text/javascript">
             <?= 'const datos_chart = '.$data_chart.';'?>
         </script>
-        <script type="text/javascript" src="<?= base_url('assets/pages/chart/google/js/'.$charts_js);?>"></script>        
+        <script type="text/javascript" src="<?= base_url('assets/pages/chart/google/js/'.$charts_js);?>"></script>
     <?php }?>
 
     <!-- Custom ck editor -->
@@ -233,7 +233,8 @@
     <?php if(isset($mapas) && $mapas){ ?>
     <script type="text/javascript" src="<?= base_url('assets/pages/leaflet/leaflet.js');?>"></script>
     <script type="text/javascript" src="<?= base_url('assets/pages/leaflet/leaflet.legend.js');?>"></script>
-    <script type="text/javascript" src="<?= base_url('assets/js/maps.js');?>"></script>
+    <script type="text/javascript" src="<?= base_url('assets/pages/leaflet/L.LatLng.UTM.js');?>"></script>
+    <script type="text/javascript" src="<?= base_url('assets/js/maps.js?n=1');?>"></script>
         <?php if(isset($puntos) && count($puntos)>0){?>
             <script type="text/javascript">
                 <?php
@@ -259,7 +260,7 @@
     <script type="text/javascript" src="<?= base_url('assets/js/vartical-layout.js');?>"></script>
     <script type="text/javascript" src="<?= base_url('assets/js/jquery.mCustomScrollbar.concat.min.js');?>"></script>
     <!-- Custom js -->
-    <script type="text/javascript" src="<?= base_url('assets/js/script.js');?>"></script>
+    <script type="text/javascript" src="<?= base_url('assets/js/script.js?n=4');?>"></script>
 
 </body>
 

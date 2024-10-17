@@ -135,11 +135,11 @@ $(document).ready(function () {
     function showSuccess() {
         // We made it \:D/
         swal({
-            title: "Esta seguro de Guardar?",
+            title: "Esta seguro de GENERAR UN CITE?",
             //text: "You will not be able to recover this imaginary file!",
             type: "warning",
             showCancelButton: true,
-            confirmButtonText: "Si, Guardar!",
+            confirmButtonText: "Si, Generar!",
             cancelButtonText: "No, Cancelar!",
             closeOnConfirm: false
         },

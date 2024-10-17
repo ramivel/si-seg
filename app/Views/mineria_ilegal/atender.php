@@ -4,12 +4,71 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header text-center">
+                        <h3 class="mb-3"><?= $correlativo_hoja_ruta;?></h3>
+                        <table class="table table-bordered mb-0">
+                            <tbody>
+                                <tr>
+                                    <th class="text-nowrap text-right" width="200px" scope="row">Tipo de Minería Ilegal:</th>
+                                    <td><?= $tipo_mineria_ilegal;?></td>
+                                    <th class="text-nowrap text-right" width="200px" scope="row">Fecha Hoja Ruta:</th>
+                                    <td><?= $fecha_hoja_ruta;?></td>
+                                    <th class="text-nowrap text-right" width="200px" scope="row">Documento Derivado:</th>
+                                    <td><?= $documento_derivado;?></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th class="text-nowrap text-right" width="300px" scope="row">Formulario de Minería Ilegal:</th>
+                                    <td><?= $correlativo_denuncia;?></td>
+                                    <th class="text-nowrap text-right" width="300px" scope="row">Fecha del Formulario de Minería Ilegal:</th>
+                                    <td><?= $fecha_denuncia;?></td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <h5>Formulario</h5>
                         <span>Los campos con <code>*</code> son obligatorios.</span>
                     </div>
                     <div class="card-block">
                         <?= form_open_multipart($accion, ['id'=>'formulario']);?>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'correlativo_hoja_ruta','value'=>set_value('correlativo_hoja_ruta', (isset($correlativo_hoja_ruta) ? $correlativo_hoja_ruta : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'tipo_mineria_ilegal','value'=>set_value('tipo_mineria_ilegal', (isset($tipo_mineria_ilegal) ? $tipo_mineria_ilegal : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'fecha_hoja_ruta','value'=>set_value('fecha_hoja_ruta', (isset($fecha_hoja_ruta) ? $fecha_hoja_ruta : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'documento_derivado','value'=>set_value('documento_derivado', (isset($documento_derivado) ? $documento_derivado : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'correlativo_denuncia','value'=>set_value('correlativo_denuncia', (isset($correlativo_denuncia) ? $correlativo_denuncia : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'fecha_denuncia','value'=>set_value('fecha_denuncia', (isset($fecha_denuncia) ? $fecha_denuncia : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
                         <div class="form-group row d-none">
                             <div class="col-sm-10">
                                 <?= form_input(array('type'=>'hidden','name'=>'id_hoja_ruta','id'=>'id_hoja_ruta','value'=>set_value('id_hoja_ruta', (isset($id_hoja_ruta) ? $id_hoja_ruta : ''), false)));?>
@@ -82,16 +141,13 @@
                             <div class="col-lg-12 col-xl-12">
                                 <!-- Nav tabs -->
                                 <ul class="nav nav-tabs  tabs" role="tablist">
-                                    <li class="nav-item">
-                                        <a class="nav-link active" data-toggle="tab" href="#ínformacion" role="tab"><strong>Información</strong></a>
-                                    </li>
                                     <?php if($tipo_denuncia == 3){?>
                                         <li class="nav-item">
-                                            <a class="nav-link " data-toggle="tab" href="#origen" role="tab"><strong>Origen</strong></a>
+                                            <a class="nav-link active" data-toggle="tab" href="#origen" role="tab"><strong>Origen</strong></a>
                                         </li>
                                     <?php }else{?>
                                         <li class="nav-item">
-                                            <a class="nav-link " data-toggle="tab" href="#datos_personales" role="tab"><strong>Datos del Denunciante(s)</strong></a>
+                                            <a class="nav-link active" data-toggle="tab" href="#datos_personales" role="tab"><strong>Datos del Denunciante(s)</strong></a>
                                         </li>
                                     <?php }?>
                                     <li class="nav-item">
@@ -115,119 +171,8 @@
                                 </ul>
                                 <!-- Tab panes -->
                                 <div class="tab-content tabs card-block">
-                                    <div class="tab-pane active" id="ínformacion" role="tabpanel">
-                                        <div class="row">
-                                            <div class="col-md-6 col-sm-12">
-                                                <div class="form-group row">
-                                                    <label class="col-sm-5 col-form-label">Tipo de Minería Ilegal : </label>
-                                                    <div class="col-sm-7">
-                                                        <?php
-                                                            $campo = 'fk_tipo_denuncia';
-                                                            echo form_input(array(
-                                                                'name' => $campo,
-                                                                'id' => $campo,
-                                                                'readonly' => 'true',
-                                                                'class' => 'form-control form-control-uppercase',
-                                                                'value' => set_value($campo,(isset($denuncia[$campo]) ? $tipo_denuncias[$denuncia[$campo]] : ''),false)
-                                                            ));
-                                                        ?>
-                                                        <span class="messages"></span>
-                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                        <?php }?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 col-sm-12">
-                                                <div class="form-group row">
-                                                    <label class="col-sm-5 col-form-label">Correlativo Hoja de Ruta Minería Ilegal : </label>
-                                                    <div class="col-sm-7">
-                                                        <?php
-                                                            $campo = 'correlativo_hr';
-                                                            echo form_input(array(
-                                                                'name' => $campo,
-                                                                'id' => $campo,
-                                                                'readonly' => 'true',
-                                                                'class' => 'form-control form-control-uppercase',
-                                                                'value' => set_value($campo,(isset($hoja_ruta[$campo]) ? $hoja_ruta[$campo] : ''),false)
-                                                            ));
-                                                        ?>
-                                                        <span class="messages"></span>
-                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                        <?php }?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-sm-12">
-                                                <div class="form-group row">
-                                                    <label class="col-sm-2 col-form-label">Fecha : </label>
-                                                    <div class="col-sm-5">
-                                                        <?php
-                                                            $campo = 'fecha_hr';
-                                                            echo form_input(array(
-                                                                'name' => $campo,
-                                                                'id' => $campo,
-                                                                'class' => 'form-control form-control-uppercase',
-                                                                'readonly' => 'true',
-                                                                'value' => set_value($campo,(isset($hoja_ruta[$campo]) ? $hoja_ruta[$campo] : ''),false)
-                                                            ));
-                                                        ?>
-                                                        <span class="messages"></span>
-                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                        <?php }?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-sm-12">
-                                                <div class="form-group row">
-                                                    <label class="col-sm-5 col-form-label">Correlativo Formulario de Minería Ilegal : </label>
-                                                    <div class="col-sm-7">
-                                                        <?php
-                                                            $campo = 'correlativo_denuncia';
-                                                            echo form_input(array(
-                                                                'name' => $campo,
-                                                                'id' => $campo,
-                                                                'readonly' => 'true',
-                                                                'class' => 'form-control form-control-uppercase',
-                                                                'value' => set_value($campo,(isset($denuncia[$campo]) ? $denuncia[$campo] : ''),false)
-                                                            ));
-                                                        ?>
-                                                        <span class="messages"></span>
-                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                        <?php }?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-sm-12">
-                                                <div class="form-group row">
-                                                    <label class="col-sm-2 col-form-label">Fecha : </label>
-                                                    <div class="col-sm-5">
-                                                        <?php
-                                                            $campo = 'fecha_denuncia';
-                                                            echo form_input(array(
-                                                                'name' => $campo,
-                                                                'id' => $campo,
-                                                                'class' => 'form-control form-control-uppercase',
-                                                                'readonly' => 'true',
-                                                                'value' => set_value($campo,(isset($denuncia[$campo]) ? $denuncia[$campo] : ''),false)
-                                                            ));
-                                                        ?>
-                                                        <span class="messages"></span>
-                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                        <?php }?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                     <?php if($tipo_denuncia == 3){?>
-                                        <div class="tab-pane " id="origen" role="tabpanel">
+                                        <div class="tab-pane active" id="origen" role="tabpanel">
                                             <div class="row form-group">
                                                 <label class="col-sm-2 col-form-label">Tipo de Origen * :</label>
                                                 <div class="col-sm-4">
@@ -416,7 +361,7 @@
                                             </div>
                                         </div>
                                     <?php }else{?>
-                                        <div class="tab-pane " id="datos_personales" role="tabpanel">
+                                        <div class="tab-pane active" id="datos_personales" role="tabpanel">
                                             <p><strong>Nota.</strong> Los datos a consignar deben corresponder a la persona que esta haciendo la denuncia, no asi de la persona que está entregando la documentación.</p>
                                             <div class="row">
                                                 <div class="col-sm-12">
@@ -457,8 +402,9 @@
                                                                     <td class="text-center"><?= $row['email'];?></td>
                                                                     <td class="text-center"><?= $row['direccion'];?></td>
                                                                     <td class='text-center'>
-                                                                        <a href="<?=base_url($row['documento_identidad_digital']);?>" class='btn btn-sm btn-inverse' target='_blank' title='Ver Documento de Identidad'><i class='fa fa-file-pdf-o'></i></a> &nbsp;
-                                                                        <button type="button" class="btn btn-sm btn-danger waves-effect waves-light" title="Desanexar Denunciante" onclick="desanexar_denunciante(<?= $row['id'];?>);"><span class="icofont icofont-ui-delete"></span></button>
+                                                                        <a href="<?=base_url($row['documento_identidad_digital']);?>" class='btn btn-sm btn-inverse' target='_blank' title='Ver Documento de Identidad'><i class='fa fa-file-pdf-o'></i></a>&nbsp;
+                                                                        <button type="button" class="btn btn-sm btn-danger waves-effect waves-light" title="Desanexar Denunciante" onclick="desanexar_denunciante(<?= $row['id'];?>);"><span class="icofont icofont-ui-delete"></span></button><br>
+                                                                        <button type="button" class="btn btn-sm btn-inverse mt-2" onclick="verficar_denuncia_denunciante(<?= $row['id'];?>);"><i class="fa fa-search"></i> Verificar Denuncias Presentadas</button>
                                                                     </td>
                                                                 </tr>
                                                             <?php }?>
@@ -490,6 +436,9 @@
                                     <?php }?>
                                     <div class="tab-pane " id="descripcion_explotacion" role="tabpanel">
                                         <div class="row">
+                                            <div class="col-sm-12 text-center mb-2">
+                                                <button type="button" id="verficar_denuncia_municipio" class="btn btn-inverse"><i class="fa fa-search"></i> Verificar Denuncias en el Municipio</button>
+                                            </div>
                                             <div class="col-md-4 col-sm-12">
                                                 <div class="form-group row">
                                                     <label class="col-sm-4 col-form-label">Departamento * :</label>
@@ -729,14 +678,95 @@
                                         </div>
                                     </div>
                                     <div class="tab-pane " id="coordenadas_geograficas" role="tabpanel">
-                                        <p>Nota. Haga <strong>DOBLE CLICK</strong> en el mapa para poner uno o mas puntos.</p>
+                                    <h4 class="sub-title mb-2">UTM Estándar</h4>
+                                        <div class="row">
+                                            <div class="col-md-2 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Zona:</label>
+                                                    <div class="col-sm-8">
+                                                        <?php
+                                                            $campo = 'zona_utm';
+                                                            echo form_input(array(
+                                                                'name' => $campo,
+                                                                'id' => $campo,
+                                                                'class' => 'form-control',
+                                                                'value' => set_value($campo, '')
+                                                            ));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-5 col-form-label">Hemisferio: </label>
+                                                    <div class="col-sm-7">
+                                                        <?php
+                                                            $campo = 'hemisferio_utm';
+                                                            echo form_dropdown($campo, $hemisferios, set_value($campo, set_value($campo,'')), array('id' => $campo, 'class' => 'form-control'));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Este (X): </label>
+                                                    <div class="col-sm-8">
+                                                        <?php
+                                                            $campo = 'este_utm';
+                                                            echo form_input(array(
+                                                                'name' => $campo,
+                                                                'id' => $campo,
+                                                                'class' => 'form-control',
+                                                                'value' => set_value($campo, '')
+                                                            ));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Norte (Y): </label>
+                                                    <div class="col-sm-8">
+                                                        <?php
+                                                            $campo = 'norte_utm';
+                                                            echo form_input(array(
+                                                                'name' => $campo,
+                                                                'id' => $campo,
+                                                                'class' => 'form-control',
+                                                                'value' => set_value($campo, '')
+                                                            ));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-12 col-md-2">
+                                                <button type="button" class="btn btn-inverse" onclick="agregarPuntoUTM();"><i class="fa fa-map-marker"></i> Agregar Punto</button>
+                                            </div>
+                                        </div>
+                                        <h4 class="sub-title mb-2">Grados Decimales</h4>
                                         <div class="row">
                                             <div class="col-md-4 col-sm-12">
                                                 <div class="form-group row">
                                                     <label class="col-sm-4 col-form-label">Latitud <span class="mytooltip tooltip-effect-5">
                                                         <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
                                                         <span class="tooltip-content clearfix">
-                                                            <span class="tooltip-text">Debe ingresar el dato en Grados Decimales (GD) Ejemplo: -16.517438</span>
+                                                            <span class="tooltip-text">Ejemplo: -16.517438</span>
                                                         </span>
                                                     </span> : </label>
                                                     <div class="col-sm-8">
@@ -761,7 +791,7 @@
                                                     <label class="col-sm-4 col-form-label">Longitud <span class="mytooltip tooltip-effect-5">
                                                         <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
                                                         <span class="tooltip-content clearfix">
-                                                            <span class="tooltip-text">Debe ingresar el dato en Grados Decimales (GD) Ejemplo: -68.118976</span>
+                                                            <span class="tooltip-text">Ejemplo: -68.118976</span>
                                                         </span>
                                                     </span> : </label>
                                                     <div class="col-sm-8">
@@ -785,6 +815,7 @@
                                                 <button type="button" class="btn btn-inverse" onclick="agregarPunto();"><i class="fa fa-map-marker"></i> Agregar Punto</button>
                                             </div>
                                         </div>
+                                        <p>Nota. Haga <strong>DOBLE CLICK</strong> en el mapa para poner uno o mas puntos.</p>
                                         <div class="row">
                                             <div class="col-md-12 col-sm-12">
                                                 <div id="mi-map" class="set-map"></div>
@@ -928,54 +959,56 @@
                                             <div class="form-group row">
                                                 <label class="col-sm-12 col-form-label"><strong>Documento(s) Generado(s) :</strong></label>
                                                 <div class="col-sm-12">
-                                                    <table id="tabla_documentos" class="table table-bordered">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="text-center">N°</th>
-                                                                <th class="text-center">Correlativo</th>
-                                                                <th class="text-center">Fecha</th>
-                                                                <th class="text-center">Tipo Documento</th>
-                                                                <th class="text-center">Fecha Notificación *</th>
-                                                                <th class="text-center">Archivo Digital *</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <?php foreach($documentos as $n=>$row){?>
+                                                    <div class="dt-responsive table-responsive">
+                                                        <table id="tabla_documentos" class="table table-bordered">
+                                                            <thead>
                                                                 <tr>
-                                                                    <td class="text-center"><?= ($n+1);?></td>
-                                                                    <td class="text-center"><?= $row['correlativo'];?></td>
-                                                                    <td class="text-center"><?= $row['fecha'];?></td>
-                                                                    <td class="text-center"><?= $row['tipo_documento'];?></td>
-                                                                    <td class="text-center form-group">
-                                                                        <?php
-                                                                        if($row['notificacion'] == 't'){
-                                                                            $validacion_fecha_notificacion = 'SI';
-                                                                            $campo = 'fecha_notificacion[]';
-                                                                            echo form_input(array(
-                                                                                'name' => $campo,
-                                                                                'class' => 'form-control',
-                                                                                'type' => 'date',
-                                                                                'value' => set_value($campo)
-                                                                            ));
-                                                                            echo '<span class="messages"></span>';
-                                                                        }
-                                                                        ?>
-                                                                    </td>
-                                                                    <td class="text-center form-group">
-                                                                        <?php
-                                                                            $campo = 'documentos[]';
-                                                                            echo form_upload(array(
-                                                                                'name' => $campo,
-                                                                                'class' => 'form-control',
-                                                                                'accept' => 'application/pdf'
-                                                                            ));
-                                                                            echo '<span class="messages"></span>';
-                                                                        ?>
-                                                                    </td>
+                                                                    <th class="text-center">N°</th>
+                                                                    <th class="text-center">Correlativo</th>
+                                                                    <th class="text-center">Fecha</th>
+                                                                    <th class="text-center">Tipo Documento</th>
+                                                                    <th class="text-center">Fecha Notificación *</th>
+                                                                    <th class="text-center">Archivo Digital *</th>
                                                                 </tr>
-                                                            <?php }?>
-                                                        </tbody>
-                                                    </table>
+                                                            </thead>
+                                                            <tbody>
+                                                                <?php foreach($documentos as $n=>$row){?>
+                                                                    <tr>
+                                                                        <td class="text-center"><?= ($n+1);?></td>
+                                                                        <td class="text-center"><?= $row['correlativo'];?></td>
+                                                                        <td class="text-center"><?= $row['fecha'];?></td>
+                                                                        <td class="text-center"><?= $row['tipo_documento'];?></td>
+                                                                        <td class="text-center form-group">
+                                                                            <?php
+                                                                            if($row['notificacion'] == 't'){
+                                                                                $validacion_fecha_notificacion = 'SI';
+                                                                                $campo = 'fecha_notificacion[]';
+                                                                                echo form_input(array(
+                                                                                    'name' => $campo,
+                                                                                    'class' => 'form-control',
+                                                                                    'type' => 'date',
+                                                                                    'value' => set_value($campo)
+                                                                                ));
+                                                                                echo '<span class="messages"></span>';
+                                                                            }
+                                                                            ?>
+                                                                        </td>
+                                                                        <td class="text-center form-group">
+                                                                            <?php
+                                                                                $campo = 'documentos[]';
+                                                                                echo form_upload(array(
+                                                                                    'name' => $campo,
+                                                                                    'class' => 'form-control',
+                                                                                    'accept' => 'application/pdf'
+                                                                                ));
+                                                                                echo '<span class="messages"></span>';
+                                                                            ?>
+                                                                        </td>
+                                                                    </tr>
+                                                                <?php }?>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
                                         <?php }?>
@@ -1064,50 +1097,46 @@
                                                 <?php }?>
                                             </div>
                                         </div>
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Anexar H.R. SINCOBOL <span class="mytooltip tooltip-effect-5">
-                                                <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
-                                                <span class="tooltip-content clearfix">
-                                                    <span class="tooltip-text">Debe escribir el(los) correlativo(s) de la Hoja de Ruta Interna o Externa que desea anexar al Tramite.</span>
-                                                </span>
-                                            </span> : </label>
-                                            <div class="col-sm-10">
-                                                <?php $campo = 'anexar_hr';?>
-                                                <select id="<?= $campo;?>" name="<?= $campo;?>[]" data-controlador="<?= $controlador;?>" class="hr-in-ex-mejorado-ajax col-sm-12" multiple="multiple">
-                                                    <?php if(isset($hojas_ruta_anexadas)){ ?>
-                                                        <?php foreach($hojas_ruta_anexadas as $hoja_ruta_anexada){?>
-                                                            <option value="<?= $hoja_ruta_anexada['id'];?>" selected><?= $hoja_ruta_anexada['nombre'];?></option>
-                                                        <?php }?>
-                                                    <?php }else{ ?>
-                                                        <option value="">Escriba el correlativo de la Hoja de Ruta Interna o Externa...</option>
-                                                    <?php } ?>
-                                                </select>
-                                                <span class="messages"></span>
-                                                <span class="form-bar"><b>Nota.</b> La(s) H.R. no deben estar archivadas o anexadas en el SINCOBOL caso contrario no aparecera para su selección.</span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
+                                        <?php if(in_array(21, session()->get('registroPermisos'))){ ?>
+                                            <div class="form-group row">
+                                                <label class="col-sm-2 col-form-label">Destinatario Copias : </label>
+                                                <div class="col-sm-10">
+                                                    <?php $campo = 'destinatarios_copias';?>
+                                                    <select id="<?= $campo;?>" name="<?= $campo;?>[]" class="analista-destinatario-mineria-ilegal-ajax col-sm-12" multiple>
+                                                        <?php if(isset($usu_destinatarios)){ ?>
+                                                            <?php foreach($usu_destinatarios as $row){?>
+                                                                <option value="<?= $row['id'];?>" selected><?= $row['nombre'];?></option>
+                                                            <?php }?>
+                                                        <?php }else{ ?>
+                                                            <option value="">Escriba el Nombre o Cargo...</option>
+                                                        <?php } ?>
+                                                    </select>
+                                                    <span class="messages"></span>
+                                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                    <?php }?>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Motivo de Anexar : </label>
-                                            <div class="col-sm-10">
-                                                <?php
-                                                    $campo = 'motivo_anexo';
-                                                    echo form_textarea(array(
-                                                        'name' => $campo,
-                                                        'id' => $campo,
-                                                        'rows' => '3',
-                                                        'class' => 'form-control form-control-uppercase',
-                                                        'value' => set_value($campo,'',false)
-                                                    ));
-                                                ?>
-                                                <span class="messages"></span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
+                                            <div class="form-group row">
+                                                <label class="col-sm-2 col-form-label">Instrucción Copias : </label>
+                                                <div class="col-sm-10">
+                                                    <?php
+                                                        $campo = 'instruccion_copias';
+                                                        echo form_textarea(array(
+                                                            'name' => $campo,
+                                                            'id' => $campo,
+                                                            'rows' => '3',
+                                                            'class' => 'form-control form-control-uppercase',
+                                                            'value' => set_value($campo,'',false)
+                                                        ));
+                                                    ?>
+                                                    <span class="messages"></span>
+                                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                    <?php }?>
+                                                </div>
                                             </div>
-                                        </div>
+                                        <?php }?>
                                     </div>
                                 </div>
                             </div>
@@ -1123,6 +1152,7 @@
                         <?= form_close();?>
 
                         <?= $nuevo_denunciante;?>
+                        <?= $modal_verificacion_denuncia;?>
 
                     </div>
                 </div>

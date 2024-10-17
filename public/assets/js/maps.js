@@ -70,10 +70,23 @@ function onEachFeature(feature, layer) {
 }
 
 function agregarPunto(){
-  var latitude = document.getElementById("latitude").value;
-  var longitude = document.getElementById("longitude").value;
+  var latitude = parseFloat(document.getElementById("latitude").value);
+  var longitude = parseFloat(document.getElementById("longitude").value);
+  var validacion = true;
 
-  if(validateLatitude(latitude) && validateLongitude(longitude)){
+  if (isNaN(latitude) || latitude > 90 || latitude < -90) {
+    alert("La Latitud no es correcta.");
+    validacion = false;
+    return;
+  }
+
+  if (isNaN(longitude) || longitude > 180 || longitude < -180) {
+    alert("La Longitud no es correcta.");
+    validacion = false;
+    return;
+  }
+
+  if(validacion){
     var latlng = L.latLng(latitude, longitude);
     L.marker(latlng).addTo(myMap);
     myMap.setView(latlng, 15);
@@ -84,14 +97,54 @@ function agregarPunto(){
     alert('La Latitud y Longitud no son correctos.');
   }
 }
-function validateLatitude(lat) {
-  var regexLat = new RegExp('^(\\+|-)?(?:90(?:(?:\\.0{1,6})?)|(?:[0-9]|[1-8][0-9])(?:(?:\\.[0-9]{1,6})?))$');
-  return regexLat.test(lat);
-}
 
-function validateLongitude(lon) {
-  var regexLong = new RegExp('^(\\+|-)?(?:180(?:(?:\\.0{1,6})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\\.[0-9]{1,6})?))$');
-  return regexLong.test(lon);
+function agregarPuntoUTM(){
+  var zona = parseInt(document.getElementById("zona_utm").value);
+  var southern = parseFloat(document.getElementById("hemisferio_utm").selectedIndex) == 0;
+  var este = parseFloat(document.getElementById("este_utm").value);
+  var norte = parseFloat(document.getElementById("norte_utm").value);
+  var validacion = true;
+
+  if (isNaN(este) || isNaN(norte)) {
+      alert("Tanto el este como el norte deben ser números de punto flotante válidos.");
+      validacion = false;
+      return;
+  }
+
+  if (isNaN(zona)) {
+      alert("La zona debe ser un número entero válido.");
+      validacion = false;
+      return;
+  }
+
+  if (zona < 1 || zona > 60) {
+      alert("La zona de longitud debe estar entre 1 y 60.");
+      validacion = false;
+      return;
+  }
+
+  if (norte < 0 || norte > 10000000) {
+      alert("El norte debe estar entre 0 y 10000000");
+      validacion = false;
+      return;
+  }
+
+  if (este < 160000 || este > 834000) {
+      alert("La coordenada este cruza los límites de la zona.");
+      validacion = false;
+      return;
+  }
+
+  if(validacion){
+    var item = L.utm({x: este, y: norte, zone: zona, southHemi: southern});
+    var coord = item.latLng();
+    L.marker(coord).addTo(myMap);
+    myMap.setView(coord, 15);
+    actualizarInputCoordenadas(coord.lat, coord.lng);
+    document.getElementById("zona_utm").value = "";
+    document.getElementById("este_utm").value = "";
+    document.getElementById("norte_utm").value = "";
+  }
 }
 
 function actualizarInputCoordenadas(lat, lon){
@@ -143,7 +196,7 @@ function actualizarAreasMinerasLayer(){
       },
     });
   });
-  
+
 }
 
 function agregarPoligonoAreasMineras(geometry, label){

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\ActoAdministrativoModel;
+use App\Models\DerivacionMineriaIlegalModel;
 use App\Models\HojaRutaMineriaIlegalModel;
 use App\Models\TramitesModel;
 use App\Models\UsuariosModel;
@@ -76,7 +77,7 @@ class BaseController extends Controller
         $tramitesModel = new TramitesModel();
         $usuariosModel = new UsuariosModel();
         $actoAdministrativoModel = new ActoAdministrativoModel();
-        $hojaRutaMineriaIlegalModel =  new HojaRutaMineriaIlegalModel();
+        $derivacionMineriaIlegalModel = new DerivacionMineriaIlegalModel();
         $usuarioInfo = $usuariosModel->find(session()->get('registroUser'));
         if($usuarioInfo['tramites']){
             //$tramites = $tramitesModel->whereIn('id',explode(",", $usuarioInfo['tramites']))->where('activo',true)->findAll();
@@ -119,10 +120,12 @@ class BaseController extends Controller
                     case 2:
                         /* Trámites Pendientes */
                         $where = array(
-                            'deleted_at' => NULL,
-                            'ultimo_fk_usuario_destinatario' => session()->get('registroUser'),
+                            "deleted_at" => null,
+                            "fecha_recepcion" => null,
+                            "fk_usuario_destinatario" => session()->get('registroUser'),
+                            'estado' => 'DERIVADO',
                         );
-                        $total = $hojaRutaMineriaIlegalModel->select('COUNT(*) AS n')->where($where)->whereIn('ultimo_estado', array('MIGRADO', 'DERIVADO'))->first();
+                        $total = $derivacionMineriaIlegalModel->select('COUNT(*) AS n')->where($where)->first();
                         if($total['n'] > 0)
                             $resultado[] = array(
                                 'title' => '<strong>Tiene '.$total['n'].' Hoja(s) de Ruta de Minería Ilegal pendientes de recepción!</strong>',
@@ -141,7 +144,7 @@ class BaseController extends Controller
                         $builder = $db->table('public.correspondencia_externa AS ce')->select('count(*) as n')
                         ->join('mineria_ilegal.hoja_ruta AS hr', "ce.fk_hoja_ruta = hr.id", 'left')
                         ->where($where);
-                        $totalCorrespondencia = $builder->get()->getRowArray();                        
+                        $totalCorrespondencia = $builder->get()->getRowArray();
                         if($totalCorrespondencia['n'] > 0)
                             $resultado[] = array(
                                 'title' => '<strong>Tiene correspondencia externa ('.$totalCorrespondencia['n'].') de Minería Ilegal pendientes de recepción!</strong>',

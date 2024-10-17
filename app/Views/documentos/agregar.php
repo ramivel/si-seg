@@ -167,7 +167,7 @@
                             <div class="form-group row">
                                 <label class="col-sm-2"></label>
                                 <div class="col-sm-10">
-                                    <?php echo form_submit('enviar', 'GUARDAR','class="btn btn-primary m-b-0"');?>
+                                    <?php echo form_submit('enviar', 'GENERAR CITE','class="btn btn-primary m-b-0"');?>
                                     <a href="<?= base_url($retorno);?>" class="btn btn-success m-b-0">CANCELAR</a>
                                     <a href="<?= base_url($atender);?>" class="btn btn-inverse m-b-0">ATENDER TRAMITE</a>
                                 </div>

@@ -68,6 +68,9 @@ class Dashboard extends BaseController
 
                         break;
                     case 2:
+                    case 3:
+                    case 4:
+                    case 5:
                         $db = \Config\Database::connect();
                         $campos = array("CONCAT(etp.orden,'. ',etp.nombre) as estado_tramite", "COUNT(hr.id) as n");
                         $where = array(
@@ -112,7 +115,7 @@ class Dashboard extends BaseController
                         break;
                 }
             }
-        }
+        }        
 
         $cabera['titulo'] = 'Bienvenid@ al Sistema';
         $cabera['sub_titulo'] = 'Resumen de los Tramites';

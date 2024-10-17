@@ -82,6 +82,11 @@
                                 <span class="pcoded-mtext">Buscador</span>
                             </a>
                         </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/buscador_ventanilla/1') ? 'active' : '';?>">
+                            <a href="<?= base_url('documentos/buscador_ventanilla/1');?>">
+                                <span class="pcoded-mtext">Buscador Documentos</span>
+                            </a>
+                        </li>
                         <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/agregar') ? 'active' : '';?>">
                             <a href="<?= base_url('correspondencia_externa/agregar');?>">
                                 <span class="pcoded-mtext">Nuevo Ingreso</span>
@@ -248,16 +253,6 @@
                                     </a>
                                 </li>
 
-                                <?php if(in_array(10, session()->get('registroPermisos'))){?>
-                                <!--
-                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documentacion_digital') ? 'active' : '';?>">
-                                    <a href="<?= base_url($row['controlador'].'documentacion_digital');?>">
-                                        <span class="pcoded-mtext">Documentación Digital</span>
-                                    </a>
-                                </li>
-                                -->
-                                <?php }?>
-
                                 <?php if(in_array(6, session()->get('registroPermisos'))){?>
                                     <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'reporte_usuarios') ? 'active' : '';?>">
                                         <a href="<?= base_url($row['controlador'].'reporte_usuarios');?>">
@@ -330,12 +325,12 @@
                                 <?php if(in_array(15, session()->get('registroPermisos'))){?>
                                     <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'denuncia_manual_fmi') ? 'active' : '';?>">
                                         <a href="<?= base_url($row['controlador'].'denuncia_manual_fmi');?>">
-                                            <span class="pcoded-mtext">Agregar F.M.I. Manual</span>
+                                            <span class="pcoded-mtext">Regularización Denuncia antes del 2024</span>
                                         </a>
                                     </li>
                                     <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'denuncia_manual') ? 'active' : '';?>">
                                         <a href="<?= base_url($row['controlador'].'denuncia_manual');?>">
-                                            <span class="pcoded-mtext">Agregar H.R. y F.M.I. Manual</span>
+                                            <span class="pcoded-mtext">Regularización Denuncia Enero - Abril 2024</span>
                                         </a>
                                     </li>
                                     <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_denuncias_manuales') ? 'active' : '';?>">
@@ -440,6 +435,48 @@
                                         </ul>
                                     </li>
                                 <?php }?>
+
+                            </ul>
+                        </li>
+                    <?php }?>
+
+                    <?php if($row['controlador'] == 'derecho_preferente/'){?>
+                        <li class="pcoded-hasmenu <?= (isset($menu_actual) && strpos($menu_actual, $row['controlador']) !== false ) ? 'pcoded-trigger' : '';?>">
+                            <a href="javascript:void(0)">
+                                <span class="pcoded-micon"><i class="feather icon-folder"></i></span>
+                                <span class="pcoded-mtext"><?= $row['menu'] ?></span>
+                            </a>
+                            <ul class="pcoded-submenu">
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documento/listado') ? 'active' : '';?>">
+                                    <a href="<?= base_url('documentos/listado/'.$row['id']);?>">
+                                        <span class="pcoded-mtext">Mis Documentos</span>
+                                    </a>
+                                </li>
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_recepcion') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'listado_recepcion');?>">
+                                        <span class="pcoded-mtext">Recepción de H.R.</span>
+                                    </a>
+                                </li>
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'mis_tramites') ? 'active' : '';?>">
+                                <a href="<?= base_url($row['controlador'].'mis_tramites');?>">
+                                        <span class="pcoded-mtext">Mis Hojas de Ruta</span>
+                                    </a>
+                                </li>
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'correspondencia_externa') ? 'active' : '';?>">
+                                <a href="<?= base_url('correspondencia_externa/mis_recepciones/'.$row['id']);?>">
+                                        <span class="pcoded-mtext">Mi Correspondencia Externa</span>
+                                    </a>
+                                </li>
+
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'buscador') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'buscador');?>">
+                                        <span class="pcoded-mtext">Buscador Hojas Rutas</span>
+                                    </a>
+                                </li>
 
                             </ul>
                         </li>

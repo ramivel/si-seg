@@ -748,8 +748,102 @@ $(document).ready(function () {
           agregarPoligonoMunicipio($.parseJSON(result));
         },
       });
+      $.ajax({
+        type: "POST",
+        url: baseUrl + "mineria_ilegal/ajax_municipio_direccion",
+        data: {
+          id_municipio: id_municipio,
+        },
+        error: function () {
+          console.log("error ajax.");
+        },
+        success: function (result) {
+          $("#direccion_municipio").val(result);
+        },
+      });
     }
   });
+  $("#departamento_reporte").on("change", function () {
+    $("#provincia_reporte").html('<option value="">TODAS LAS PROVINCIAS</option>');
+    $("#municipio_reporte").html('<option value="">TODOS LOS MUNICIPIOS</option>');
+    if (this.value.length > 0) {
+      $.ajax({
+        type: "POST",
+        url: baseUrl + "mineria_ilegal/ajax_provincias_reporte",
+        data: {
+          departamento: this.value,
+        },
+        error: function () {
+          console.log("error ajax.");
+        },
+        success: function (html) {
+          $("#provincia_reporte").html(html);
+        },
+      });
+    }
+  });
+  $("#provincia_reporte").on("change", function () {
+    $("#municipio_reporte").html('<option value="">TODOS LOS MUNICIPIOS</option>');
+    if (this.value.length > 0) {
+      $.ajax({
+        type: "POST",
+        url: baseUrl + "mineria_ilegal/ajax_municipios_reporte",
+        data: {
+          departamento: $("#departamento_reporte").val(),
+          provincia: this.value,
+        },
+        error: function () {
+          console.log("error ajax.");
+        },
+        success: function (html) {
+          $("#municipio_reporte").html(html);
+        },
+      });
+    }
+  });
+  /* FIN UBICACION MINERIA ILEGAL */
+
+  /* VERIFICAR DENUNCIAS PRESENTADAS */
+  $("#verficar_denuncia_municipio").click(function () {
+    var fk_municipio = parseInt($("#fk_municipio").val());
+    if(fk_municipio > 0){
+      $.ajax({
+        type: "POST",
+        url: baseUrl + "mineria_ilegal/ajax_verficar_denuncia_municipio",
+        data: {
+          id_municipio: fk_municipio,
+        },
+        error: function () {
+          console.log("error ajax.");
+        },
+        success: function (html) {
+          $("#modal-verificacion-denuncia-header").html("VERIFICAR DENUNCIAS POR MUNICIPIO");
+          $("#modal-verificacion-denuncia-body").html(html);
+          $("#modal-verificacion-denuncia").modal('toggle');
+          $('#tabla-verificacion').DataTable({
+              responsive: true,
+              order: [],
+              columnDefs: [
+                  { width: 200, targets: 0 }
+              ],
+              fixedColumns: false,
+              pageLength: 50,
+              lengthMenu: [[50, 100, -1], [50, 100, "All"]],
+              language: {
+                  "url": "https://cdn.datatables.net/plug-ins/1.11.3/i18n/es-mx.json"
+              },
+              'aoColumnDefs': [{
+                  'bSortable': false,
+                  'aTargets': ['nosort']
+              }]
+          });
+        },
+      });
+    }else{
+      alert('Debe seleccionar un municipio.')
+    }
+  });
+  /* FIN VERIFICAR DENUNCIAS PRESENTADAS */
 
   /* BUSCADOR DE DENUNCIANTE */
   $(".denunciante-ajax").select2({
@@ -792,7 +886,11 @@ $(document).ready(function () {
             "<td class='text-center'>"+result.telefonos+"</td>"+
             "<td class='text-center'>"+result.email+"</td>"+
             "<td class='text-center'>"+result.direccion+"</td>"+
-            "<td class='text-center'><a href='"+baseUrl+result.documento_identidad_digital+"' class='btn btn-sm btn-inverse' target='_blank' title='Ver Documento de Identidad'><i class='fa fa-file-pdf-o'></i></a> <button type='button' class='btn btn-sm btn-danger waves-effect waves-light' title='Desanexar Denunciante' onclick='desanexar_denunciante("+result.id+");'><span class='icofont icofont-ui-delete'></span></button></td>"+
+            "<td class='text-center'>"+
+            "<a href='"+baseUrl+result.documento_identidad_digital+"' class='btn btn-sm btn-inverse' target='_blank' title='Ver Documento de Identidad'><i class='fa fa-file-pdf-o'></i></a> "+
+            "<button type='button' class='btn btn-sm btn-danger waves-effect waves-light' title='Desanexar Denunciante' onclick='desanexar_denunciante("+result.id+");'><span class='icofont icofont-ui-delete'></span></button><br>"+
+            "<button type='button' class='btn btn-sm btn-inverse mt-2' onclick='verficar_denuncia_denunciante("+result.id+");'><i class='fa fa-search'></i> Verificar Denuncias Presentadas</button>"+
+            "</td>"+
           "</tr>";
           $("#tabla_denunciantes tbody").append(markup);
           $(".denunciante-ajax").val('').trigger('change');
@@ -929,7 +1027,7 @@ $(document).ready(function () {
           "</tr>";
           $("#tabla_areas_mineras tbody").append(markup);
           $(".area-minera-cam-dp-ajax").val('').trigger('change');
-          $("#areas_mineras_anexadas").val('SI');          
+          $("#areas_mineras_anexadas").val('SI');
         },
       });
     }
@@ -1117,6 +1215,42 @@ function verificarTipoMineriaManual(){
     default:
       $('#verificacion-oficio-manual').hide();
       break;
+  }
+}
+function verficar_denuncia_denunciante(id_denunciante){
+  if(id_denunciante>0){
+    $.ajax({
+      type: "POST",
+      url: baseUrl + "mineria_ilegal/ajax_verficar_denuncia_denunciante",
+      data: {
+        id_denunciante: id_denunciante,
+      },
+      error: function () {
+        console.log("error ajax.");
+      },
+      success: function (html) {
+        $("#modal-verificacion-denuncia-header").html("VERIFICAR DENUNCIAS POR DENUNCIANTE");
+        $("#modal-verificacion-denuncia-body").html(html);
+        $("#modal-verificacion-denuncia").modal('toggle');
+        $('#tabla-verificacion').DataTable({
+            responsive: true,
+            order: [],
+            columnDefs: [
+                { width: 200, targets: 0 }
+            ],
+            fixedColumns: false,
+            pageLength: 50,
+            lengthMenu: [[50, 100, -1], [50, 100, "All"]],
+            language: {
+                "url": "https://cdn.datatables.net/plug-ins/1.11.3/i18n/es-mx.json"
+            },
+            'aoColumnDefs': [{
+                'bSortable': false,
+                'aTargets': ['nosort']
+            }]
+        });
+      },
+    });
   }
 }
 

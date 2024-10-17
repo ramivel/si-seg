@@ -17,6 +17,11 @@
     </div>
     <?php }?>
     <div class="page-body">
+        <div class="row mb-3">
+            <div class="col-sm-12 text-right">
+                <a href="<?= base_url($controlador.'mis_documentos_excel/'.$id_tramite);?>" class="btn btn-inverse" target="_blank"><i class="fa fa-file-excel-o"></i> Descargar Mis Documentos</a>
+            </div>
+        </div>
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
@@ -50,6 +55,8 @@
                                                         <?php echo anchor('documentos/descargar/'.$fila['id'], 'Descargar Word',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                         <?php if($fila['estado'] == 'SUELTO'){?>
                                                             <?php echo anchor('documentos/editar/'.$id_tramite.'/'.$fila['id'], 'Editar',array('class' =>'dropdown-item waves-light waves-effect'));?>
+                                                            <?php echo anchor('documentos/anular/'.$id_tramite.'/'.$fila['id'], 'Solicitar Anulación',array('class' =>'dropdown-item waves-light waves-effect'));?>
+                                                        <?php }elseif($fila['fk_usuario_actual'] == $id_usuario && !$fila['doc_digital']){?>
                                                             <?php echo anchor('documentos/anular/'.$id_tramite.'/'.$fila['id'], 'Solicitar Anulación',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                         <?php }?>
                                                         <?php if(!$fila['doc_digital']){?>

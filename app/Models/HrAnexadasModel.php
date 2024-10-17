@@ -10,15 +10,15 @@ class HrAnexadasModel extends Model{
     //protected $useAutoIncrement = true;
 
     protected $returnType     = 'array';
-    protected $useSoftDeletes = false;
+    protected $useSoftDeletes = true;
 
     protected $allowedFields = [
-        'fk_derivacion', 'fk_hoja_ruta'
+        'fk_derivacion', 'fk_acto_administrativo', 'fk_hoja_ruta_sincobol', 'fk_usuario_creador', 'motivo_anexo'
     ];
 
-    /*protected $useTimestamps = true;
+    protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
-    protected $deletedField  = 'deleted_at';*/
+    protected $deletedField  = 'deleted_at';
 
 }

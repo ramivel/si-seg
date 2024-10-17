@@ -43,39 +43,49 @@
                                         <?php for($i=0;$i<count($campos_listar);$i++){?>
                                         <th class="text-center"><?php echo $campos_listar[$i];?></th>
                                         <?php }?>
-
                                     </tr>
                                 </thead>
                                 <tbody>
                                 <?php if(!empty($datos) && count($datos)>0){?>
                                     <?php foreach ($datos as $fila){?>
-                                    <tr id="hr<?= $fila['id_derivacion']; ?>">
-                                    <td class="text-center"><input name="recibir[]" value="<?= $fila['id_derivacion'];?>" type="checkbox" class="seleccionado"/></td>
+                                    <tr id="hr<?= $fila['id']; ?>">
+                                        <td class="text-center"><input name="recibir[]" value="<?= $fila['id'];?>" type="checkbox" class="seleccionado"/></td>
                                         <td class="text-center">
-                                            <?= anchor($controlador.'recibir/'.$fila['id_derivacion'], '<i class="fa fa-exchange"></i> RECIBIR',array('class' =>'btn btn-sm btn-primary recibir_tramite'));?><br>
-                                            <button type="button" class="btn btn-sm btn-warning devolver_correspondencia mt-1" data-direccion="<?= base_url($controlador.'ajax_guardar_devolver')?>" data-idtra="<?=$fila['id_derivacion'];?>" data-hr="<?=$fila['correlativo_hr'];?>"><i class="fa fa-reply"></i> DEVOLVER</button><br>
-                                            <?= anchor($controlador.'formulario_denuncia_pdf/'.$fila['id_denuncia'], '<i class="fa fa-print"></i> IMPRIMIR FORMULARIO',array('class' =>'btn btn-sm btn-info mt-1', 'target'=>'_blank'));?><br>
-                                            <?= anchor($controlador.'hoja_ruta_pdf/'.$fila['id_hoja_ruta'], '<i class="fa fa-print"></i> IMPRIMIR H.R.',array('class' =>'btn btn-sm btn-info mt-1', 'target'=>'_blank'));?>
+                                            <?= anchor($controlador.'recibir/'.$fila['id'], '<i class="fa fa-exchange"></i> RECIBIR',array('class' =>'btn btn-sm btn-primary recibir_tramite'));?><br>
+                                            <button type="button" class="btn btn-sm btn-warning devolver_correspondencia mt-1" data-direccion="<?= base_url($controlador.'ajax_guardar_devolver')?>" data-idtra="<?=$fila['id'];?>" data-hr="<?=$fila['correlativo'];?>"><i class="fa fa-reply"></i> DEVOLVER</button>
                                         </td>
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>
                                         <td class="text-center" >
                                             <?php
-                                                if($campos_reales[$i]=='tipo_documento_derivado'){
+                                                if($campos_reales[$i]=='ultimo_estado'){
                                                     $style = '';
                                                     switch($fila[$campos_reales[$i]]){
-                                                        case 'ORIGINAL':
-                                                            $style = 'btn btn-out btn-sm btn-success btn-square';
+                                                        case 'MIGRADO':
+                                                            $style = 'btn btn-sm btn-inverse btn-round';
                                                             break;
-                                                        case 'COPIA':
-                                                            $style = 'btn btn-out btn-sm btn-info btn-square';
+                                                        case 'ATENDIDO':
+                                                            $style = 'btn btn-sm btn-success btn-round';
+                                                            break;
+                                                        case 'DERIVADO':
+                                                            $style = 'btn btn-sm btn-primary btn-round';
+                                                            break;
+                                                        case 'DEVUELTO':
+                                                            $style = 'btn btn-sm btn-warning btn-round';
+                                                            break;
+                                                        case 'FINALIZADO':
+                                                            $style = 'btn btn-sm btn-danger btn-round';
+                                                            break;
+                                                        case 'EN ESPERA':
+                                                            $style = 'btn btn-sm btn-info btn-round';
                                                             break;
                                                     }
                                                     echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';
-                                                }elseif($campos_reales[$i]=='fk_tipo_denuncia'){
-                                                    echo $tipo_denuncias[$fila[$campos_reales[$i]]];
+                                                }elseif($campos_reales[$i]=='doc_digital'){
+                                                    echo '<a href="'.base_url($fila[$campos_reales[$i]]).'" target="_blank" title="Ver Documento"><i class="feather icon-file"></i> Ver Documento</a>';
                                                 }else{
                                                     echo $fila[$campos_reales[$i]];
                                                 }
+
                                             ?>
                                         </td>
                                         <?php }?>
@@ -91,7 +101,7 @@
                             <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h4 class="modal-title">Devolver Hoja de Ruta</h4>
+                                        <h4 class="modal-title">Devolver Trámite</h4>
                                     </div>
                                     <div class="modal-body">
                                         <div class="form-group row d-none">

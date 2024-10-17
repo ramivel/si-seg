@@ -17,7 +17,7 @@ $(document).ready(function () {
     id: {
       presence: true,
     },
-    fk_oficina: {
+    /*fk_oficina: {
       presence: {
         message: "^Debe seleccionar la Dirección Departamental o Regional.",
       },
@@ -26,7 +26,7 @@ $(document).ready(function () {
       presence: {
         message: "^Debe seleccionar el Destinatario.",
       },
-    },
+    },*/
   };
 
   // Hook up the form so we can prevent it from being posted

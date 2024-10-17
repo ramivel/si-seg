@@ -11,6 +11,6 @@ class DenunciasAreasMinerasMineriaIlegalModel extends Model{
 
     protected $returnType     = 'array';    
 
-    protected $allowedFields = ['fk_denuncia', 'fk_area_minera'];
+    protected $allowedFields = ['fk_denuncia', 'fk_area_minera','codigo_unico','area_minera'];
 
 }

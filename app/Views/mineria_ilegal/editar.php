@@ -736,14 +736,95 @@
                                         </div>
                                     </div>
                                     <div class="tab-pane " id="coordenadas_geograficas" role="tabpanel">
-                                        <p>Nota. Haga <strong>DOBLE CLICK</strong> en el mapa para poner uno o mas puntos.</p>
+                                    <h4 class="sub-title mb-2">UTM Estándar</h4>
+                                        <div class="row">
+                                            <div class="col-md-2 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Zona:</label>
+                                                    <div class="col-sm-8">
+                                                        <?php
+                                                            $campo = 'zona_utm';
+                                                            echo form_input(array(
+                                                                'name' => $campo,
+                                                                'id' => $campo,
+                                                                'class' => 'form-control',
+                                                                'value' => set_value($campo, '')
+                                                            ));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-5 col-form-label">Hemisferio: </label>
+                                                    <div class="col-sm-7">
+                                                        <?php
+                                                            $campo = 'hemisferio_utm';
+                                                            echo form_dropdown($campo, $hemisferios, set_value($campo, set_value($campo,'')), array('id' => $campo, 'class' => 'form-control'));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Este (X): </label>
+                                                    <div class="col-sm-8">
+                                                        <?php
+                                                            $campo = 'este_utm';
+                                                            echo form_input(array(
+                                                                'name' => $campo,
+                                                                'id' => $campo,
+                                                                'class' => 'form-control',
+                                                                'value' => set_value($campo, '')
+                                                            ));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Norte (Y): </label>
+                                                    <div class="col-sm-8">
+                                                        <?php
+                                                            $campo = 'norte_utm';
+                                                            echo form_input(array(
+                                                                'name' => $campo,
+                                                                'id' => $campo,
+                                                                'class' => 'form-control',
+                                                                'value' => set_value($campo, '')
+                                                            ));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-12 col-md-2">
+                                                <button type="button" class="btn btn-inverse" onclick="agregarPuntoUTM();"><i class="fa fa-map-marker"></i> Agregar Punto</button>
+                                            </div>
+                                        </div>
+                                        <h4 class="sub-title mb-2">Grados Decimales</h4>
                                         <div class="row">
                                             <div class="col-md-4 col-sm-12">
                                                 <div class="form-group row">
                                                     <label class="col-sm-4 col-form-label">Latitud <span class="mytooltip tooltip-effect-5">
                                                         <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
                                                         <span class="tooltip-content clearfix">
-                                                            <span class="tooltip-text">Debe ingresar el dato en Grados Decimales (GD) Ejemplo: -16.517438</span>
+                                                            <span class="tooltip-text">Ejemplo: -16.517438</span>
                                                         </span>
                                                     </span> : </label>
                                                     <div class="col-sm-8">
@@ -768,7 +849,7 @@
                                                     <label class="col-sm-4 col-form-label">Longitud <span class="mytooltip tooltip-effect-5">
                                                         <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
                                                         <span class="tooltip-content clearfix">
-                                                            <span class="tooltip-text">Debe ingresar el dato en Grados Decimales (GD) Ejemplo: -68.118976</span>
+                                                            <span class="tooltip-text">Ejemplo: -68.118976</span>
                                                         </span>
                                                     </span> : </label>
                                                     <div class="col-sm-8">
@@ -792,6 +873,7 @@
                                                 <button type="button" class="btn btn-inverse" onclick="agregarPunto();"><i class="fa fa-map-marker"></i> Agregar Punto</button>
                                             </div>
                                         </div>
+                                        <p>Nota. Haga <strong>DOBLE CLICK</strong> en el mapa para poner uno o mas puntos.</p>
                                         <div class="row">
                                             <div class="col-md-12 col-sm-12">
                                                 <div id="mi-map" class="set-map"></div>
@@ -1030,50 +1112,6 @@
                                             <div class="col-sm-10">
                                                 <?php
                                                     $campo = 'instruccion';
-                                                    echo form_textarea(array(
-                                                        'name' => $campo,
-                                                        'id' => $campo,
-                                                        'rows' => '3',
-                                                        'class' => 'form-control form-control-uppercase',
-                                                        'value' => set_value($campo,(isset($derivacion[$campo]) ? $derivacion[$campo] : ''),false)
-                                                    ));
-                                                ?>
-                                                <span class="messages"></span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Anexar H.R. SINCOBOL <span class="mytooltip tooltip-effect-5">
-                                                <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
-                                                <span class="tooltip-content clearfix">
-                                                    <span class="tooltip-text">Debe escribir el(los) correlativo(s) de la Hoja de Ruta Interna o Externa que desea anexar al Tramite.</span>
-                                                </span>
-                                            </span> : </label>
-                                            <div class="col-sm-10">
-                                                <?php $campo = 'anexar_hr';?>
-                                                <select id="<?= $campo;?>" name="<?= $campo;?>[]" data-controlador="<?= $controlador;?>" class="hr-in-ex-mejorado-ajax col-sm-12" multiple="multiple">
-                                                    <?php if(isset($hojas_ruta_anexadas)){ ?>
-                                                        <?php foreach($hojas_ruta_anexadas as $hoja_ruta_anexada){?>
-                                                            <option value="<?= $hoja_ruta_anexada['id'];?>" selected><?= $hoja_ruta_anexada['nombre'];?></option>
-                                                        <?php }?>
-                                                    <?php }else{ ?>
-                                                        <option value="">Escriba el correlativo de la Hoja de Ruta Interna o Externa...</option>
-                                                    <?php } ?>
-                                                </select>
-                                                <span class="messages"></span>
-                                                <span class="form-bar"><b>Nota.</b> La(s) H.R. no deben estar archivadas o anexadas en el SINCOBOL caso contrario no aparecera para su selección.</span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Motivo de Anexar : </label>
-                                            <div class="col-sm-10">
-                                                <?php
-                                                    $campo = 'motivo_anexo';
                                                     echo form_textarea(array(
                                                         'name' => $campo,
                                                         'id' => $campo,

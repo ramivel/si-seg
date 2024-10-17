@@ -33,6 +33,7 @@ class Usuarios extends BaseController
             10 => 'Encargado de Cargar Documentación Digital',
             16 => 'Reportes Administración',
             17 => 'Reportes por fecha mecanizada a nivel nacional',
+            22 => 'Ver Documentación Digital',
         ),
         'Minería Ilegal' => array(
             12 => 'Responsable Atender Denuncias Página Web',
@@ -42,6 +43,7 @@ class Usuarios extends BaseController
             18 => 'Reporte de denuncias',
             19 => 'Reporte de denuncias a nivel nacional',
             20 => 'Finalizar Trámite',
+            21 => 'Crear Copias de la Hoja de Ruta',
         ),
     );
 

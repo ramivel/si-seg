@@ -17,11 +17,11 @@
     </div>
     <?php }?>
     <div class="page-body">
-        <div class="row mb-3">
+        <!--div class="row mb-3">
             <div class="col-sm-12 text-right">
                 <a href="<?= base_url($controlador.'mis_tramites_excel');?>" class="btn btn-inverse" target="_blank"><i class="fa fa-file-excel-o"></i> Descargar Bandeja</a>
             </div>
-        </div>
+        </!--div-->
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
@@ -34,8 +34,6 @@
                     </div>
                     <div class="card-block">
                         <div class="dt-responsive table-responsive">
-                            <!--div class="bg-color-box color-warning waves-effect waves-light" style="background-color: #FEEDB9;color:black !important;">TRÁMITES A PUNTO DE VENCER SU PLAZO</!--div>
-                            <div-- class="bg-color-box color-danger waves-effect waves-light" style="background-color: #F2C4C9; color:black !important;">TRÁMITES QUE VENCIERON SU PLAZO</div-->
                             <table id="tabla-listado" class="table table-striped table-bordered nowrap" style="font-size: small;">
                                 <thead>
                                     <tr>
@@ -49,16 +47,7 @@
                                 <tbody>
                                 <?php if(!empty($datos) && count($datos)>0){?>
                                     <?php foreach ($datos as $fila){?>
-                                        <?php
-                                        $style = '';
-                                        if($fila['notificar']=='t'){
-                                            if($fila['dias'] > $fila['dias_limite'])
-                                                $style = 'table-danger';
-                                            elseif($fila['dias'] > $fila['dias_intermedio'])
-                                                $style = 'table-warning';
-                                        }
-                                        ?>
-                                    <tr class="<?=$style?>">
+                                    <tr>
                                         <td class="text-center">
                                             <div class="dropdown-info dropdown open">
                                                 <button class="btn btn-sm btn-info dropdown-toggle waves-effect waves-light " type="button" id="dropdown-4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Acciones</button>
@@ -71,7 +60,6 @@
                                                             echo anchor('documentos/agregar/'.$id_tramite.'/'.$fila['id'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             echo anchor($controlador.'atender/'.$fila['id'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             echo anchor($controlador.'espera/'.$fila['id'], 'En Espera',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            //echo anchor($controlador.'devolver/'.$fila['id'], 'Devolver',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             if(in_array(5, session()->get('registroPermisos')) && $fila['finalizar'] == 'SI')
                                                                 echo anchor($controlador.'finalizar/'.$fila['id'], 'Finalizar',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             break;
@@ -86,14 +74,8 @@
                                                             break;
                                                     }
                                                     ?>
-                                                    <?php echo anchor($controlador.'anexar_sincobol/'.$fila['id'], 'Anexar H.R. SINCOBOL',array('class' =>'dropdown-item waves-light waves-effect'));?>
-                                                    <?php echo anchor($controlador.'hoja_ruta_pdf/'.$fila['id'], 'Imprimir Hoja de Ruta',array('class' =>'dropdown-item waves-light waves-effect', 'target'=>'_blank'));?>
                                                 </div>
                                             </div>
-                                            <?php if($fila['n_correspondencia_externa'] > 0){?>
-                                                <br>
-                                                <?= anchor($controlador.'correspondencia_externa/'.$fila['id'], 'Correspondencia Externa',array('class' =>'btn btn-sm btn-primary mt-1'));?>
-                                            <?php }?>
                                         </td>
                                         <?php for($i=0;$i<count($campos_reales);$i++){?>
                                         <td class="text-center" >
@@ -121,13 +103,8 @@
                                                             break;
                                                     }
                                                     echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';
-                                                }elseif($campos_reales[$i]=='apm_presento'){
-                                                    if($fila['ultimo_recurso_jerarquico']=='t')
-                                                        echo 'RECURSO JERÁRQUICO<br>';
-                                                    if($fila['ultimo_recurso_revocatoria']=='t')
-                                                        echo 'RECURSO DE REVOCATORIA<br>';
-                                                    if($fila['ultimo_oposicion']=='t')
-                                                        echo 'OPOSICIÓN';
+                                                }elseif($campos_reales[$i]=='doc_digital'){
+                                                    echo '<a href="'.base_url($fila[$campos_reales[$i]]).'" target="_blank" title="Ver Documento"><i class="feather icon-file"></i> Ver Documento</a>';
                                                 }else{
                                                     echo $fila[$campos_reales[$i]];
                                                 }

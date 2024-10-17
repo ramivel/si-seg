@@ -610,7 +610,15 @@
     <script type="text/javascript" src="<?= base_url('assets/pages/leaflet/leaflet.js');?>"></script>
     <script type="text/javascript" src="<?= base_url('assets/pages/leaflet/leaflet-control-geocoder/Control.Geocoder.js');?>"></script>
     <script type="text/javascript" src="<?= base_url('assets/pages/leaflet/custom.js');?>"></script>
-    <script src="<?= base_url('assets/js/mineria-ilegal.js');?>"></script>
+    <?php if(isset($puntos) && count($puntos)>0){?>
+        <script type="text/javascript">
+            <?php
+            foreach($puntos as $punto)
+                echo "L.marker([".$punto['latitud'].", ".$punto['longitud']."]).addTo(myMap);";
+            ?>
+        </script>
+    <?php }?>
+    <script src="<?= base_url('assets/js/mineria-ilegal.js');?>"></script>    
 </body>
 
 </html>

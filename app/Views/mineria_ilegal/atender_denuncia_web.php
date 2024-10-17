@@ -40,9 +40,6 @@
                                     <li class="nav-item">
                                         <a class="nav-link " data-toggle="tab" href="#adjuntos" role="tab"><strong>Adjunto(s)</strong></a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#hoja_ruta" role="tab"><strong>Hoja de Ruta</strong></a>
-                                    </li>
                                 </ul>
                                 <!-- Tab panes -->
                                 <div class="tab-content tabs card-block">
@@ -115,9 +112,6 @@
                                     </div>
                                     <div class="tab-pane " id="datos_personales" role="tabpanel">
                                         <div class="row">
-                                            <div class="col-sm-12 text-center mb-3">
-                                                <button type="button" class="btn btn-inverse verificar_denuncias"><i class="fa fa-search"></i> Verificar Formularios Minería Ilegal</button>
-                                            </div>
                                             <div class="col-md-6 col-sm-12">
                                                 <div class="form-group row">
                                                     <label class="col-sm-2 col-form-label">Nombre(s) :</label>
@@ -533,38 +527,6 @@
                                                     </div>
                                                 </div>
                                             <?php }?>
-                                        </div>
-                                    </div>
-                                    <div class="tab-pane " id="hoja_ruta" role="tabpanel">
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Dirección Departamental/Regional * :</label>
-                                            <div class="col-sm-10">
-                                                <?php
-                                                    $campo = 'fk_oficina';
-                                                    echo form_dropdown($campo, $oficinas, set_value($campo, set_value($campo,(isset($denuncia[$campo]) ? $denuncia[$campo] : ''))), array('id' => $campo, 'class' => 'form-control'));
-                                                ?>
-                                                <span class="messages"></span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-sm-2 col-form-label">Destinatario * :</label>
-                                            <div class="col-sm-10">
-                                                <?php $campo = 'fk_usuario_destinatario';?>
-                                                <select id="<?= $campo;?>" name="<?= $campo;?>" class="analista-destinatario-mineria-ilegal-ajax col-sm-12">
-                                                    <?php if(isset($usu_destinatario)){ ?>
-                                                        <option value="<?= $usu_destinatario['id'];?>"><?= $usu_destinatario['nombre'];?></option>
-                                                    <?php }else{ ?>
-                                                        <option value="">Escriba el Nombre o Cargo...</option>
-                                                    <?php } ?>
-                                                </select>
-                                                <span class="messages"></span>
-                                                <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                                    <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                                <?php }?>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>

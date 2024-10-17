@@ -20,9 +20,6 @@ $(document).ready(function () {
         id_hoja_ruta: {
             presence: true,
         },
-        id_derivacion: {
-            presence: true,
-        },
         id_denuncia: {
             presence: true,
         },
@@ -33,7 +30,7 @@ $(document).ready(function () {
             presence: {
                 message: "^Debe anexar a un denunciante al menos."
             },
-        },        
+        },
         departamento:{
             presence: {
                 message: "^Debe seleccionar un Departamento."
@@ -53,14 +50,6 @@ $(document).ready(function () {
             presence: true,
         },
         descripcion_lugar: {
-            presence: true,
-        },        
-        fk_usuario_destinatario:{
-            presence: {
-                message: "^Debe seleccionar el Destinatario."
-            },
-        },
-        instruccion: {
             presence: true,
         },
     };
