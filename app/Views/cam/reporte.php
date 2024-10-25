@@ -72,6 +72,9 @@
                                 <div class="col-sm-12 mt-3">
                                     <button name="enviar" class="btn btn-info" type="submit" value="buscar"><i class="fa fa-list"></i> Generar Reporte</button>
                                     <button name="enviar" class="btn btn-inverse" type="submit" value="excel"><i class="fa fa-file-excel-o"></i> Exportar Excel</button>
+                                    <?php if(in_array(23, session()->get('registroPermisos'))){?>
+                                        <button name="enviar" class="btn btn-warning" type="submit" value="excel-planificacion"><i class="fa fa-file-excel-o"></i> Exportar Datos Planificación</button>
+                                    <?php }?>
                                 </div>
                             </div>
                         <?= form_close();?>

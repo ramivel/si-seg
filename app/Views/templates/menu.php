@@ -184,7 +184,38 @@
                     </ul>
                 </li>
             </ul>
+        <?php }?>
 
+        <?php if(in_array(23, session()->get('registroPermisos'))){?>
+            <div class="pcoded-navigatio-lavel">Trámites</div>
+            <ul class="pcoded-item pcoded-left-item">
+                <li class="pcoded-hasmenu <?= (isset($menu_actual) && strpos($menu_actual, 'cam/') !== false ) ? 'pcoded-trigger' : '';?>">
+                    <a href="javascript:void(0)">
+                        <span class="pcoded-micon"><i class="feather icon-layers"></i></span>
+                        <span class="pcoded-mtext">CAM</span>
+                    </a>
+                    <ul class="pcoded-submenu">
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'cam/reporte') ? 'active' : '';?>">
+                            <a href="<?= base_url('cam/reporte');?>">
+                                <span class="pcoded-mtext">Reporte Ejecutivo</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="pcoded-hasmenu <?= (isset($menu_actual) && strpos($menu_actual, 'mineria_ilegal/') !== false ) ? 'pcoded-trigger' : '';?>">
+                    <a href="javascript:void(0)">
+                        <span class="pcoded-micon"><i class="feather icon-layers"></i></span>
+                        <span class="pcoded-mtext">Minería Ilegal</span>
+                    </a>
+                    <ul class="pcoded-submenu">
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'mineria_ilegal/reporte') ? 'active' : '';?>">
+                            <a href="<?= base_url('mineria_ilegal/reporte');?>">
+                                <span class="pcoded-mtext">Reporte Ejecutivo</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         <?php }?>
 
         <?php if(isset($tramites_menu) && count($tramites_menu) > 0){?>

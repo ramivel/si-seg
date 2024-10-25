@@ -242,7 +242,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->post('guardar_atender', 'MineriaIlegal::guardarAtender');
         $routes->add('editar/(:num)', 'MineriaIlegal::editar/$1');
         $routes->post('guardar_editar', 'MineriaIlegal::guardarEditar');
-        $routes->add('anexar/(:num)', 'MineriaIlegal::anexar/$1');
+        $routes->add('anexar/(:num)/(:num)', 'MineriaIlegal::anexar/$1/$2');
         $routes->post('guardar_anexar', 'MineriaIlegal::guardarAnexar');
         $routes->add('anexar_sincobol/(:num)', 'MineriaIlegal::anexarSincobol/$1');
         $routes->post('guardar_anexar_sincobol', 'MineriaIlegal::guardarAnexarSincobol');

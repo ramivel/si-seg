@@ -3593,10 +3593,41 @@ class Cam extends BaseController
                     $data['data_chart'] = json_encode($data_js);
                     $data['charts_js'] = 'chart_general.js';
 
-                    if ($this->request->getPost() && $this->request->getPost('enviar')=='excel') {
+                    if ($this->request->getPost() && $this->request->getPost('enviar')=='excel')
                         $this->exportarReporteGeneral($estados_tramites, $oficinas, $resultado);
-                    }
-
+                }
+                if ($this->request->getPost() && $this->request->getPost('enviar')=='excel-planificacion') {
+                    $campos = array(
+                    "to_char(ac.fecha_mecanizada, 'DD/MM/YYYY') as fecha_mecanizada", 'ac.correlativo',"to_char(ac.ultimo_fecha_derivacion, 'DD/MM/YYYY') as ultima_derivacion",
+                    "CONCAT(etp.orden,'. ',etp.nombre) as estado_tramite",
+                    "CASE WHEN ac.ultimo_fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE '' END as sub_estado_tramite",
+                    'dam.titular', 'dam.clasificacion_titular',
+                    "o.nombre as regional"
+                    );
+                    $where = array(
+                        'ac.deleted_at' => NULL,
+                        'ac.fecha_mecanizada >=' => $this->request->getPost('fecha_inicio'),
+                        'ac.fecha_mecanizada <=' => $this->request->getPost('fecha_fin'),
+                    );
+                    if($this->request->getPost('oficina') && $this->request->getPost('oficina')>0)
+                        $where['ac.fk_oficina'] = $this->request->getPost('oficina');
+                    $builder = $db->table('public.acto_administrativo as ac')
+                    ->select($campos)
+                    ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+                    ->join('estado_tramite as etp', 'ac.ultimo_fk_estado_tramite_padre = etp.id', 'left')
+                    ->join('estado_tramite as eth', 'ac.ultimo_fk_estado_tramite_hijo = eth.id', 'left')
+                    ->join('public.oficinas as o', 'ac.fk_oficina = o.id', 'left')
+                    ->where($where)
+                    ->orderBY('o.nombre ASC, ac.fecha_mecanizada ASC');
+                    $datos_planificacion = $builder->get()->getResultArray();
+                    $campos_listar_planificacion=array(
+                        'Fecha Mecanizada','Hoja de Ruta','Fecha Ultimo Cambio','Estado Tramite','Sub Estado Tramite','Solicitante','Clasificación APM','Dirección Departamental/Regional'
+                    );
+                    $campos_reales_planificacion=array(
+                        'fecha_mecanizada','correlativo','ultima_derivacion','estado_tramite','sub_estado_tramite','titular','clasificacion_titular','regional'
+                    );
+                    $file_name = 'CAM_'.$this->request->getPost('fecha_inicio').'_'.$this->request->getPost('fecha_fin').'.xlsx';
+                    $this->exportarXLS($campos_listar_planificacion, $campos_reales_planificacion, $datos_planificacion, $file_name, $oficinas[$this->request->getPost('oficina')], 'DE : '.$this->request->getPost('fecha_inicio').' A :'.$this->request->getPost('fecha_fin'));
                 }
             }
         }

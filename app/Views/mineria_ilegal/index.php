@@ -63,7 +63,7 @@
                                                         case 'REGULARIZACIÓN':
                                                             echo anchor('documentos/agregar/'.$id_tramite.'/'.$fila['id_hoja_ruta'].'/'.$fila['id_derivacion'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             echo anchor($controlador.'atender/'.$fila['id_hoja_ruta'].'/'.$fila['id_derivacion'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            echo anchor($controlador.'anexar/'.$fila['id_hoja_ruta'], 'Anexar a H.R. Míneria Ilegal',array('class' =>'dropdown-item waves-light waves-effect'));
+                                                            echo anchor($controlador.'anexar/'.$fila['id_hoja_ruta'].'/'.$fila['id_derivacion'], 'Anexar a H.R. Míneria Ilegal',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             echo anchor($controlador.'anexar_sincobol/'.$fila['id_hoja_ruta'], 'Anexar H.R. SINCOBOL',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             if($fila['editar'] == 't')
                                                                 echo anchor($controlador.'editar/'.$fila['id_hoja_ruta'], 'Editar Regularización',array('class' =>'dropdown-item waves-light waves-effect'));
@@ -74,7 +74,7 @@
                                                         case 'DEVUELTO':
                                                             echo anchor('documentos/agregar/'.$id_tramite.'/'.$fila['id_hoja_ruta'].'/'.$fila['id_derivacion'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             echo anchor($controlador.'atender/'.$fila['id_hoja_ruta'].'/'.$fila['id_derivacion'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));
-                                                            echo anchor($controlador.'anexar/'.$fila['id_hoja_ruta'], 'Anexar a H.R. Míneria Ilegal',array('class' =>'dropdown-item waves-light waves-effect'));
+                                                            echo anchor($controlador.'anexar/'.$fila['id_hoja_ruta'].'/'.$fila['id_derivacion'], 'Anexar a H.R. Míneria Ilegal',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             echo anchor($controlador.'anexar_sincobol/'.$fila['id_hoja_ruta'], 'Anexar H.R. SINCOBOL',array('class' =>'dropdown-item waves-light waves-effect'));
                                                             if(in_array(20, session()->get('registroPermisos')) && $fila['finalizar'] == 'SI')
                                                                 echo anchor($controlador.'finalizar/'.$fila['id_hoja_ruta'], 'Finalizar',array('class' =>'dropdown-item waves-light waves-effect'));

@@ -20,6 +20,9 @@ class Usuarios extends BaseController
         'Correspondencia Externa' => array(
             11 => 'Correspondencia Externa',
         ),
+        'Planificación y Gestion Institucional' => array(
+            23 => 'Reportes Generales de los Trámites',
+        ),
         'Contratos Administrativos Mineros' => array(
             1 => 'Migrar SINCOBOL',
             2 => 'Anular Documentos',
