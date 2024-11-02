@@ -11,7 +11,41 @@
                     </div>
                     <div class="card-block">
                         <?= form_open_multipart($accion, ['id'=>'formulario']);?>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'fk_hoja_ruta_reiterativa','id'=>'fk_hoja_ruta_reiterativa','value'=>set_value('fk_hoja_ruta_reiterativa', (isset($fk_hoja_ruta_reiterativa) ? $fk_hoja_ruta_reiterativa : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+
                         <!-- Row start -->
+                        <div class="row" id="div_denuncia_reiterativa" style="display: none;">
+                            <div class="col-md-12 col-sm-12" >
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Denuncia Reiterativa:</label>
+                                    <div class="col-sm-4">
+                                        <?php
+                                            $campo = 'hoja_ruta_reiterativa';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'class' => 'form-control',
+                                                'readonly' => 'true',
+                                                'value' => set_value($campo, '')
+                                            ));
+                                        ?>
+                                        <span class="messages"></span>
+                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                        <?php }?>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <button type="button" class="btn btn-danger waves-effect waves-light" onclick="desanexar_reiterativa()" title="Desanexar Reiterativa"><i class="icofont icofont-ui-delete"></i> Desanexar Reiterativa</button>
+                                        <?php echo anchor('#', '<i class="fa fa-eye"></i> Ver',array('id'=>'ver_hoja_ruta_reiterativa','class' =>'btn btn-info enlace_reiterativa', "title"=>"Ver la Denuncia", "target"=>"_blank"));?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-lg-12 col-xl-12">
                                 <!-- Nav tabs -->

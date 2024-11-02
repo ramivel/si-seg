@@ -1253,5 +1253,62 @@ function verficar_denuncia_denunciante(id_denunciante){
     });
   }
 }
+function verficar_denuncia_denunciante_nombre(nombres, apellidos){
+  $.ajax({
+    type: "POST",
+    url: baseUrl + "mineria_ilegal/ajax_verficar_denuncia_denunciante_nombre",
+    data: {
+      nombres: nombres,
+      apellidos: apellidos,
+    },
+    error: function () {
+      console.log("error ajax.");
+    },
+    success: function (html) {
+      $("#modal-verificacion-denuncia-header").html("VERIFICAR DENUNCIAS POR DENUNCIANTE");
+      $("#modal-verificacion-denuncia-body").html(html);
+      $("#modal-verificacion-denuncia").modal('toggle');
+      $('#tabla-verificacion').DataTable({
+          responsive: true,
+          order: [],
+          columnDefs: [
+              { width: 200, targets: 0 }
+          ],
+          fixedColumns: false,
+          pageLength: 50,
+          lengthMenu: [[50, 100, -1], [50, 100, "All"]],
+          language: {
+              "url": "https://cdn.datatables.net/plug-ins/1.11.3/i18n/es-mx.json"
+          },
+          'aoColumnDefs': [{
+              'bSortable': false,
+              'aTargets': ['nosort']
+          }]
+      });
+    },
+  });
+}
 
-
+function agregar_reiterativa(id_hr, correlativo){
+  if(id_hr && correlativo){
+    var div_denuncia_reiterativa = document.getElementById('div_denuncia_reiterativa');
+    var fk_hoja_ruta_reiterativa = document.getElementById('fk_hoja_ruta_reiterativa');
+    var hoja_ruta_reiterativa = document.getElementById('hoja_ruta_reiterativa');
+    var ver_hoja_ruta_reiterativa = document.getElementById('ver_hoja_ruta_reiterativa');
+    fk_hoja_ruta_reiterativa.value = id_hr;
+    hoja_ruta_reiterativa.value = correlativo;
+    ver_hoja_ruta_reiterativa.href = "/garnet/mineria_ilegal/ver/4/"+id_hr;
+    $("#modal-verificacion-denuncia").modal('toggle');
+    div_denuncia_reiterativa.style.display = 'block';
+  }
+}
+function desanexar_reiterativa(){
+  var div_denuncia_reiterativa = document.getElementById('div_denuncia_reiterativa');
+  var fk_hoja_ruta_reiterativa = document.getElementById('fk_hoja_ruta_reiterativa');
+  var hoja_ruta_reiterativa = document.getElementById('hoja_ruta_reiterativa');
+  var ver_hoja_ruta_reiterativa = document.getElementById('ver_hoja_ruta_reiterativa');
+  fk_hoja_ruta_reiterativa.value = "";
+  hoja_ruta_reiterativa.value = "";
+  ver_hoja_ruta_reiterativa.href = "#";
+  div_denuncia_reiterativa.style.display = 'none';
+}

@@ -9,120 +9,34 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h5>Formulario</h5>
-                        <span>Los campos con <code>*</code> son obligatorios.</span>
+                    <div class="card-header text-center">
+                        <h3 class="mb-3"><?= $correlativo_hoja_ruta;?></h3>
                     </div>
                     <div class="card-block">
-                        <?= form_open_multipart($accion, ['id'=>'formulario']);?>
-                        <div class="row">
-                            <div class="col-md-6 col-sm-12">
-                                <div class="form-group row">
-                                    <label class="col-sm-5 col-form-label">Tipo de Minería Ilegal : </label>
-                                    <div class="col-sm-7">
-                                        <?php
-                                            $campo = 'fk_tipo_denuncia';
-                                            echo form_input(array(
-                                                'name' => $campo,
-                                                'id' => $campo,
-                                                'readonly' => 'true',
-                                                'class' => 'form-control form-control-uppercase',
-                                                'value' => set_value($campo,(isset($denuncia[$campo]) ? $tipo_denuncias[$denuncia[$campo]] : ''),false)
-                                            ));
-                                        ?>
-                                        <span class="messages"></span>
-                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                        <?php }?>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 col-sm-12">
-                                <div class="form-group row">
-                                    <label class="col-sm-5 col-form-label">Correlativo Hoja de Ruta Minería Ilegal : </label>
-                                    <div class="col-sm-7">
-                                        <?php
-                                            $campo = 'correlativo_hr';
-                                            echo form_input(array(
-                                                'name' => $campo,
-                                                'id' => $campo,
-                                                'readonly' => 'true',
-                                                'class' => 'form-control form-control-uppercase',
-                                                'value' => set_value($campo,(isset($hoja_ruta[$campo]) ? $hoja_ruta[$campo] : ''),false)
-                                            ));
-                                        ?>
-                                        <span class="messages"></span>
-                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                        <?php }?>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-sm-12">
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Fecha : </label>
-                                    <div class="col-sm-5">
-                                        <?php
-                                            $campo = 'fecha_hr';
-                                            echo form_input(array(
-                                                'name' => $campo,
-                                                'id' => $campo,
-                                                'class' => 'form-control form-control-uppercase',
-                                                'readonly' => 'true',
-                                                'value' => set_value($campo,(isset($hoja_ruta[$campo]) ? $hoja_ruta[$campo] : ''),false)
-                                            ));
-                                        ?>
-                                        <span class="messages"></span>
-                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                        <?php }?>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-sm-12">
-                                <div class="form-group row">
-                                    <label class="col-sm-5 col-form-label">Correlativo Formulario de Minería Ilegal : </label>
-                                    <div class="col-sm-7">
-                                        <?php
-                                            $campo = 'correlativo_denuncia';
-                                            echo form_input(array(
-                                                'name' => $campo,
-                                                'id' => $campo,
-                                                'readonly' => 'true',
-                                                'class' => 'form-control form-control-uppercase',
-                                                'value' => set_value($campo,(isset($denuncia[$campo]) ? $denuncia[$campo] : ''),false)
-                                            ));
-                                        ?>
-                                        <span class="messages"></span>
-                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                        <?php }?>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-sm-12">
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Fecha : </label>
-                                    <div class="col-sm-5">
-                                        <?php
-                                            $campo = 'fecha_denuncia';
-                                            echo form_input(array(
-                                                'name' => $campo,
-                                                'id' => $campo,
-                                                'class' => 'form-control form-control-uppercase',
-                                                'readonly' => 'true',
-                                                'value' => set_value($campo,(isset($denuncia[$campo]) ? $denuncia[$campo] : ''),false)
-                                            ));
-                                        ?>
-                                        <span class="messages"></span>
-                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                        <?php }?>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="table-responsive">
+                            <h4 class="sub-title mb-2">Información</h4>
+                            <table class="table table-bordered mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th class="text-nowrap text-right" width="200px" scope="row">Tipo de Minería Ilegal:</th>
+                                        <td><?= $tipo_mineria_ilegal;?></td>
+                                        <th class="text-nowrap text-right" width="200px" scope="row">Fecha Hoja Ruta:</th>
+                                        <td><?= $fecha_hoja_ruta;?></td>
+                                        <th class="text-nowrap text-right" width="200px" scope="row">Documento Derivado:</th>
+                                        <td><?= $documento_derivado;?></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th class="text-nowrap text-right" width="300px" scope="row">Formulario de Minería Ilegal:</th>
+                                        <td><?= $correlativo_denuncia;?></td>
+                                        <th class="text-nowrap text-right" width="300px" scope="row">Fecha del Formulario de Minería Ilegal:</th>
+                                        <td><?= $fecha_denuncia;?></td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                         <?php if($denuncia['fk_tipo_denuncia']==3){?>
                             <h4 class="sub-title mt-2 mb-2">Origen</h4>
@@ -256,7 +170,43 @@
                                 </tbody>
                             </table>
                         </div>
-
+                        <?= form_open_multipart($accion, ['id'=>'formulario']);?>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'correlativo_hoja_ruta','value'=>set_value('correlativo_hoja_ruta', (isset($correlativo_hoja_ruta) ? $correlativo_hoja_ruta : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'tipo_mineria_ilegal','value'=>set_value('tipo_mineria_ilegal', (isset($tipo_mineria_ilegal) ? $tipo_mineria_ilegal : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'fecha_hoja_ruta','value'=>set_value('fecha_hoja_ruta', (isset($fecha_hoja_ruta) ? $fecha_hoja_ruta : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'documento_derivado','value'=>set_value('documento_derivado', (isset($documento_derivado) ? $documento_derivado : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'correlativo_denuncia','value'=>set_value('correlativo_denuncia', (isset($correlativo_denuncia) ? $correlativo_denuncia : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'fecha_denuncia','value'=>set_value('fecha_denuncia', (isset($fecha_denuncia) ? $fecha_denuncia : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
                         <div class="form-group row d-none">
                             <div class="col-sm-10">
                                 <?= form_input(array('type'=>'hidden','name'=>'id_hoja_ruta','id'=>'id_hoja_ruta','value'=>set_value('id_hoja_ruta', (isset($id_hoja_ruta) ? $id_hoja_ruta : ''), false)));?>
@@ -276,6 +226,7 @@
                             </div>
                         </div>
                         <h4 class="sub-title mt-4 mb-2">ANEXAR HOJA DE RUTA DE SINCOBOL</h4>
+                        <span>Los campos con <code>*</code> son obligatorios.</span>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">Hoja(s) de ruta(s) Interna o Externa del SINCOBOL que se anexará * <span class="mytooltip tooltip-effect-5">
                                 <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>

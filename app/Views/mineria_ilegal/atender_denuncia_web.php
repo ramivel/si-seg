@@ -19,8 +19,47 @@
                                 <span class="messages"></span>
                             </div>
                         </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'fk_municipio','id'=>'fk_municipio','value'=>set_value('fk_municipio', (isset($denuncia['fk_municipio']) ? $denuncia['fk_municipio'] : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'fk_hoja_ruta_reiterativa','id'=>'fk_hoja_ruta_reiterativa','value'=>set_value('fk_hoja_ruta_reiterativa', (isset($fk_hoja_ruta_reiterativa) ? $fk_hoja_ruta_reiterativa : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
 
                         <!-- Row start -->
+                        <div class="row" id="div_denuncia_reiterativa" style="display: none;">
+                            <div class="col-md-12 col-sm-12" >
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Denuncia Reiterativa:</label>
+                                    <div class="col-sm-4">
+                                        <?php
+                                            $campo = 'hoja_ruta_reiterativa';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'class' => 'form-control',
+                                                'readonly' => 'true',
+                                                'value' => set_value($campo, '')
+                                            ));
+                                        ?>
+                                        <span class="messages"></span>
+                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                        <?php }?>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <button type="button" class="btn btn-danger waves-effect waves-light" onclick="desanexar_reiterativa()" title="Desanexar Reiterativa"><i class="icofont icofont-ui-delete"></i> Desanexar Reiterativa</button>
+                                        <?php echo anchor('#', '<i class="fa fa-eye"></i> Ver',array('id'=>'ver_hoja_ruta_reiterativa','class' =>'btn btn-info enlace_reiterativa', "title"=>"Ver la Denuncia", "target"=>"_blank"));?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-lg-12 col-xl-12">
                                 <!-- Nav tabs -->
@@ -112,10 +151,10 @@
                                     </div>
                                     <div class="tab-pane " id="datos_personales" role="tabpanel">
                                         <div class="row">
-                                            <div class="col-md-6 col-sm-12">
+                                            <div class="col-md-4 col-sm-12">
                                                 <div class="form-group row">
-                                                    <label class="col-sm-2 col-form-label">Nombre(s) :</label>
-                                                    <div class="col-sm-10">
+                                                    <label class="col-sm-3 col-form-label">Nombre(s) :</label>
+                                                    <div class="col-sm-9">
                                                         <?php
                                                             $campo = 'nombres';
                                                             echo form_input(array(
@@ -133,10 +172,10 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 col-sm-12">
+                                            <div class="col-md-4 col-sm-12">
                                                 <div class="form-group row">
-                                                    <label class="col-sm-2 col-form-label">Apellido(s) :</label>
-                                                    <div class="col-sm-10">
+                                                    <label class="col-sm-3 col-form-label">Apellido(s) :</label>
+                                                    <div class="col-sm-9">
                                                         <?php
                                                             $campo = 'apellidos';
                                                             echo form_input(array(
@@ -153,6 +192,9 @@
                                                         <?php }?>
                                                     </div>
                                                 </div>
+                                            </div>
+                                            <div class="col-md-4 col-sm-12">
+                                                <button type="button" id="verficar_denuncia_denunciante" onclick="verficar_denuncia_denunciante_nombre('<?= $denuncia['nombres'];?>','<?= $denuncia['apellidos'];?>');" class="btn btn-inverse"><i class="fa fa-search"></i> Verificar Denuncias Presentadas por el Denunciate</button>
                                             </div>
                                             <div class="col-md-4 col-sm-12">
                                                 <div class="form-group row">
@@ -326,6 +368,30 @@
                                                         <?php if(isset($validation) && $validation->hasError($campo)){?>
                                                             <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
                                                         <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-sm-12">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-2 col-form-label">Dirección Desconcentrada que pertenece el Municipio:</label>
+                                                    <div class="col-sm-7">
+                                                        <?php
+                                                            $campo = 'direccion_municipio';
+                                                            echo form_input(array(
+                                                                'name' => $campo,
+                                                                'id' => $campo,
+                                                                'class' => 'form-control',
+                                                                'readonly' => 'true',
+                                                                'value' => set_value($campo,(isset($oficina_municipio['nombre']) ? $oficina_municipio['nombre'] : ''),false)
+                                                            ));
+                                                        ?>
+                                                        <span class="messages"></span>
+                                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                                        <?php }?>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <button type="button" id="verficar_denuncia_municipio" class="btn btn-inverse"><i class="fa fa-search"></i> Verificar Denuncias en el Municipio</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -543,6 +609,8 @@
                             </div>
                         </div>
                         <?= form_close();?>
+
+                        <?= $modal_verificacion_denuncia;?>
 
                         <div class="modal fade" id="archivado-denuncia-modal" tabindex="-1" role="dialog">
                             <div class="modal-dialog modal-lg" role="document">

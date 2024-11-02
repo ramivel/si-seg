@@ -9,6 +9,6 @@
         <a class="nav-link <?= $activo=='DOCUMENTO(S) GENERADO(S)' ? 'active':'';?>" href="<?= $url_documentos_generados;?>#tabla_datos" title="Ver la Información"><strong>DOCUMENTO(S) GENERADO(S)</strong></a>
     </li>
     <li class="nav-item">
-        <a class="nav-link <?= $activo=='HOJA(S) DE RUTA ANEXADA(S)' ? 'active':'';?>" href="<?= $url_hojas_ruta_anexadas;?>#tabla_datos" title="Ver la Información"><strong>HOJA(S) DE RUTA ANEXADA(S)</strong></a>
+        <a class="nav-link <?= $activo=='HOJA(S) DE RUTA ANEXADA(S)' ? 'active':'';?>" href="<?= $url_hojas_ruta_anexadas;?>#tabla_datos" title="Ver la Información"><strong>HOJA(S) DE RUTA SINCOBOL ANEXADA(S)</strong></a>
     </li>
 </ul>

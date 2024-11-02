@@ -182,7 +182,7 @@
     <script src="<?= base_url('assets/pages/data-table/js/data-table-custom.js?n=1');?>"></script>
 
     <!-- Custom Select 2 -->
-    <script type="text/javascript" src="<?= base_url('assets/pages/advance-elements/select2-custom.js?n=5');?>"></script>
+    <script type="text/javascript" src="<?= base_url('assets/pages/advance-elements/select2-custom.js?n=6');?>"></script>
 
     <!-- Custom From Validation -->
     <?php if(isset($validacion_js)){ ?>

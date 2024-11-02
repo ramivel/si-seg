@@ -33,6 +33,7 @@ class HojaRutaMineriaIlegalModel extends Model{
         'fojas',
         'caja_documental',
         'gestion_archivo',
+        'fk_hoja_ruta_reiterativa',
     ];
 
     protected $useTimestamps = true;

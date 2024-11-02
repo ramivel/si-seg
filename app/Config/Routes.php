@@ -282,6 +282,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_municipio_direccion', 'MineriaIlegal::ajaxMunicipioDireccion');
         $routes->add('ajax_verficar_denuncia_municipio', 'MineriaIlegal::ajaxVerficarDenunciaMunicipio');
         $routes->add('ajax_verficar_denuncia_denunciante', 'MineriaIlegal::ajaxVerficarDenunciaDenunciante');
+        $routes->add('ajax_verficar_denuncia_denunciante_nombre', 'MineriaIlegal::ajaxVerficarDenunciaDenuncianteNombre');
 
         $routes->add('denuncia_manual', 'MineriaIlegal::denunciaManual');
         $routes->add('denuncia_manual_fmi', 'MineriaIlegal::denunciaManualFmi');

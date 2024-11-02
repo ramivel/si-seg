@@ -34,6 +34,14 @@
                                         <th class="text-nowrap text-right" scope="row">Fecha y hora del Formulario de Minería Ilegal:</th>
                                         <td><?= $denuncia['fecha_denuncia'];?></td>
                                     </tr>
+                                    <?php if(isset($hoja_ruta_reiterativa) && $hoja_ruta_reiterativa){?>
+                                        <tr>
+                                            <th class="text-nowrap text-right" scope="row">Denuncia Reiterativa:</th>
+                                            <td><?= $hoja_ruta_reiterativa['correlativo_hr'];?></td>
+                                            <th class="text-nowrap text-right" scope="row">Fecha y hora:</th>
+                                            <td><?= $hoja_ruta_reiterativa['fecha_hr'];?></td>
+                                        </tr>
+                                    <?php }?>
                                 </tbody>
                             </table>
                         </div>
