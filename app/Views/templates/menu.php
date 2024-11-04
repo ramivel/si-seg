@@ -513,6 +513,34 @@
                         </li>
                     <?php }?>
 
+                    <?php if($row['controlador'] == 'lpe/'){?>
+                        <li class="pcoded-hasmenu <?= (isset($menu_actual) && strpos($menu_actual, $row['controlador']) !== false ) ? 'pcoded-trigger' : '';?>">
+                            <a href="javascript:void(0)">
+                                <span class="pcoded-micon"><i class="feather icon-folder"></i></span>
+                                <span class="pcoded-mtext"><?= $row['menu'] ?></span>
+                            </a>
+                            <ul class="pcoded-submenu">
+                                <?php if(in_array(1, session()->get('registroPermisos'))){?>
+                                    <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'agregar') ? 'active' : '';?>">
+                                        <a href="<?= base_url($row['controlador'].'agregar');?>">
+                                            <span class="pcoded-mtext">Migrar SOL-LPE</span>
+                                        </a>
+                                    </li>
+                                <?php }?>
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_recepcion') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'listado_recepcion');?>">
+                                        <span class="pcoded-mtext">Recepción de H.R.</span>
+                                    </a>
+                                </li>
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'mis_tramites') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'mis_tramites');?>">
+                                        <span class="pcoded-mtext">Mis Hojas de Ruta</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    <?php }?>
+
                 </ul>
             <?php }?>
         <?php } ?>

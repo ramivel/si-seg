@@ -13,7 +13,7 @@
                     </div>
                 </div>
             </div>
-            <?php if($navegador){?>
+            <?php if(isset($navegador) && $navegador){?>
             <!--div class="col-lg-4">
                 <div class="page-header-breadcrumb">
                     <ul class="breadcrumb-title">

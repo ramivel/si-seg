@@ -1034,6 +1034,82 @@ $(document).ready(function () {
   });
   /* FIN BUSCADOR AREA MINERA DERECHO PREFERENTE */
 
+  /* LICENCIA DE PROSPECCIÓN Y EXPLORACION */
+  $(".hoja-ruta-madre-lpe-ajax").select2({
+    language: "es",
+    placeholder: "Escriba la Hoja de Ruta Madre o el Código Único del Área Minera...",
+    minimumInputLength: 1,
+    ajax: {
+      url: baseUrl + "lpe/ajax_hoja_ruta",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+  $(".hoja-ruta-madre-lpe-ajax").on("select2:select", function (e) {
+    var data = e.params.data;
+    $.ajax({
+      url: baseUrl + "lpe/ajax_datos_hr",
+      type: "POST",
+      data: data,
+      dataType: "json",
+      success: function (result) {
+        $("#fk_area_minera").val(result.fk_area_minera);
+        $("#referencia").val(result.referencia);
+        $("#fecha_mecanizada").val(result.fecha_mecanizada);
+        $("#denominacion").val(result.denominacion);
+        $("#codigo_unico").val(result.codigo_unico);
+        $("#extension").val(result.extension);
+        $("#departamentos").val(result.departamentos);
+        $("#provincias").val(result.provincias);
+        $("#municipios").val(result.municipios);
+        $("#area_protegida").val(result.area_protegida);
+        $("#regional").val(result.regional);
+        $("#representante_legal").val(result.representante_legal);
+        $("#nacionalidad").val(result.nacionalidad);
+        $("#titular").val(result.titular);
+        $("#clasificacion").val(result.clasificacion);
+        $("#domicilio_legal").val(result.domicilio_legal);
+        $("#domicilio_procesal").val(result.domicilio_procesal);
+        $("#telefono_solicitante").val(result.telefono_solicitante);
+      },
+    });
+  });
+  $(".analista-destinatario-lpe-ajax").select2({
+    language: "es",
+    placeholder: "Escriba el Nombre o Cargo...",
+    minimumInputLength: 3,
+    ajax: {
+      url: baseUrl + "lpe/ajax_analista_destinario",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+  /* FIN LICENCIA DE PROSPECCIÓN Y EXPLORACION */
+
   /* LIBRO DE REGISTRO */
   $(".libro-registro-ajax").select2({
     language: "es",

@@ -343,20 +343,6 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_analista_destinario', 'LicenciaComercializacion::ajaxAnalistaDestinatario');
     });
 
-    /*$routes->group('acto_administrativo', function($routes){
-        $routes->add('/', 'ActoAdministrativo::index');
-        $routes->add('agregar', 'ActoAdministrativo::agregar');
-        $routes->add('ajax_hoja_ruta', 'ActoAdministrativo::ajaxHojaRutaMadre');
-        $routes->add('ajax_datos_hr', 'ActoAdministrativo::ajaxDatosHR');
-
-        $routes->add('atender/(:num)', 'ActoAdministrativo::atender/$1');
-        $routes->post('guardar_atender', 'ActoAdministrativo::guardar_atender');
-        $routes->add('modificar/(:num)', 'ActoAdministrativo::modificar/$1');
-        $routes->post('guardar_modificar', 'ActoAdministrativo::guardar_modificar');
-        $routes->add('ver/(:num)/(:num)', 'ActoAdministrativo::ver/$1/$1');
-        $routes->add('eliminar/(:num)', 'ActoAdministrativo::eliminar/$1');
-    });*/
-
     $routes->group('documentos', function($routes){
         $routes->add('agregar/(:any)', 'Documentos::agregar/$1');
         $routes->add('editar/(:num)/(:num)', 'Documentos::editar/$1/$2');
@@ -389,6 +375,20 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         //$routes->add('actualizar_path', 'Documentos::actualizarPath');
 
     });
+
+    $routes->group('lpe', function($routes){
+        $routes->add('listado_recepcion', 'Lpe::listadoRecepcion');
+        $routes->add('mis_tramites', 'Lpe::misTramites');
+
+        $routes->add('agregar', 'Lpe::agregar');
+        $routes->post('recibir_multiple', 'Lpe::recibirMultiple');
+
+        $routes->add('ajax_hoja_ruta', 'Lpe::ajaxHojaRutaMadre');
+        $routes->add('ajax_datos_hr', 'Lpe::ajaxDatosHR');
+        $routes->add('ajax_analista_destinario', 'Lpe::ajaxAnalistaDestinatario');
+        $routes->add('ajax_guardar_devolver', 'Lpe::ajaxGuardarDevolver');
+    });
+
 });
 $routes->group('', ['filter'=>'AlreadyLogged'], function($routes){
     // Agregar todas las rutas que necesitan proteccion
