@@ -4,7 +4,8 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header text-center">
+                        <h3 class="mb-3"><?= $correlativo;?></h3>
                         <h5>Formulario</h5>
                         <span>Los campos con <code>*</code> son obligatorios.</span>
                     </div>
@@ -12,7 +13,13 @@
                         <?= form_open($accion, ['id'=>'formulario']);?>
                             <div class="form-group row d-none">
                                 <div class="col-sm-10">
-                                    <?= form_hidden('id', set_value('id', $fila['id']));?>
+                                    <?= form_hidden('correlativo', set_value('correlativo', (isset($correlativo) ? $correlativo : '')));?>
+                                    <span class="messages"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row d-none">
+                                <div class="col-sm-10">
+                                    <?= form_hidden('id', set_value('id', (isset($fila['id']) ? $fila['id'] : '')));?>
                                     <span class="messages"></span>
                                 </div>
                             </div>
@@ -21,30 +28,12 @@
                                     <?= form_hidden('id_tramite', set_value('id_tramite', $id_tramite));?>
                                     <span class="messages"></span>
                                 </div>
-                            </div>                            
-                            <div class="row">
-                                <div class="col-sm-12 text-center mb-4"><h5><?= $fila['correlativo'];?></h5></div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Tipo Documento:</label>
-                                <div class="col-sm-8">
-                                    <?php
-                                        $campo = 'fk_tipo_documento';
-                                        echo form_input(array(
-                                            'name' => $campo,
-                                            'id' => $campo,
-                                            'class' => 'form-control',
-                                            'readonly' => 'true',
-                                            'value' => set_value($campo,$tiposDocumentos[$fila[$campo]],false)
-                                        ));
-                                    ?>
-                                </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-2 col-form-label">Hoja Ruta Madre:</label>
                                 <div class="col-sm-8">
                                     <?php
-                                        $campo = 'hr';
+                                        $campo = 'correlativo_hr';
                                         echo form_input(array(
                                             'name' => $campo,
                                             'id' => $campo,
@@ -55,29 +44,76 @@
                                     ?>
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Código Único:</label>
-                                <div class="col-sm-3">
-                                    <?php
-                                        $campo = 'codigo_unico';
-                                        echo form_input(array(
-                                            'name' => $campo,
-                                            'id' => $campo,
-                                            'class' => 'form-control form-control-uppercase',
-                                            'readonly' => true,
-                                            'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
-                                        ));
-                                    ?>
+                            <?php if($tipo_tramite == 'cam/' || $tipo_tramite == 'lpe/'){?>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Código Único:</label>
+                                    <div class="col-sm-3">
+                                        <?php
+                                            $campo = 'codigo_unico';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'class' => 'form-control form-control-uppercase',
+                                                'readonly' => true,
+                                                'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
+                                            ));
+                                        ?>
+                                    </div>
+                                    <label class="col-sm-1 col-form-label">Denominación:</label>
+                                    <div class="col-sm-5">
+                                        <?php
+                                            $campo = 'denominacion';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'class' => 'form-control form-control-uppercase',
+                                                'readonly' => true,
+                                                'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
+                                            ));
+                                        ?>
+                                    </div>
                                 </div>
-                                <label class="col-sm-1 col-form-label">Denominación:</label>
-                                <div class="col-sm-5">
+                            <?php }elseif($tipo_tramite == 'mineria_ilegal/'){?>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Formulario Minería Ilegal:</label>
+                                    <div class="col-sm-3">
+                                        <?php
+                                            $campo = 'correlativo_denuncia';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'class' => 'form-control form-control-uppercase',
+                                                'readonly' => true,
+                                                'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
+                                            ));
+                                        ?>
+                                    </div>
+                                    <label class="col-sm-1 col-form-label">Fecha:</label>
+                                    <div class="col-sm-2">
+                                        <?php
+                                            $campo = 'fecha_denuncia';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'class' => 'form-control form-control-uppercase',
+                                                'readonly' => true,
+                                                'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
+                                            ));
+                                        ?>
+                                    </div>
+                                </div>
+                            <?php }?>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Tipo Documento:</label>
+                                <div class="col-sm-8">
                                     <?php
-                                        $campo = 'denominacion';
+                                        $campo = 'tipo_documento';
                                         echo form_input(array(
                                             'name' => $campo,
                                             'id' => $campo,
-                                            'class' => 'form-control form-control-uppercase',
-                                            'readonly' => true,
+                                            'class' => 'form-control',
+                                            'readonly' => 'true',
                                             'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                         ));
                                     ?>
@@ -122,10 +158,10 @@
                                             'id' => $campo,
                                             'readonly' => 'true',
                                             'class' => 'form-control form-control-uppercase',
-                                            'value' => set_value($campo, $fila[$campo])
+                                            'value' => set_value($campo, (isset($fila[$campo]) ? $fila[$campo] : ''))
                                         ));
                                     ?>
-                                    <span class="messages"></span>                                    
+                                    <span class="messages"></span>
                                 </div>
                             </div>
                             <div class="form-group row">

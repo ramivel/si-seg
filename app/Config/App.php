@@ -24,8 +24,8 @@ class App extends BaseConfig
      * @var string
      */
     //public $baseURL = BASEURL;
-    public $baseURL = 'http://localhost/garnet/';
-    //public $baseURL = 'http://192.168.182.100/garnet/';
+    //public $baseURL = 'http://localhost/garnet/';
+    public $baseURL = 'http://192.168.182.100/garnet/';
 
     /**
      * --------------------------------------------------------------------------

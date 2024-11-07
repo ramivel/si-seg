@@ -17,20 +17,11 @@
     </div>
     <?php }?>
     <div class="page-body">
-        <div class="row mb-3">
-            <div class="col-sm-12 text-right">
-                <a href="<?= base_url($controlador.'mis_documentos_excel/'.$id_tramite);?>" class="btn btn-inverse" target="_blank"><i class="fa fa-file-excel-o"></i> Descargar Mis Documentos</a>
-            </div>
-        </div>
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-header">
-                        <div class="card-header-right">
-                            <ul class="list-unstyled card-option">
-                                <li><i class="feather icon-maximize full-card"></i></li>
-                            </ul>
-                        </div>
+                    <div class="card-header text-center pb-0">
+                        <a href="<?= base_url($controlador.'mis_documentos_excel/'.$id_tramite);?>" class="btn btn-inverse" target="_blank"><i class="fa fa-file-excel-o"></i> Descargar Mis Documentos</a>
                     </div>
                     <div class="card-block">
                         <div class="dt-responsive table-responsive">

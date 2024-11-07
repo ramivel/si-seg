@@ -102,8 +102,49 @@
                                         ?>
                                     </div>
                                 </div>
+                            <?php }elseif($tipo_tramite == 'lpe/'){?>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Código Único:</label>
+                                    <div class="col-sm-3">
+                                        <?php
+                                            $campo = 'codigo_unico';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'class' => 'form-control form-control-uppercase',
+                                                'readonly' => true,
+                                                'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
+                                            ));
+                                        ?>
+                                    </div>
+                                    <label class="col-sm-1 col-form-label">Denominación:</label>
+                                    <div class="col-sm-5">
+                                        <?php
+                                            $campo = 'denominacion';
+                                            echo form_input(array(
+                                                'name' => $campo,
+                                                'id' => $campo,
+                                                'class' => 'form-control form-control-uppercase',
+                                                'readonly' => true,
+                                                'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
+                                            ));
+                                        ?>
+                                    </div>
+                                </div>
                             <?php }?>
-
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Tipo de Documento*:</label>
+                                <div class="col-sm-9">
+                                    <?php
+                                        $campo = 'fk_tipo_documento';
+                                        echo form_dropdown($campo, $tiposDocumentos, set_value($campo), array('id'=>$campo, 'class' => 'form-control'));
+                                    ?>
+                                    <span class="messages"></span>
+                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
+                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
+                                    <?php }?>
+                                </div>
+                            </div>
                             <div class="form-group row">
                                 <label class="col-sm-2 col-form-label">Fecha Actual:</label>
                                 <div class="col-sm-2">
@@ -134,21 +175,8 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Tipo de Documento*:</label>
-                                <div class="col-sm-10">
-                                    <?php
-                                        $campo = 'fk_tipo_documento';
-                                        echo form_dropdown($campo, $tiposDocumentos, set_value($campo), array('id'=>$campo, 'class' => 'form-control'));
-                                    ?>
-                                    <span class="messages"></span>
-                                    <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                        <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                    <?php }?>
-                                </div>
-                            </div>
-                            <div class="form-group row">
                                 <label class="col-sm-2 col-form-label">Referencia:</label>
-                                <div class="col-sm-10">
+                                <div class="col-sm-9">
                                     <?php
                                         $campo = 'referencia';
                                         echo form_input(array(
@@ -163,7 +191,7 @@
                                         <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
                                     <?php }?>
                                 </div>
-                            </div>                            
+                            </div>
                             <div class="form-group row">
                                 <label class="col-sm-2"></label>
                                 <div class="col-sm-10">

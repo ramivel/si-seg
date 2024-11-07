@@ -61,7 +61,7 @@
                                     <?php }?>
                                 </div>
                                 <div class="col-sm-3">
-                                    <button name="enviar" class="btn btn-info" type="submit" value="buscar"><i class="fa fa-list"></i> Buscar</button>                                    
+                                    <button name="enviar" class="btn btn-info" type="submit" value="buscar"><i class="fa fa-list"></i> Buscar</button>
                                 </div>
                             </div>
                         <?= form_close();?>
@@ -87,6 +87,9 @@
                                                         <?php echo anchor('documentos/descargar/'.$fila['id'], 'Descargar Word',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                         <?php if($fila['estado'] == 'ANEXADO'){?>
                                                             <?php echo anchor('documentos/desanexar/'.$fila['id'], 'Desanexar',array('class' =>'dropdown-item waves-light waves-effect desanexar'));?>
+                                                        <?php }?>
+                                                        <?php if($fila['estado'] == 'ANEXADO' || $fila['estado'] == 'SUELTO'){?>
+                                                            <?php echo anchor('documentos/anular/'.$id_tramite.'/'.$fila['id'], 'Solicitar Anulación',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                         <?php }?>
                                                     </div>
                                                 </div>

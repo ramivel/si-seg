@@ -50,7 +50,7 @@
                 <li class="pcoded-hasmenu <?= (isset($menu_actual) && ($menu_actual === 'documentos/buscador' || $menu_actual === 'documentos/buscador_sincobol') ) ? 'pcoded-trigger' : '';?>">
                     <a href="javascript:void(0)">
                         <span class="pcoded-micon"><i class="feather icon-file-minus"></i></span>
-                        <span class="pcoded-mtext">Desanexar</span>
+                        <span class="pcoded-mtext">Desanexar/Anular</span>
                     </a>
                     <ul class="pcoded-submenu">
                         <li class="<?= (isset($menu_actual) && $menu_actual === 'documentos/buscador') ? 'active' : '';?>">
@@ -520,6 +520,11 @@
                                 <span class="pcoded-mtext"><?= $row['menu'] ?></span>
                             </a>
                             <ul class="pcoded-submenu">
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documento/listado') ? 'active' : '';?>">
+                                    <a href="<?= base_url('documentos/listado/'.$row['id']);?>">
+                                        <span class="pcoded-mtext">Mis Documentos</span>
+                                    </a>
+                                </li>
                                 <?php if(in_array(1, session()->get('registroPermisos'))){?>
                                     <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'agregar') ? 'active' : '';?>">
                                         <a href="<?= base_url($row['controlador'].'agregar');?>">

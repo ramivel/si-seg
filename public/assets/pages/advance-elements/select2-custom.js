@@ -1,6 +1,14 @@
 "use strict";
 const baseUrl = "/garnet/";
 $(document).ready(function () {
+
+  /* SELECT MULTIPLE */
+  $(".seleccion-multiple").select2({
+    language: "es",
+    placeholder: "SELECCIONE UNA OPCIÓN",
+  });
+  /* SELECT MULTIPLE */
+
   /* Documentos */
 
   $(".documentos-area-minera-ajax").select2({
@@ -24,6 +32,112 @@ $(document).ready(function () {
       },
       cache: true,
     },
+  });
+
+  $(".editar-documento-cam-ajax").select2({
+    language: "es",
+    placeholder:"Escriba la Hoja de Ruta Madre o el Código Único del Área Minera",
+    minimumInputLength: 1,
+    ajax: {
+      url: baseUrl + "cam/ajax_mis_tramites",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+  $(".editar-documento-cam-ajax").on("select2:select", function (e) {
+    var data = e.params.data;
+    $.ajax({
+      url: baseUrl + "cam/ajax_datos_tramite",
+      type: "POST",
+      data: data,
+      dataType: "json",
+      success: function (result) {
+        $("#codigo_unico").val(result.codigo_unico);
+        $("#denominacion").val(result.denominacion);
+      },
+    });
+  });
+  $(".editar-documento-minilegal-ajax").select2({
+    language: "es",
+    placeholder: "Escriba la Hoja de Ruta Minería Ilegal",
+    minimumInputLength: 1,
+    ajax: {
+      url: baseUrl + "mineria_ilegal/ajax_mis_hojas_ruta",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+  $(".editar-documento-minilegal-ajax").on("select2:select", function (e) {
+    var data = e.params.data;
+    $.ajax({
+      url: baseUrl + "mineria_ilegal/ajax_datos_tramite",
+      type: "POST",
+      data: data,
+      dataType: "json",
+      success: function (result) {
+        $("#correlativo_denuncia").val(result.correlativo_denuncia);
+        $("#fecha_denuncia").val(result.fecha_denuncia);
+      },
+    });
+  });
+  $(".editar-documento-lpe-ajax").select2({
+    language: "es",
+    placeholder:"Escriba la Hoja de Ruta Madre o el Código Único del Área Minera",
+    minimumInputLength: 1,
+    ajax: {
+      url: baseUrl + "lpe/ajax_mis_hojas_ruta",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+  $(".editar-documento-lpe-ajax").on("select2:select", function (e) {
+    var data = e.params.data;
+    $.ajax({
+      url: baseUrl + "lpe/ajax_datos_tramite",
+      type: "POST",
+      data: data,
+      dataType: "json",
+      success: function (result) {
+        $("#codigo_unico").val(result.codigo_unico);
+        $("#denominacion").val(result.denominacion);
+      },
+    });
   });
 
   /* Fin Documentos */
@@ -573,7 +687,7 @@ $(document).ready(function () {
     else $("#anexar_documentos").val("SI");
   });
 
-  /* CORRESPONDENCIA EXTERNA */
+  /* CORRESPONDENCIA EXTERNA CAM */
   $(".buscar-tramite-ajax").select2({
     language: "es",
     placeholder:
@@ -597,7 +711,6 @@ $(document).ready(function () {
       cache: true,
     },
   });
-
   $(".buscar-tramite-ajax").on("select2:select", function (e) {
     var data = e.params.data;
     $.ajax({
@@ -618,7 +731,6 @@ $(document).ready(function () {
       },
     });
   });
-
   $(".persona-externa-ajax").select2({
     language: "es",
     placeholder: "Escriba el Documento de Identidad o Nombre de la Persona",
@@ -641,7 +753,6 @@ $(document).ready(function () {
       cache: true,
     },
   });
-
   $(".buscar-hoja-ruta-ajax").select2({
     language: "es",
     placeholder:
@@ -686,8 +797,53 @@ $(document).ready(function () {
       },
     });
   });
+  /* FIN CORRESPONDENCIA EXTERNA CAM */
 
-  /* FIN CORRESPONDENCIA EXTERNA */
+  /* CORRESPONDENCIA EXTERNA LPE */
+  $(".buscar-tramite-lpe-ajax").select2({
+    language: "es",
+    placeholder:
+      "Escriba la Hoja de Ruta Madre o el Código Único del Área Minera",
+    minimumInputLength: 1,
+    ajax: {
+      url: baseUrl + "lpe/ajax_buscar_tramite",
+      dataType: "json",
+      type: "POST",
+      delay: 250,
+      data: function (params) {
+        return {
+          texto: params.term,
+        };
+      },
+      processResults: function (data) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+  $(".buscar-tramite-lpe-ajax").on("select2:select", function (e) {
+    var data = e.params.data;
+    $.ajax({
+      url: baseUrl + "lpe/ajax_datos_tramite",
+      type: "POST",
+      data: data,
+      dataType: "json",
+      success: function (result) {
+        $("#codigo_unico").val(result.codigo_unico);
+        $("#denominacion").val(result.denominacion);
+        $("#representante_legal").val(result.representante_legal);
+        $("#nacionalidad").val(result.nacionalidad);
+        $("#titular").val(result.titular);
+        $("#clasificacion").val(result.clasificacion);
+        $("#remitente").val(result.remitente);
+        $("#destinatario").val(result.destinatario);
+        $("#responsable").val(result.responsable);
+      },
+    });
+  });
+  /* FIN CORRESPONDENCIA EXTERNA LPE */
 
   /* UBICACION MINERIA ILEGAL */
   $("#departamento").on("change", function () {

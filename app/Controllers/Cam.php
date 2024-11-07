@@ -4876,7 +4876,41 @@ class Cam extends BaseController
             echo json_encode($data);
         }
     }
-
+    public function ajaxMisTramites(){
+        $cadena = mb_strtoupper($this->request->getPost('texto'));
+        if(!empty($cadena) && session()->get('registroUser')){
+            $db = \Config\Database::connect();
+            $campos = array('ac.id', 'ac.correlativo', 'dam.codigo_unico', 'dam.denominacion',
+            "CONCAT(ac.correlativo,' (',dam.codigo_unico,' - ',dam.denominacion,')') as hr");
+            $where = array(
+                'ac.deleted_at' => NULL,
+                'ac.fk_usuario_actual' => session()->get('registroUser'),
+            );
+            $builder = $db->table('public.acto_administrativo as ac')
+            ->select($campos)
+            ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+            ->where($where)
+            ->whereIn('ac.ultimo_estado',array('MIGRADO', 'RECIBIDO', 'EN ESPERA', 'DEVUELTO'))
+            ->like("CONCAT(ac.correlativo,' (',dam.codigo_unico,' - ',dam.denominacion,')')", $cadena)
+            ->orderBY('ac.id', 'DESC')
+            ->limit(10);
+            $datos = $builder->get()->getResultArray();
+            if($datos){
+                foreach($datos as $row){
+                    $data[] = array(
+                        'id' => $row['id'],
+                        'text' => $row['hr'],
+                    );
+                }
+            }else{
+                $data[] = array(
+                    'id' => 0,
+                    'text' => 'No se encuentra la hoja de ruta que busca'
+                );
+            }
+            echo json_encode($data);
+        }
+    }
     public function ajaxDatosTramite(){
         $id = $this->request->getPost('id');
         if(!empty($id)){

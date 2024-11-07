@@ -68,9 +68,6 @@ class Dashboard extends BaseController
 
                         break;
                     case 2:
-                    case 3:
-                    case 4:
-                    case 5:
                         $db = \Config\Database::connect();
                         $campos = array("CONCAT(etp.orden,'. ',etp.nombre) as estado_tramite", "COUNT(hr.id) as n");
                         $where = array(
@@ -115,13 +112,13 @@ class Dashboard extends BaseController
                         break;
                 }
             }
-        }        
+        }
 
         $cabera['titulo'] = 'Bienvenid@ al Sistema';
         $cabera['sub_titulo'] = 'Resumen de los Tramites';
         $cabera['navegador'] = false;
         $contenido['title'] = view('templates/title',$cabera);
-        $contenido['resultados'] = $resultados;
+        //$contenido['resultados'] = $resultados;
         $data['content'] = view($this->carpeta.'index', $contenido);
         $data['tramites_menu'] = $this->tramitesMenu();
         $data['alertas'] = $this->alertasTramites();
@@ -135,11 +132,11 @@ class Dashboard extends BaseController
         $cabera['navegador'] = true;
         $cabera['subtitulo'] = 'Video Tutoriales';
         $contenido['title'] = view('templates/title',$cabera);
-        $contenido['subtitulo'] = 'Video Tutoriales';        
+        $contenido['subtitulo'] = 'Video Tutoriales';
         $data['content'] = view($this->carpeta.'video_tutorial', $contenido);
         $data['menu_actual'] = 'video_tutorial';
         $data['tramites_menu'] = $this->tramitesMenu();
-        $data['alertas'] = $this->alertasTramites();        
+        $data['alertas'] = $this->alertasTramites();
         echo view('templates/template', $data);
     }
 

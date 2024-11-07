@@ -20,8 +20,8 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
-                    <div class="card-header text-center">
-                        <a href="<?= base_url($controlador.'mis_tramites_excel');?>" class="btn btn-sm btn-inverse" target="_blank"><i class="fa fa-file-excel-o"></i> Descargar Bandeja</a>
+                    <div class="card-header text-center pb-0">
+                        <a href="<?= base_url($controlador.'mis_tramites_excel');?>" class="btn btn-inverse" target="_blank"><i class="fa fa-file-excel-o"></i> Descargar Bandeja</a>
                     </div>
                     <div class="card-block">
                         <div class="dt-responsive table-responsive">

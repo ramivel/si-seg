@@ -178,6 +178,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_subir_archivo', 'Cam::ajaxSubirArchivo');
         $routes->add('ajax_buscar_tramite', 'Cam::ajaxBuscarTramite');
         $routes->add('ajax_datos_tramite', 'Cam::ajaxDatosTramite');
+        $routes->add('ajax_mis_tramites', 'Cam::ajaxMisTramites');
         $routes->add('correspondencia_externa/(:num)', 'Cam::correspondenciaExterna/$1');
         $routes->add('generar_codigo_seguimiento', 'Cam::generarCodigoSeguimiento');
         $routes->add('pdf_seguimiento/(:num)', 'Cam::pdfCodigoSeguimiento/$1');
@@ -298,6 +299,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('buscador_ventanilla', 'MineriaIlegal::buscadorVentanilla');
         $routes->add('ajax_buscar_tramite', 'MineriaIlegal::ajaxBuscarTramite');
         $routes->add('ajax_datos_tramite', 'MineriaIlegal::ajaxDatosTramite');
+        $routes->add('ajax_mis_hojas_ruta', 'MineriaIlegal::ajaxMisHojasRuta');
 
         $routes->add('correspondencia_externa/(:num)', 'MineriaIlegal::correspondenciaExterna/$1');
 
@@ -387,6 +389,10 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_datos_hr', 'Lpe::ajaxDatosHR');
         $routes->add('ajax_analista_destinario', 'Lpe::ajaxAnalistaDestinatario');
         $routes->add('ajax_guardar_devolver', 'Lpe::ajaxGuardarDevolver');
+        $routes->add('ajax_buscar_tramite', 'Lpe::ajaxBuscarTramite');
+        $routes->add('ajax_datos_tramite', 'Lpe::ajaxDatosTramite');
+        $routes->add('ajax_mis_hojas_ruta', 'Lpe::ajaxMisHojasRuta');
+        
     });
 
 });

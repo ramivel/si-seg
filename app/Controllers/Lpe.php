@@ -16,7 +16,7 @@ class Lpe extends BaseController
     protected $titulo = 'Licencias de Prospección y Exploración';
     protected $controlador = 'lpe/';
     protected $carpeta = 'lpe/';
-    protected $idTramite = 3;
+    protected $idTramite = 6;
     protected $menuActual = 'lpe/';
     protected $rutaArchivos = 'archivos/lpe/';
     protected $urlSincobol = 'https://sincobol.autoridadminera.gob.bo/sincobol/';
@@ -783,6 +783,107 @@ class Lpe extends BaseController
             }
         }
         echo json_encode($resultado);
+    }
+    public function ajaxBuscarTramite(){
+        $cadena = mb_strtoupper($this->request->getPost('texto'));
+        if(!empty($cadena) && session()->get('registroUser')){
+            $db = \Config\Database::connect();
+            $campos = array('hr.id', 'hr.correlativo', 'dam.codigo_unico', 'dam.denominacion',"CONCAT(hr.correlativo,' (',dam.codigo_unico,' - ',dam.denominacion,')') as hr");
+            $where = array(
+                'hr.deleted_at' => NULL,
+                'hr.fk_oficina' => session()->get('registroOficina')
+            );
+            $builder = $db->table('licencia_prospeccion_exploracion.hoja_ruta as hr')
+            ->select($campos)
+            ->join('licencia_prospeccion_exploracion.datos_area_minera as dam', 'hr.id = dam.fk_hoja_ruta', 'left')
+            ->where($where)
+            ->like("CONCAT(hr.correlativo,' (',dam.codigo_unico,' - ',dam.denominacion,')')", $cadena)
+            ->limit(10);
+            $datos = $builder->get()->getResultArray();
+            if($datos){
+                foreach($datos as $row){
+                    $data[] = array(
+                        'id' => $row['id'],
+                        'text' => $row['hr'],
+                    );
+                }
+            }else{
+                $data[] = array(
+                    'id' => 0,
+                    'text' => 'No se encuentra la hoja de ruta que busca'
+                );
+            }
+            echo json_encode($data);
+        }
+    }
+    public function ajaxMisHojasRuta(){
+        $cadena = mb_strtoupper($this->request->getPost('texto'));
+        if(!empty($cadena) && session()->get('registroUser')){
+            $db = \Config\Database::connect();
+            $campos = array('hr.id', "CONCAT(hr.correlativo,' (',dam.codigo_unico,' - ',dam.denominacion,')') as hr");
+            $where = array(
+                'hr.deleted_at' => NULL,
+                'hr.fk_usuario_actual' => session()->get('registroUser'),
+            );
+            $builder = $db->table('licencia_prospeccion_exploracion.hoja_ruta as hr')
+            ->select($campos)
+            ->join('licencia_prospeccion_exploracion.datos_area_minera as dam', 'hr.id = dam.fk_hoja_ruta', 'left')
+            ->where($where)
+            ->whereIn('hr.ultimo_estado',array('MIGRADO', 'RECIBIDO', 'EN ESPERA', 'DEVUELTO'))
+            ->like("CONCAT(hr.correlativo,' (',dam.codigo_unico,' - ',dam.denominacion,')')", $cadena)
+            ->orderBY('hr.id', 'DESC')
+            ->limit(10);
+            $datos = $builder->get()->getResultArray();
+            if($datos){
+                foreach($datos as $row){
+                    $data[] = array(
+                        'id' => $row['id'],
+                        'text' => $row['hr'],
+                    );
+                }
+            }else{
+                $data[] = array(
+                    'id' => 0,
+                    'text' => 'No se encuentra la hoja de ruta que busca'
+                );
+            }
+            echo json_encode($data);
+        }
+    }
+    public function ajaxDatosTramite(){
+        $id = $this->request->getPost('id');
+        if(!empty($id)){
+            $db = \Config\Database::connect();
+            $campos = array('hr.id', 'dam.codigo_unico', 'dam.denominacion', 'dam.representante_legal', 'dam.nacionalidad', 'dam.titular', 'dam.clasificacion_titular',
+                "CONCAT(ur.nombre_completo, ' - ',pr.nombre) as remitente", "CONCAT(ud.nombre_completo, ' - ',pd.nombre) as destinatario", "CONCAT(ua.nombre_completo,' - ',pa.nombre) as responsable");
+            $where = array(
+                'hr.deleted_at' => NULL,
+                'hr.id' => $id,
+            );
+            $builder = $db->table('licencia_prospeccion_exploracion.hoja_ruta as hr')
+            ->select($campos)
+            ->join('licencia_prospeccion_exploracion.datos_area_minera as dam', 'hr.id = dam.fk_hoja_ruta', 'left')
+            ->join('usuarios as ur', 'hr.ultimo_fk_usuario_remitente = ur.id', 'left')
+            ->join('perfiles as pr', 'ur.fk_perfil=pr.id', 'left')
+            ->join('usuarios as ud', 'hr.ultimo_fk_usuario_destinatario = ud.id', 'left')
+            ->join('perfiles as pd', 'ud.fk_perfil=pd.id', 'left')
+            ->join('usuarios as ua', 'hr.ultimo_fk_usuario_responsable = ua.id', 'left')
+            ->join('perfiles as pa', 'ua.fk_perfil = pa.id', 'left')
+            ->where($where);
+            $resultado = array();
+            if($tramite = $builder->get()->getRowArray()){
+                $resultado['codigo_unico'] = $tramite['codigo_unico'];
+                $resultado['denominacion'] = $tramite['denominacion'];
+                $resultado['representante_legal'] = $tramite['representante_legal'];
+                $resultado['nacionalidad'] = $tramite['nacionalidad'];
+                $resultado['titular'] = $tramite['titular'];
+                $resultado['clasificacion'] = $tramite['clasificacion_titular'];
+                $resultado['remitente'] = $tramite['remitente'];
+                $resultado['destinatario'] = $tramite['destinatario'];
+                $resultado['responsable'] = $tramite['responsable'];
+            }
+            echo json_encode($resultado);
+        }
     }
 
 }

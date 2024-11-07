@@ -25,7 +25,7 @@
                         <span>Debe seleccionar los campos requeridos para la busqueda.</span>
                     </div>
                     <div class="card-block">
-                        <?= form_open($accion);?>                            
+                        <?= form_open($accion);?>
                             <div class="form-group row">
                                 <div class="col-sm-2">
                                     <label class="col-form-label">Fecha Inicio:</label>
@@ -59,11 +59,11 @@
                                         <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
                                     <?php }?>
                                 </div>
-                                <div class="col-sm-4">
+                                <div class="col-sm-8">
                                     <label class="col-form-label">Tipo Documento:</label>
                                     <?php
                                         $campo = 'id_tipo_documento';
-                                        echo form_dropdown($campo, $tipos_documentos, set_value($campo), array('class' => 'form-control'));
+                                        echo form_dropdown($campo.'[]', $tipos_documentos, set_value($campo), array('class' => 'seleccion-multiple form-control', 'multiple'=>'multiple'));
                                     ?>
                                     <?php if(isset($validation) && $validation->hasError($campo)){?>
                                         <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>

@@ -7105,7 +7105,41 @@ class MineriaIlegal extends BaseController
             echo json_encode($data);
         }
     }
-
+    public function ajaxMisHojasRuta(){
+        $cadena = mb_strtoupper($this->request->getPost('texto'));
+        if(!empty($cadena) && session()->get('registroUser')){
+            $data = array();
+            $db = \Config\Database::connect();
+            $campos = array(
+                "hr.id","hr.correlativo"
+            );
+            $where = "de.deleted_at is null AND hr.deleted_at is null AND (de.fecha_recepcion is not null OR de.fecha_devolucion is not null) AND de.fk_usuario_destinatario = ".session()->get('registroUser');
+            $builder = $db->table('mineria_ilegal.derivacion AS de')
+            ->select($campos)
+            ->join('mineria_ilegal.hoja_ruta AS hr', 'de.fk_hoja_ruta = hr.id', 'left')
+            ->join('mineria_ilegal.denuncias AS dn', 'hr.fk_denuncia = dn.id', 'left')
+            ->where($where)
+            ->whereIn('de.estado',array('REGULARIZACIÓN', 'RECIBIDO', 'EN ESPERA', 'DEVUELTO'))
+            ->like("hr.correlativo", $cadena)
+            ->limit(10)
+            ->orderBY('hr.id', 'DESC');
+            $datos = $builder->get()->getResultArray();
+            if($datos){
+                foreach($datos as $row){
+                    $data[] = array(
+                        'id' => $row['id'],
+                        'text' => $row['correlativo'],
+                    );
+                }
+            }else{
+                $data[] = array(
+                    'id' => 0,
+                    'text' => 'No se encuentra la hoja de ruta que busca'
+                );
+            }
+            echo json_encode($data);
+        }
+    }
     public function ajaxDatosTramite(){
         $id_hoja_ruta = $this->request->getPost('id');
         $resultado = array();
