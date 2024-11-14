@@ -337,12 +337,23 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
 
     $routes->group('licencia_comercializacion', function($routes){
         $routes->add('mis_ingresos', 'LicenciaComercializacion::misIngresos');
+        $routes->add('listado_recepcion', 'LicenciaComercializacion::listadoRecepcion');
+        $routes->add('mis_tramites', 'LicenciaComercializacion::misTramites');
 
         $routes->add('agregar_ventanilla', 'LicenciaComercializacion::agregarVentanilla');
+        $routes->add('editar_ventanilla/(:num)', 'LicenciaComercializacion::editarVentanilla/$1');
+        $routes->post('guardar_editar_ventanilla', 'LicenciaComercializacion::guardarEditarVentanilla');
+        $routes->post('recibir_multiple', 'LicenciaComercializacion::recibirMultiple');
+        $routes->add('recibir/(:any)', 'LicenciaComercializacion::recibir/$1');
+        $routes->add('atender/(:num)', 'LicenciaComercializacion::atender/$1');
+        $routes->post('guardar_atender', 'LicenciaComercializacion::guardarAtender');
+        $routes->add('editar/(:num)', 'LicenciaComercializacion::editar/$1');
+        $routes->post('guardar_editar', 'LicenciaComercializacion::guardarEditar');
 
         $routes->add('hoja_ruta_pdf/(:num)', 'LicenciaComercializacion::hojaRutaPdf/$1');
 
         $routes->add('ajax_analista_destinario', 'LicenciaComercializacion::ajaxAnalistaDestinatario');
+        $routes->add('ajax_guardar_devolver', 'LicenciaComercializacion::ajaxGuardarDevolver');
     });
 
     $routes->group('documentos', function($routes){
@@ -392,7 +403,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_buscar_tramite', 'Lpe::ajaxBuscarTramite');
         $routes->add('ajax_datos_tramite', 'Lpe::ajaxDatosTramite');
         $routes->add('ajax_mis_hojas_ruta', 'Lpe::ajaxMisHojasRuta');
-        
+
     });
 
 });

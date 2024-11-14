@@ -84,3 +84,12 @@ defined('EXIT__AUTO_MAX')      || define('EXIT__AUTO_MAX', 125); // highest auto
 
 /* NOMBRES SISTEMA */
 defined('TITLE_PAGE')        || define('TITLE_PAGE', 'Sistema de Seguimiento y Control de Tramites');
+
+/* ESTADOS DEL SISTEMA */
+defined('INGRESADO')        || define('INGRESADO', 'btn btn-sm btn-danger btn-round');
+defined('RECIBIDO')        || define('RECIBIDO', 'btn btn-sm btn-primary btn-round');
+defined('MIGRADO')        || define('MIGRADO', 'btn btn-sm btn-danger btn-round');
+defined('ATENDIDO')        || define('ATENDIDO', 'btn btn-sm btn-success btn-round');
+defined('DEVUELTO')        || define('DEVUELTO', 'btn btn-sm btn-warning btn-round');
+defined('DERIVADO')        || define('DERIVADO', 'btn btn-sm btn-inverse btn-round');
+defined('EN_ESPERA')        || define('EN_ESPERA', 'btn btn-sm btn-info btn-round');

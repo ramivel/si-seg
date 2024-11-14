@@ -10,6 +10,18 @@
                     </div>
                     <div class="card-block">
                         <?= form_open_multipart($accion, ['id' => 'formulario']); ?>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_input(array('type'=>'hidden','name'=>'id','value'=>set_value('id', (isset($fila['id']) ? $fila['id'] : ''), false)));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row d-none">
+                            <div class="col-sm-10">
+                                <?= form_hidden('doc_digital_anterior', set_value('doc_digital_anterior',isset($doc_digital_anterior) ? $doc_digital_anterior:''));?>
+                                <span class="messages"></span>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-sm-8">
                                 <div class="form-group row">
@@ -21,7 +33,7 @@
                                             'name' => $campo,
                                             'id' => $campo,
                                             'class' => 'form-control form-control-uppercase',
-                                            'value' => set_value($campo)
+                                            'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                         ));
                                         ?>
                                         <span class="messages"></span>
@@ -34,7 +46,7 @@
                             <div class="col-sm-4">
                                 <div class="form-group row">
                                     <label class="col-sm-2 col-form-label">Fecha * :</label>
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-5">
                                         <?php
                                         $campo = 'fecha_cite';
                                         echo form_input(array(
@@ -42,7 +54,7 @@
                                             'id' => $campo,
                                             'class' => 'form-control',
                                             'type' => 'date',
-                                            'value' => set_value($campo)
+                                            'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''))
                                         ));
                                         ?>
                                         <span class="messages"></span>
@@ -76,7 +88,7 @@
                         <?= $modal_remitente?>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">Referencia * :</label>
-                            <div class="col-sm-10">
+                            <div class="col-sm-9">
                                 <?php
                                 $campo = 'referencia';
                                 echo form_textarea(array(
@@ -84,7 +96,7 @@
                                     'id' => $campo,
                                     'rows' => '2',
                                     'class' => 'form-control form-control-uppercase',
-                                    'value' => set_value($campo)
+                                    'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                 ));
                                 ?>
                                 <span class="messages"></span>
@@ -105,7 +117,7 @@
                                             'id' => $campo,
                                             'type' => 'number',
                                             'class' => 'form-control form-control-uppercase',
-                                            'value' => set_value($campo)
+                                            'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                         ));
                                         ?>
                                         <span class="messages"></span>
@@ -118,14 +130,14 @@
                             <div class="col-sm-8">
                                 <div class="form-group row">
                                     <label class="col-sm-2 col-form-label">Adjuntos * :</label>
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-9">
                                         <?php
                                         $campo = 'adjuntos';
                                         echo form_input(array(
                                             'name' => $campo,
                                             'id' => $campo,
                                             'class' => 'form-control form-control-uppercase',
-                                            'value' => set_value($campo)
+                                            'value' => set_value($campo,(isset($fila[$campo]) ? $fila[$campo] : ''),false)
                                         ));
                                         ?>
                                         <span class="messages"></span>
@@ -137,13 +149,24 @@
                             </div>
                         </div>
                         <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">Documento Digital Subido <span class="mytooltip tooltip-effect-5">
+                                    <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
+                                    <span class="tooltip-content clearfix">
+                                        <span class="tooltip-text">Si sube un nuevo DOCUMENTO reemplazará al anterior.</span>
+                                    </span>
+                                </span> : </label>
+                            <div class="col-sm-10">
+                                <a href="<?= base_url($doc_digital_anterior);?>" class="btn btn-inverse" target="_blank"><i class="icofont icofont-download-alt"></i>Descargar</a>
+                            </div>
+                        </div>
+                        <div class="form-group row">
                             <label class="col-sm-2 col-form-label">Doc. Digital (.pdf) (Max. 35MB)* <span class="mytooltip tooltip-effect-5">
                                     <span class="tooltip-item"><i class="fa fa-question-circle"></i></span>
                                     <span class="tooltip-content clearfix">
                                         <span class="tooltip-text">Debe subir al menos la nota externa.</span>
                                     </span>
                                 </span> : </label>
-                            <div class="col-sm-10">
+                            <div class="col-sm-9">
                                 <?php
                                 $campo = 'doc_digital';
                                 echo form_upload(array(

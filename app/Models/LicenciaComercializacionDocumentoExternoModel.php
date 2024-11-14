@@ -18,6 +18,10 @@ class LicenciaComercializacionDocumentoExternoModel extends Model{
         'fojas',
         'adjuntos',
         'doc_digital',
+        'estado',
+        'editar',
+        'fecha_recepcion',
+        'fk_usuario_recepcion',
     ];
 
 }

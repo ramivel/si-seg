@@ -163,6 +163,29 @@ class Documentos extends BaseController
                         'estado','fecha','correlativo','doc_digital','tipo_documento', 'referencia','codigo_unico','hoja_ruta',
                     );
                     break;
+                case 'licencia_comercializacion/':
+                    $campos = array(
+                        'doc.id', 'doc.correlativo', "to_char(doc.fecha, 'DD/MM/YYYY') as fecha", 'doc.referencia',
+                        'hr.correlativo as hoja_ruta', 'doc.estado', 'td.nombre as tipo_documento', 'doc.doc_digital', 'hr.fk_usuario_actual'
+                    );
+                    $where = array(
+                        'doc.fk_tramite' => $idTramite,
+                        'doc.fk_usuario_creador' => session()->get('registroUser'),
+                    );
+                    $builder = $db->table('public.documentos as doc')
+                    ->select($campos)
+                    ->join('public.tipo_documento as td', 'doc.fk_tipo_documento = td.id', 'left')
+                    ->join('licencia_comercializacion.hoja_ruta as hr', 'doc.fk_hoja_ruta = hr.id', 'left')                    
+                    ->where($where)
+                    ->orderBY('doc.id', 'DESC');
+                    $datos = $builder->get()->getResult('array');
+                    $campos_listar=array(
+                        'Estado','Fecha','Correlativo','Documento Digital','Tipo Documento', 'Referencia','Hoja de Ruta',
+                    );
+                    $campos_reales=array(
+                        'estado','fecha','correlativo','doc_digital','tipo_documento', 'referencia','hoja_ruta',
+                    );
+                    break;
             }
             $this->menuActual = $tramite['controlador'].'documento/listado';
             $cabera['titulo'] = $this->titulo;
@@ -461,6 +484,21 @@ class Documentos extends BaseController
                     ->join('licencia_prospeccion_exploracion.datos_area_minera as dam', 'hr.id = dam.fk_hoja_ruta', 'left')
                     ->where($where);
                     break;
+                case 'licencia_comercializacion/':
+                    $campos = array(
+                        'hr.id','hr.correlativo',"to_char(hr.fecha_hoja_ruta, 'DD/MM/YYYY') as fecha_hoja_ruta","dex.cite","to_char(dex.fecha_cite, 'DD/MM/YYYY') as fecha_cite",
+                        "CONCAT(pex.nombres, ' ', pex.apellidos, ' (', pex.institucion, ' - ',pex.cargo,')') as remitente", 'dex.referencia', "dex.doc_digital",
+                    );
+                    $where = array(
+                        'hr.deleted_at' => NULL,
+                        'hr.id' => $id,
+                    );
+                    $builder = $db->table('licencia_comercializacion.hoja_ruta as hr')
+                    ->select($campos)
+                    ->join('licencia_comercializacion.documento_externo as dex', 'hr.id = dex.fk_hoja_ruta', 'left')
+                    ->join('public.persona_externa as pex', 'dex.fk_persona_externa = pex.id', 'left')
+                    ->where($where);
+                    break;
             }
             if($fila = $builder->get()->getRowArray()){
                 if ($this->request->getPost()) {
@@ -488,15 +526,17 @@ class Documentos extends BaseController
                             'referencia' => $this->request->getPost('referencia'),
                             'fk_usuario_creador' => session()->get('registroUser'),
                         );
-                        if($tramite['controlador'] == 'cam/')
-                            $data['fk_acto_administrativo'] = $id;
-                        elseif($tramite['controlador'] == 'mineria_ilegal/')
-                            $data['fk_hoja_ruta'] = $id;
-                        elseif($tramite['controlador'] == 'derecho_preferente/')
-                            $data['fk_hoja_ruta'] = $id;
-                        elseif($tramite['controlador'] == 'lpe/')
-                            $data['fk_hoja_ruta'] = $id;
-
+                        switch($tramite['controlador']){
+                            case 'cam/':
+                                $data['fk_acto_administrativo'] = $id;
+                                break;
+                            case 'mineria_ilegal/':
+                            case 'derecho_preferente/':
+                            case 'lpe/':
+                            case 'licencia_comercializacion/':
+                                $data['fk_hoja_ruta'] = $id;
+                                break;
+                        }
                         if($documentosModel->insert($data) === false){
                             session()->setFlashdata('fail', $documentosModel->errors());
                         }else{

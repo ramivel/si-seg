@@ -546,6 +546,32 @@
                         </li>
                     <?php }?>
 
+                    <?php if($row['controlador'] == 'licencia_comercializacion/'){?>
+                        <li class="pcoded-hasmenu <?= (isset($menu_actual) && strpos($menu_actual, $row['controlador']) !== false ) ? 'pcoded-trigger' : '';?>">
+                            <a href="javascript:void(0)">
+                                <span class="pcoded-micon"><i class="feather icon-folder"></i></span>
+                                <span class="pcoded-mtext"><?= $row['menu'] ?></span>
+                            </a>                            
+                            <ul class="pcoded-submenu">
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documento/listado') ? 'active' : '';?>">
+                                    <a href="<?= base_url('documentos/listado/'.$row['id']);?>">
+                                        <span class="pcoded-mtext">Mis Documentos</span>
+                                    </a>
+                                </li>
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'listado_recepcion') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'listado_recepcion');?>">
+                                        <span class="pcoded-mtext">Recepción de H.R.</span>
+                                    </a>
+                                </li>
+                                <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'mis_tramites') ? 'active' : '';?>">
+                                    <a href="<?= base_url($row['controlador'].'mis_tramites');?>">
+                                        <span class="pcoded-mtext">Mis Hojas de Ruta</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    <?php }?>
+
                 </ul>
             <?php }?>
         <?php } ?>
