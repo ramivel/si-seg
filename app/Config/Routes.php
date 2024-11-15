@@ -356,6 +356,27 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('ajax_guardar_devolver', 'LicenciaComercializacion::ajaxGuardarDevolver');
     });
 
+    $routes->group('lpe', function($routes){
+        $routes->add('listado_recepcion', 'Lpe::listadoRecepcion');
+        $routes->add('mis_tramites', 'Lpe::misTramites');
+
+        $routes->add('agregar', 'Lpe::agregar');
+        $routes->post('recibir_multiple', 'Lpe::recibirMultiple');
+        $routes->add('atender/(:num)', 'Lpe::atender/$1');
+        $routes->post('guardar_atender', 'Lpe::guardarAtender');
+        $routes->add('editar/(:num)', 'Lpe::editar/$1');
+        $routes->post('guardar_editar', 'Lpe::guardarEditar');
+
+        $routes->add('ajax_hoja_ruta', 'Lpe::ajaxHojaRutaMadre');
+        $routes->add('ajax_datos_hr', 'Lpe::ajaxDatosHR');
+        $routes->add('ajax_analista_destinario', 'Lpe::ajaxAnalistaDestinatario');
+        $routes->add('ajax_guardar_devolver', 'Lpe::ajaxGuardarDevolver');
+        $routes->add('ajax_buscar_tramite', 'Lpe::ajaxBuscarTramite');
+        $routes->add('ajax_datos_tramite', 'Lpe::ajaxDatosTramite');
+        $routes->add('ajax_mis_hojas_ruta', 'Lpe::ajaxMisHojasRuta');
+
+    });
+
     $routes->group('documentos', function($routes){
         $routes->add('agregar/(:any)', 'Documentos::agregar/$1');
         $routes->add('editar/(:num)/(:num)', 'Documentos::editar/$1/$2');
@@ -387,24 +408,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
 
         //$routes->add('actualizar_path', 'Documentos::actualizarPath');
 
-    });
-
-    $routes->group('lpe', function($routes){
-        $routes->add('listado_recepcion', 'Lpe::listadoRecepcion');
-        $routes->add('mis_tramites', 'Lpe::misTramites');
-
-        $routes->add('agregar', 'Lpe::agregar');
-        $routes->post('recibir_multiple', 'Lpe::recibirMultiple');
-
-        $routes->add('ajax_hoja_ruta', 'Lpe::ajaxHojaRutaMadre');
-        $routes->add('ajax_datos_hr', 'Lpe::ajaxDatosHR');
-        $routes->add('ajax_analista_destinario', 'Lpe::ajaxAnalistaDestinatario');
-        $routes->add('ajax_guardar_devolver', 'Lpe::ajaxGuardarDevolver');
-        $routes->add('ajax_buscar_tramite', 'Lpe::ajaxBuscarTramite');
-        $routes->add('ajax_datos_tramite', 'Lpe::ajaxDatosTramite');
-        $routes->add('ajax_mis_hojas_ruta', 'Lpe::ajaxMisHojasRuta');
-
-    });
+    });    
 
 });
 $routes->group('', ['filter'=>'AlreadyLogged'], function($routes){

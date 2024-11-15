@@ -1195,7 +1195,8 @@ class LicenciaComercializacion extends BaseController
                 'ultimo_instruccion' => $motivo_devolucion,
                 'ultimo_fk_usuario_remitente' => session()->get('registroUser'),
                 'ultimo_fk_usuario_destinatario' => $derivacion_restaurar['fk_usuario_destinatario'],
-                'ultimo_fk_documentos' => (count($documentos_anexados)==0?'':$fila['ultimo_fk_documentos'])
+                'ultimo_fk_usuario_responsable' => $derivacion_restaurar['fk_usuario_responsable'],
+                'ultimo_fk_documentos' => (count($documentos_anexados)>0?'':$fila['ultimo_fk_documentos'])
             );
             if($licenciaComercializacionHojaRutaModel->save($dataHR) === false){
                 session()->setFlashdata('fail', $licenciaComercializacionHojaRutaModel->errors());

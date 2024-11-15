@@ -310,7 +310,7 @@
                                     <?php $campo = 'responsable';?>
                                     <div class="checkbox-fade fade-in-primary">
                                         <label>
-                                            <input type="checkbox" value="true" name="<?= $campo;?>" <?= set_checkbox($campo, 'true'); ?> />
+                                            <input type="checkbox" value="true" name="<?= $campo;?>" <?= set_checkbox($campo, 'true',(isset($derivacion['fk_usuario_responsable']) && $derivacion['fk_usuario_responsable'] == $derivacion['fk_usuario_destinatario']) ); ?> />
                                             <span class="cr"><i class="cr-icon icofont icofont-ui-check txt-primary"></i></span>
                                             <span>SI</span>
                                         </label>

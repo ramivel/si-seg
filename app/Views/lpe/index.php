@@ -81,22 +81,19 @@
                                                         $style = '';
                                                         switch($fila[$campos_reales[$i]]){
                                                             case 'MIGRADO':
-                                                                $style = 'btn btn-sm btn-danger btn-round';
-                                                                break;
-                                                            case 'ATENDIDO':
-                                                                $style = 'btn btn-sm btn-success btn-round';
+                                                                $style = MIGRADO;
                                                                 break;
                                                             case 'RECIBIDO':
-                                                                $style = 'btn btn-sm btn-primary btn-round';
+                                                                $style = RECIBIDO;
                                                                 break;
                                                             case 'DEVUELTO':
-                                                                $style = 'btn btn-sm btn-warning btn-round';
+                                                                $style = DEVUELTO;
                                                                 break;
                                                             case 'DERIVADO':
-                                                                $style = 'btn btn-sm btn-inverse btn-round';
+                                                                $style = DERIVADO;
                                                                 break;
                                                             case 'EN ESPERA':
-                                                                $style = 'btn btn-sm btn-info btn-round';
+                                                                $style = EN_ESPERA;
                                                                 break;
                                                         }
                                                         echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';

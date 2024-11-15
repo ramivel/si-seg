@@ -474,7 +474,7 @@ $(document).ready(function () {
       },
       cache: true,
     },
-  });
+  });  
 
   $(".documentos-limpiar").click(function () {
     $(".documentos-ajax").val("").trigger("change");
