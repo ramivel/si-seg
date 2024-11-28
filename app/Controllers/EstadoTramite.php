@@ -43,7 +43,7 @@ class EstadoTramite extends BaseController
         $tramitesModel = new TramitesModel();
         if($tramite = $tramitesModel->find($id)){
             $db = \Config\Database::connect();
-            $campos = array('et.id', 'et.orden', 'et.nombre', 'et.dias_intermedio', 'et.dias_limite', 
+            $campos = array('et.id', 'et.orden', 'et.nombre', 'et.dias_intermedio', 'et.dias_limite',
             "CASE WHEN et.notificar THEN 'SI' ELSE 'NO' END AS notificar", "CASE WHEN et.anexar_documentos THEN 'SI' ELSE 'NO' END AS anexar_documentos",
             "CASE WHEN et.finalizar THEN 'SI' ELSE 'NO' END AS finalizar",'et.descripcion', "COUNT(etp.id) as n");
             $builder = $db->table('public.estado_tramite as et')
@@ -266,7 +266,7 @@ class EstadoTramite extends BaseController
         $estadoTramiteModel = new EstadoTramiteModel();
         if($categoria = $estadoTramiteModel->find($id)){
             $db = \Config\Database::connect();
-            $campos = array('id', 'orden', 'nombre', 'dias_intermedio', 'dias_limite', "CASE WHEN notificar THEN 'SI' ELSE 'NO' END AS notificar", 
+            $campos = array('id', 'orden', 'nombre', 'dias_intermedio', 'dias_limite', "CASE WHEN notificar THEN 'SI' ELSE 'NO' END AS notificar",
             "CASE WHEN anexar_documentos THEN 'SI' ELSE 'NO' END AS anexar_documentos", "CASE WHEN finalizar THEN 'SI' ELSE 'NO' END AS finalizar",
             'descripcion');
             $builder = $db->table('public.estado_tramite')
@@ -452,6 +452,39 @@ class EstadoTramite extends BaseController
             session()->setFlashdata('fail', 'El Registro no existe.');
         }
         return redirect()->to($this->controlador.'subcategoria/'.$estado['id']);
+    }
+
+    public function ajaxEstadoTramitePadre(){
+        $id_tramite = $this->request->getPost('id_tramite');
+        $html = '<option value="">SELECCIONE UNA OPCIÓN</option>';
+        if($id_tramite){
+            $estadoTramiteModel = new EstadoTramiteModel();
+            $where = array(
+                'deleted_at' => NULL,
+                'fk_estado_padre' => NULL,
+                'fk_tramite' => $id_tramite,
+            );
+            if($estados_tramite = $estadoTramiteModel->where($where)->orderBy('orden')->findAll())
+                foreach($estados_tramite as $row)
+                    $html .= '<option value="'.$row['id'].'" data-padre="'.$row['padre'].'" >'.$row['orden'].'. '.$row['nombre'].'</option>';
+        }
+        echo $html;
+    }
+    public function ajaxEstadoTramiteHijo(){
+        $id_padre = $this->request->getPost('id_padre');
+        $html = '<option value="">SELECCIONE UNA OPCIÓN</option>';
+        if($id_padre){
+            $estadoTramiteModel = new EstadoTramiteModel();
+            $categoria = $estadoTramiteModel->find($id_padre);
+            $where = array(
+                'deleted_at' => NULL,
+                'fk_estado_padre' => $id_padre,
+            );
+            if($estados_tramite = $estadoTramiteModel->where($where)->orderBy('orden')->findAll())
+                foreach($estados_tramite as $row)
+                    $html .= '<option value="'.$row['id'].'" >'.$categoria['orden'].'.'.$row['orden'].'. '.$row['nombre'].'</option>';
+        }
+        echo $html;
     }
 
 }

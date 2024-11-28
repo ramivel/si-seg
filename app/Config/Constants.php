@@ -93,3 +93,4 @@ defined('ATENDIDO')        || define('ATENDIDO', 'btn btn-sm btn-success btn-rou
 defined('DEVUELTO')        || define('DEVUELTO', 'btn btn-sm btn-warning btn-round');
 defined('DERIVADO')        || define('DERIVADO', 'btn btn-sm btn-inverse btn-round');
 defined('EN_ESPERA')        || define('EN_ESPERA', 'btn btn-sm btn-info btn-round');
+defined('FINALIZADO')        || define('FINALIZADO', 'btn btn-sm btn-danger btn-round');

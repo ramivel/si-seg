@@ -48,7 +48,7 @@
                                                         switch($fila['ultimo_estado']){
                                                             case 'RECIBIDO':
                                                             case 'DEVUELTO':
-                                                                echo anchor('documentos/agregar/'.$id_tramite.'/'.$fila['id'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
+                                                                echo anchor('documentos/generar_documento/'.$id_tramite.'/'.$fila['id'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
                                                                 echo anchor($controlador.'atender/'.$fila['id'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));
                                                                 echo anchor($controlador.'espera/'.$fila['id'], 'En Espera',array('class' =>'dropdown-item waves-light waves-effect'));
                                                                 if(in_array(5, session()->get('registroPermisos')) && $fila['finalizar'] == 'SI')
@@ -60,7 +60,7 @@
                                                                     echo anchor($controlador.'editar/'.$fila['id'], 'Editar Derivación',array('class' =>'dropdown-item waves-light waves-effect'));
                                                                 break;
                                                             case 'EN ESPERA':
-                                                                echo anchor('documentos/agregar/'.$id_tramite.'/'.$fila['id'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
+                                                                echo anchor('documentos/generar_documento/'.$id_tramite.'/'.$fila['id'], 'Generar Documento',array('class' =>'dropdown-item waves-light waves-effect'));
                                                                 echo anchor($controlador.'atender/'.$fila['id'], 'Atender',array('class' =>'dropdown-item waves-light waves-effect'));
                                                                 break;
                                                         }

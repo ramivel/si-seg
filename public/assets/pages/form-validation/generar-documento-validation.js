@@ -17,24 +17,21 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
-        fk_solicitud_licencia_contrato:{
+        fk_tipo_documento:{
             presence: {
-                message: "^Debe seleccionar la Hoja de Ruta Madre."
+                message: "^Debe seleccionar el Tipo de Documento."
             },
         },
-        domicilio_legal: {
-            presence: true,
-        },
-        domicilio_procesal: {
-            presence: true,
-        },
-        telefono_solicitante: {
-            presence: true,
+        referencia: {
+            presence: false,
         },
         fk_estado_tramite: {
-            presence: {
-                message: "^Debe seleccionar el Estado del Tramite."
-            },
+            presence: function(){
+                if($('#fk_tipo_documento').children('option:selected').data('cambia-estado') == 'EL USUARIO SELECCIONA')
+                    return true;
+                else
+                    return false;
+            }
         },
         fk_estado_tramite_hijo:{
             presence: function(){
@@ -44,20 +41,9 @@ $(document).ready(function () {
                     return false;
             }
         },
-        observaciones: {
-            presence: true,
-        },
-        fk_usuario_destinatario:{
-            presence: {
-                message: "^Debe seleccionar el Destinatario."
-            },
-        },
-        instruccion: {
-            presence: true,
-        },
-        otro:{
+        justificacion: {
             presence: function(){
-                if($('#instruccion').val() == 'OTRO')
+                if($('#fk_tipo_documento').children('option:selected').data('justificacion') == 'SI')
                     return true;
                 else
                     return false;
@@ -183,4 +169,5 @@ $(document).ready(function () {
             }
         });
     }
+
 });

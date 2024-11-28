@@ -183,6 +183,24 @@
                         </li>
                     </ul>
                 </li>
+                <li class="pcoded-hasmenu <?= (isset($menu_actual) && strpos($menu_actual, 'correspondencia_externa/') !== false ) ? 'pcoded-trigger' : '';?>">
+                    <a href="javascript:void(0)">
+                        <span class="pcoded-micon"><i class="feather icon-layers"></i></span>
+                        <span class="pcoded-mtext">LPE</span>
+                    </a>
+                    <ul class="pcoded-submenu">
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/agregar_lpe') ? 'active' : '';?>">
+                            <a href="<?= base_url('correspondencia_externa/agregar_lpe');?>">
+                                <span class="pcoded-mtext">Nuevo Ingreso</span>
+                            </a>
+                        </li>
+                        <li class="<?= (isset($menu_actual) && $menu_actual === 'correspondencia_externa/mis_ingresos_lpe') ? 'active' : '';?>">
+                            <a href="<?= base_url('correspondencia_externa/mis_ingresos_lpe');?>">
+                                <span class="pcoded-mtext">Mis Ingresos</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
         <?php }?>
 
@@ -551,7 +569,7 @@
                             <a href="javascript:void(0)">
                                 <span class="pcoded-micon"><i class="feather icon-folder"></i></span>
                                 <span class="pcoded-mtext"><?= $row['menu'] ?></span>
-                            </a>                            
+                            </a>
                             <ul class="pcoded-submenu">
                                 <li class="<?= (isset($menu_actual) && $menu_actual == $row['controlador'].'documento/listado') ? 'active' : '';?>">
                                     <a href="<?= base_url('documentos/listado/'.$row['id']);?>">

@@ -77,6 +77,7 @@
                                                 <div class="dropdown-menu" aria-labelledby="dropdown-4" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                     <?php echo anchor('tipo_documento/descargar/'.$fila['id'], 'Descargar Plantilla',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                     <?php echo anchor('tipo_documento/editar/'.$fila['id'], 'Editar',array('class' =>'dropdown-item waves-light waves-effect'));?>
+                                                    <?php echo anchor('tipo_documento/asignar_tramite/'.$fila['id'], 'Asignar Trámite',array('class' =>'dropdown-item waves-light waves-effect'));?>
                                                     <?php echo anchor('tipo_documento/eliminar/'.$fila['id'], 'Eliminar',array('class' =>'dropdown-item waves-light waves-effect eliminar'));?>
                                                 </div>
                                             </div>

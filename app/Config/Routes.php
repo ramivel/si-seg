@@ -121,14 +121,20 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->add('editar_subcategoria/(:num)', 'EstadoTramite::editar_subcategoria/$1');
         $routes->post('guardar_editar_subcategoria', 'EstadoTramite::guardar_editar_subcategoria');
         $routes->add('eliminar_subcategoria/(:num)', 'EstadoTramite::eliminar_subcategoria/$1');
+
+        $routes->add('ajax_estado_tramite_padre', 'EstadoTramite::ajaxEstadoTramitePadre');
+        $routes->add('ajax_estado_tramite_hijo', 'EstadoTramite::ajaxEstadoTramiteHijo');
     });
 
     $routes->group('tipo_documento', function($routes){
         $routes->add('/', 'TipoDocumento::index');
         $routes->add('agregar', 'TipoDocumento::agregar');
+        $routes->add('asignar_tramite/(:num)', 'TipoDocumento::asignarTramite/$1');
+        $routes->post('guardar_asignar_tramite', 'TipoDocumento::guardarAsignarTramite');
         $routes->add('editar/(:num)', 'TipoDocumento::editar/$1');
         $routes->post('guardar_editar', 'TipoDocumento::guardar_editar');
         $routes->add('eliminar/(:num)', 'TipoDocumento::eliminar/$1');
+        $routes->add('eliminar_asignacion/(:num)', 'TipoDocumento::eliminarAsignacion/$1');
         $routes->add('descargar/(:num)', 'TipoDocumento::descargar/$1');
     });
 
@@ -221,7 +227,8 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
 
         $routes->post('guardar_atender', 'CorrespondenciaExterna::guardarAtender');
 
-        //$routes->add('actualizar_path', 'CorrespondenciaExterna::actualizarPath');
+        $routes->add('mis_ingresos_lpe', 'CorrespondenciaExterna::misIngresosLPE');
+        $routes->add('agregar_lpe', 'CorrespondenciaExterna::agregarLPE');
 
     });
 
@@ -359,6 +366,12 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
     $routes->group('lpe', function($routes){
         $routes->add('listado_recepcion', 'Lpe::listadoRecepcion');
         $routes->add('mis_tramites', 'Lpe::misTramites');
+        $routes->add('ver/(:num)/(:num)', 'Lpe::ver/$1/$2');
+        $routes->add('ver_correspondencia_externa/(:num)/(:num)', 'Lpe::verCorrespondenciaExterna/$1/$2');
+        $routes->add('ver_documentos_generados/(:num)/(:num)', 'Lpe::verDocumentosGenerados/$1/$2');
+        $routes->add('ver_hojas_ruta_anexadas/(:num)/(:num)', 'Lpe::verHojasRutaAnexadas/$1/$2');
+        $routes->add('ver_historico_sincobol/(:num)/(:num)', 'Lpe::verHistoricoSincobol/$1/$2');
+        $routes->add('ver_seguimiento_historico_sincobol/(:num)/(:num)', 'Lpe::verSeguimientoHistoricoSincobol/$1/$2');
 
         $routes->add('agregar', 'Lpe::agregar');
         $routes->post('recibir_multiple', 'Lpe::recibirMultiple');
@@ -379,6 +392,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
 
     $routes->group('documentos', function($routes){
         $routes->add('agregar/(:any)', 'Documentos::agregar/$1');
+        $routes->add('generar_documento/(:any)', 'Documentos::generarDocumento/$1');
         $routes->add('editar/(:num)/(:num)', 'Documentos::editar/$1/$2');
         $routes->post('guardar_editar', 'Documentos::guardarEditar');
         $routes->add('subir/(:num)/(:num)', 'Documentos::subir/$1/$2');
@@ -408,7 +422,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
 
         //$routes->add('actualizar_path', 'Documentos::actualizarPath');
 
-    });    
+    });
 
 });
 $routes->group('', ['filter'=>'AlreadyLogged'], function($routes){

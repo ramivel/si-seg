@@ -17,50 +17,27 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
-        fk_solicitud_licencia_contrato:{
-            presence: {
-                message: "^Debe seleccionar la Hoja de Ruta Madre."
-            },
-        },
-        domicilio_legal: {
+        id:{
             presence: true,
         },
-        domicilio_procesal: {
+        cambia_estado:{
             presence: true,
         },
-        telefono_solicitante: {
+        fk_tramite:{
             presence: true,
         },
         fk_estado_tramite: {
-            presence: {
-                message: "^Debe seleccionar el Estado del Tramite."
-            },
+            presence: function(){
+                if($("#cambia_estado_si").is(":checked"))
+                    return true;
+                return false;
+            }
         },
         fk_estado_tramite_hijo:{
             presence: function(){
-                if($('#fk_estado_tramite').children('option:selected').data('padre') == 't')
+                if($('#fk_estado_tramite_padre_asignar').children('option:selected').data('padre') == 't')
                     return true;
-                else
-                    return false;
-            }
-        },
-        observaciones: {
-            presence: true,
-        },
-        fk_usuario_destinatario:{
-            presence: {
-                message: "^Debe seleccionar el Destinatario."
-            },
-        },
-        instruccion: {
-            presence: true,
-        },
-        otro:{
-            presence: function(){
-                if($('#instruccion').val() == 'OTRO')
-                    return true;
-                else
-                    return false;
+                return false;
             }
         },
     };
@@ -99,7 +76,7 @@ $(document).ready(function () {
     // Updates the inputs with the validation errors
     function showErrors(form, errors) {
         // We loop through all the inputs and show the errors for that input
-        _.each(form.querySelectorAll("input[name], select[name], textarea[name]"), function (input) {
+        _.each(form.querySelectorAll("input[name], select[name]"), function (input) {
             // Since the errors can be null if no errors were found we need to handle
             // that
             showErrorsForInput(input, errors && errors[input.name]);
@@ -170,7 +147,6 @@ $(document).ready(function () {
         // We made it \:D/
         swal({
             title: "Esta seguro de Guardar?",
-            //text: "You will not be able to recover this imaginary file!",
             type: "warning",
             showCancelButton: true,
             confirmButtonText: "Si, Guardar!",

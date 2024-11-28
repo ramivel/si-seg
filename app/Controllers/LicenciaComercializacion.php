@@ -993,21 +993,26 @@ class LicenciaComercializacion extends BaseController
             $pdf->MultiCell(38,5, $documentoExterno['fecha_cite'], 1, 'L', true, 1);
 
             $pdf->SetFont($this->fontPDF, 'B', 8);
-            $pdf->MultiCell(50, 5, "PROCEDENCIA:", 1, 'R', true, 0);
+            $pdf->MultiCell(50, 5, "SOLICITANTE:", 1, 'R', true, 0);
             $pdf->SetFont($this->fontPDF, '', 8);
-            $pdf->MultiCell(144,5, $personaExterna['institucion'], 1, 'L', false, 1);
+            $pdf->MultiCell(86,5, $personaExterna['institucion'], 1, 'L', false, 0);
+            $pdf->SetFont($this->fontPDF, 'B', 8);
+            $pdf->MultiCell(20, 5, "TIPO:", 1, 'R', false, 0);
+            $pdf->SetFont($this->fontPDF, '', 8);
+            $pdf->MultiCell(38,5, "COOPERATIVA MINERA", 1, 'L', true, 1);
+
+            $pdf->SetFont($this->fontPDF, 'B', 8);
+            $pdf->MultiCell(50, 5, "REPRESENTANTE LEGAL:", 1, 'R', true, 0);
+            $pdf->SetFont($this->fontPDF, '', 8);
+            $pdf->MultiCell(144,5, "JUAN PEREZ", 1, 'L', false, 1);
             $pdf->SetFont($this->fontPDF, 'B', 8);
             $pdf->MultiCell(50, 5, "REMITENTE:", 1, 'R', true, 0);
             $pdf->SetFont($this->fontPDF, '', 8);
             $pdf->MultiCell(144,5, $personaExterna['nombres'].' '.$personaExterna['apellidos'], 1, 'L', false, 1);
             $pdf->SetFont($this->fontPDF, 'B', 8);
-            $pdf->MultiCell(50, 5, "CARGO REMITENTE:", 1, 'R', true, 0);
-            $pdf->SetFont($this->fontPDF, '', 8);
-            $pdf->MultiCell(144,5, $personaExterna['cargo'], 1, 'L', false, 1);
-            $pdf->SetFont($this->fontPDF, 'B', 8);
             $pdf->MultiCell(50, 5, "REFERENCIA:", 1, 'R', true, 0);
             $pdf->SetFont($this->fontPDF, '', 8);
-            $pdf->MultiCell(144,5, $documentoExterno['referencia'], 1, 'L', false, 1);
+            $pdf->MultiCell(144,5, 'SOLICITUD DE LICENCIA DE COMERCIALIZACIÓN', 1, 'L', false, 1);
 
             $pdf->SetFont($this->fontPDF, 'B', 8);
             $pdf->MultiCell(50, 5, "USUARIO DESTINO:", 1, 'R', true, 0);

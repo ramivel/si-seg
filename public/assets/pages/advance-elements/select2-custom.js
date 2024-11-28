@@ -474,7 +474,7 @@ $(document).ready(function () {
       },
       cache: true,
     },
-  });  
+  });
 
   $(".documentos-limpiar").click(function () {
     $(".documentos-ajax").val("").trigger("change");
@@ -644,6 +644,87 @@ $(document).ready(function () {
   });
   /* Fin Buscador Hoja de Ruta Mineria Ilegal*/
 
+  /* TIPO DOCUMENTO ESTADO TRAMITE */
+  $("#estado_tramite_padre").hide();
+  $("#cambia_estado_si").click(function () {
+    $("#estado_tramite_padre").show();
+  });
+  $("#cambia_estado_seleccion").click(function () {
+    $("#estado_tramite_padre").hide();
+  });
+  $("#cambia_estado_no").click(function () {
+    $("#estado_tramite_padre").hide();
+  });
+  $("#fk_tramite_asignar").on("change", function () {
+    $.ajax({
+      type: "POST",
+      url: baseUrl + "estado_tramite/ajax_estado_tramite_padre",
+      data: {
+        id_tramite: this.value,
+      },
+      error: function () {
+        console.log("error ajax.");
+      },
+      success: function (html) {
+        $("#fk_estado_tramite_padre_asignar").html(html);
+      },
+    });
+  });
+  $("#fk_estado_tramite_padre_asignar").on("change", function () {
+    if ($(this).children("option:selected").data("padre") == "t") {
+      $("#estado_tramite_hijo").show();
+      $.ajax({
+        type: "POST",
+        url: baseUrl + "estado_tramite/ajax_estado_tramite_hijo",
+        data: {
+          id_padre: this.value,
+        },
+        error: function () {
+          console.log("error ajax.");
+        },
+        success: function (html) {
+          console.log(html);
+          $("#fk_estado_tramite_hijo_asignar").html(html);
+        },
+      });
+    } else {
+      $("#estado_tramite_hijo").hide();
+      $("#fk_estado_tramite_hijo_asignar").html('<option value="">SELECCIONE UNA OPCIÓN</option>');
+    }
+  });
+  /* FIN TIPO DOCUMENTO ESTADO TRAMITE */
+
+  /* GENERAR DOCUMENTO */
+  $("#estado_actualizar").hide();
+  $("#justificacion_emision").hide();
+  $("#fk_tipo_documento").on("change", function () {
+    var cambia_estado = $(this).children("option:selected").data("cambia-estado");
+    var estado_tramite = $(this).children("option:selected").data("estado-tramite");
+    switch(cambia_estado) {
+      case "SI":
+        $("#estado_actualizar").show();
+        $("#estado_tramite_padre").hide();
+        $("#estado_tramite_hijo").hide();
+        $("#estado_actualizarse").val(estado_tramite);
+       break;
+      case "EL USUARIO SELECCIONA":
+        $("#estado_actualizar").hide();
+        $("#estado_tramite_padre").show();
+        $("#estado_actualizarse").val('');
+       break;
+      case "NO":
+        $("#estado_actualizar").hide();
+        break;
+    }
+    var justificacion = $(this).children("option:selected").data("justificacion");
+    if(justificacion=='SI')
+      $("#justificacion_emision").show();
+    else
+      $("#justificacion_emision").hide();
+  });
+
+  /* FIN GENERAR DOCUMENTO */
+
   /* Estado Tramite Hijo */
   if (
     $("#fk_estado_tramite").children("option:selected").data("padre") == "t"
@@ -802,8 +883,7 @@ $(document).ready(function () {
   /* CORRESPONDENCIA EXTERNA LPE */
   $(".buscar-tramite-lpe-ajax").select2({
     language: "es",
-    placeholder:
-      "Escriba la Hoja de Ruta Madre o el Código Único del Área Minera",
+    placeholder:"Escriba la Hoja de Ruta Madre o el Código Único del Área Minera",
     minimumInputLength: 1,
     ajax: {
       url: baseUrl + "lpe/ajax_buscar_tramite",
@@ -1263,6 +1343,19 @@ $(document).ready(function () {
       },
       cache: true,
     },
+  });
+  if($(".instrucciones").val() == 'OTRO'){
+    $(".instruccion_otro").show();
+  }else{
+    $(".instruccion_otro").hide();
+  }
+  $(".instrucciones").select2();
+  $(".instrucciones").on("select2:select", function (e) {
+    var data = e.params.data;
+    if(data.id == 'OTRO')
+      $(".instruccion_otro").show();
+    else
+      $(".instruccion_otro").hide();
   });
   /* FIN LICENCIA DE PROSPECCIÓN Y EXPLORACION */
 

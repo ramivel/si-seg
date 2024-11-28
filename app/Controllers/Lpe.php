@@ -23,17 +23,18 @@ class Lpe extends BaseController
     protected $alpha = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
     protected $fontPDF = 'helvetica';
     protected $acciones = array(
-        'Para su conocimiento y consideración',
-        'Analizar',
-        'Procesar conforme a normativa',
-        'Preparar respuesta',
-        'Atender lo solicitado',
-        'Preparar informe',
-        'Elaborar resolución',
-        'Elaborar contrato',
-        'Proceder conforme a reglamento',
-        'Proyectar providencia',
-        'Archivar',
+        'PARA SU CONOCIMIENTO Y CONSIDERACIÓN',
+        'ANALIZAR',
+        'PROCESAR CONFORME A NORMATIVA',
+        'PREPARAR RESPUESTA',
+        'ATENDER LO SOLICITADO',
+        'REVISAR',
+        'PREPARAR INFORME',
+        'ELABORAR RESOLUCIÓN',
+        'ELABORAR CONTRATO',
+        'PROCEDER CONFORME A REGLAMENTO',
+        'PROYECTAR PROVIDENCIA',
+        'ARCHIVAR',
     );
 
     public function listadoRecepcion()
@@ -140,6 +141,45 @@ class Lpe extends BaseController
         $data['alertas'] = $this->alertasTramites();
         echo view('templates/template', $data);
     }
+    public function ver($back,$id_hoja_ruta){
+        $hojaRutaModel = new HojaRutaLPEModel();
+        switch($back){
+            case 1:
+                $url_atras = base_url($this->controlador.'buscador');
+                $menuActual = $this->menuActual.'buscador';
+                break;
+            case 2:
+                $url_atras = base_url($this->controlador.'mis_tramites');
+                $menuActual = $this->menuActual.'mis_tramites';
+                break;
+            case 3:
+                $url_atras = base_url($this->controlador.'buscador_mis_tramites');
+                $menuActual = $this->menuActual.'buscador_mis_tramites';
+                break;
+            case 4:
+                $url_atras = base_url($this->controlador.'buscador');
+                $menuActual = $this->menuActual.'buscador';
+                break;
+        }
+        if($fila = $hojaRutaModel->find($id_hoja_ruta)){
+            $cabera['titulo'] = $this->titulo;
+            $cabera['subtitulo'] = 'Ver Estado Tramite';
+            $contenido['title'] = view('templates/title',$cabera);
+            $contenido['controlador'] = $this->controlador;
+            $contenido['fila'] = $fila;
+            $contenido['informacion_tramite'] = $this->verInformacionTramite($fila['id']);
+            $contenido['seccion'] = $this->obtenerVerSeguimientoTramite($back, $fila['id']);
+            $contenido['url_atras'] = $url_atras;
+            $data['content'] = view($this->carpeta.'ver', $contenido);
+            $data['menu_actual'] = $menuActual;
+            $data['tramites_menu'] = $this->tramitesMenu();
+            $data['alertas'] = $this->alertasTramites();
+            echo view('templates/template', $data);
+        }else{
+            session()->setFlashdata('fail', 'El registro no existe.');
+            return redirect()->to($url_atras);
+        }
+    }
 
     public function agregar(){
         $estadosTramites = $this->obtenerEstadosTramites($this->idTramite);
@@ -209,7 +249,7 @@ class Lpe extends BaseController
                         'ultimo_fk_estado_tramite_padre' => $this->request->getPost('fk_estado_tramite'),
                         'ultimo_fk_estado_tramite_hijo' => ((!empty($this->request->getPost('fk_estado_tramite_hijo'))) ? $this->request->getPost('fk_estado_tramite_hijo') : NULL),
                         'ultimo_fecha_actualizacion_estado' => date('Y-m-d H:i:s'),
-                        'ultimo_instruccion' => mb_strtoupper($this->request->getPost('instruccion')),
+                        'ultimo_instruccion' => ($this->request->getPost('instruccion')=='OTRO')?mb_strtoupper($this->request->getPost('otro')):$this->request->getPost('instruccion'),
                         'ultimo_fk_usuario_remitente' => session()->get('registroUser'),
                         'ultimo_fk_usuario_destinatario' => $this->request->getPost('fk_usuario_destinatario'),
                         'ultimo_fk_usuario_responsable' => $this->request->getPost('fk_usuario_destinatario'),
@@ -252,7 +292,7 @@ class Lpe extends BaseController
                             'domicilio_procesal' => mb_strtoupper($this->request->getPost('domicilio_procesal')),
                             'telefono_solicitante' => mb_strtoupper($this->request->getPost('telefono_solicitante')),
                             'observaciones' => mb_strtoupper($this->request->getPost('observaciones')),
-                            'instruccion' => mb_strtoupper($this->request->getPost('instruccion')),
+                            'instruccion' => ($this->request->getPost('instruccion')=='OTRO')?mb_strtoupper($this->request->getPost('otro')):$this->request->getPost('instruccion'),
                             'fecha_actualizacion_estado' => date('Y-m-d H:i:s'),
                             'recurso_jerarquico' => ($this->request->getPost('recurso_jerarquico') ? 'true' : 'false'),
                             'recurso_revocatoria' => ($this->request->getPost('recurso_revocatoria') ? 'true' : 'false'),
@@ -291,7 +331,9 @@ class Lpe extends BaseController
         $cabera['titulo'] = $this->titulo;
         $cabera['subtitulo'] = 'Migrar Licencia de Prospección y Exploración - SINCOBOL';
         $contenido['title'] = view('templates/title',$cabera);
+        $contenido['titulo_formulario'] = $cabera['subtitulo'];
         $contenido['estadosTramites'] = $estadosTramites;
+        $contenido['instrucciones'] = array(''=>'SELECCIONE UNA OPCIÓN')+$this->acciones+array('OTRO'=>'OTRO');
         $contenido['accion'] = $this->controlador.'agregar';
         $contenido['controlador'] = $this->controlador;
         $data['content'] = view($this->carpeta.'agregar', $contenido);
@@ -1188,6 +1230,121 @@ class Lpe extends BaseController
         ->where($where)
         ->orderBY('doc.id', 'ASC');
         return $builder->get()->getResultArray();
+    }
+    private function verInformacionTramite($id_hoja_ruta){
+        $db = \Config\Database::connect();
+        $dbSincobol = \Config\Database::connect('sincobol');
+        $campos = array(
+            "hr.id","hr.fk_hoja_ruta_sincobol","hr.fk_area_minera","to_char(hr.fecha_mecanizada, 'YYYY-MM-DD HH24:MI') as fecha_mecanizada","codigo_unico","denominacion","extension",
+            "departamentos","provincias","municipios","regional","area_protegida","area_protegida_adicional","representante_legal","nacionalidad","titular","clasificacion_titular"
+        );
+        $where = array(
+            'hr.deleted_at' => NULL,
+            'hr.id' => $id_hoja_ruta,
+        );
+        $builder = $db->table('licencia_prospeccion_exploracion.hoja_ruta as hr')
+        ->select($campos)
+        ->join('licencia_prospeccion_exploracion.datos_area_minera as dam', 'hr.id = dam.fk_hoja_ruta', 'left')
+        ->where($where);
+        $hoja_ruta = $builder->get()->getRowArray();
+        $campos = array('hr.correlativo','hr.cantidad_fojas','hr.referencia',"CONCAT(p.nombres,' ',p.apellido_paterno,' ',p.apellido_materno) as nombre_completo",'e.cargo','e.institucion');
+        $where = array(
+            'hr.id' => $hoja_ruta['fk_hoja_ruta_sincobol'],
+        );
+        $builder = $dbSincobol->table('sincobol.hoja_ruta as hr')
+        ->select($campos)
+        ->join('sincobol.externo as e', 'hr.fk_externo_remitente = e.id', 'left')
+        ->join('sincobol.persona as p', 'e.fk_persona = p.id', 'left')
+        ->where($where);
+        $hr_remitente = $builder->get()->getFirstRow('array');
+        $campos = array(
+            "CONCAT(urt.nombre_completo,'<br><b>',prt.nombre,'</b>') as usuario_responsable",
+            "CASE WHEN der.fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_actual_tramite",
+            'der.domicilio_legal','der.domicilio_procesal','der.telefono_solicitante','der.recurso_jerarquico', 'der.recurso_revocatoria', 'der.oposicion'
+        );
+        $where = array(
+            'der.deleted_at' => NULL,
+            'der.fk_hoja_ruta' => $hoja_ruta['id'],
+        );
+        $query = $db->table('licencia_prospeccion_exploracion.derivacion as der')
+        ->select($campos)
+        ->join('usuarios as urt', 'der.fk_usuario_responsable = urt.id', 'left')
+        ->join('perfiles as prt', 'urt.fk_perfil = prt.id', 'left')
+        ->join('estado_tramite as etp', 'der.fk_estado_tramite_padre = etp.id', 'left')
+        ->join('estado_tramite as eth', 'der.fk_estado_tramite_hijo = eth.id', 'left')
+        ->where($where)
+        ->orderBY('der.id', 'DESC');
+        $ultima_derivacion = $query->get()->getFirstRow('array');
+        $where = array(
+            'id_area_minera' => $hoja_ruta['fk_area_minera'],
+        );
+        $builder = $dbSincobol->table('contabilidad.vista_deuda_anio_total')->where($where);
+        $deuda = $builder->get()->getFirstRow('array');
+        $builder = $dbSincobol->table('siremi.reporte_general_cam')->where($where)->whereIn('estado', array('INSCRITO','FINALIZADO','HISTORICO'));
+        $registro_minero = $builder->get()->getFirstRow('array');
+        $contenido['hoja_ruta'] = $hoja_ruta;
+        $contenido['hr_remitente'] = $hr_remitente;
+        $contenido['ultima_derivacion'] = $ultima_derivacion;
+        $contenido['deuda'] = $deuda;
+        $contenido['registro_minero'] = $registro_minero;
+        return view($this->carpeta.'ver_informacion', $contenido);
+    }
+    private function obtenerCabeceraVer($back, $id_hoja_ruta, $activo){
+        $url_seguimiento_tramite = base_url($this->controlador.'ver/'.$back.'/'.$id_hoja_ruta);
+        $url_correspondencia_externa = base_url($this->controlador.'ver_correspondencia_externa/'.$back.'/'.$id_hoja_ruta);
+        $url_documentos_generados = base_url($this->controlador.'ver_documentos_generados/'.$back.'/'.$id_hoja_ruta);
+        $url_hojas_ruta_anexadas = base_url($this->controlador.'ver_hojas_ruta_anexadas/'.$back.'/'.$id_hoja_ruta);
+        $url_historico_sincobol = base_url($this->controlador.'ver_historico_sincobol/'.$back.'/'.$id_hoja_ruta);
+        $url_seguimiento_historico_sincobol = base_url($this->controlador.'ver_seguimiento_historico_sincobol/'.$back.'/'.$id_hoja_ruta);
+        $contenido['url_seguimiento_tramite'] = $url_seguimiento_tramite;
+        $contenido['url_correspondencia_externa'] = $url_correspondencia_externa;
+        $contenido['url_documentos_generados'] = $url_documentos_generados;
+        $contenido['url_hojas_ruta_anexadas'] = $url_hojas_ruta_anexadas;
+        $contenido['url_historico_sincobol'] = $url_historico_sincobol;
+        $contenido['url_seguimiento_historico_sincobol'] = $url_seguimiento_historico_sincobol;
+        $contenido['activo'] = $activo;
+        return view($this->carpeta.'ver_cabecera', $contenido);
+    }
+    private function obtenerVerSeguimientoTramite($back, $id_hoja_ruta){
+        $db = \Config\Database::connect();
+        $cabecera_listado = array(
+            '','Remitente','Destinatario','Instrucción','Estado Tramite','APM Presento','Responsable Trámite','Fecha Derivación','Fecha Recepción','Fecha Devolución','Fecha Atención',
+            'Domicilio Legal','Domicilio Procesal','Teléfono(s) Solicitante',
+        );
+        $campos_listado = array(
+            'estado','remitente','destinatario','instruccion','estado_tramite','apm_presento','responsable','fecha_derivacion','fecha_recepcion','fecha_devolucion','fecha_atencion',
+            'domicilio_legal','domicilio_procesal','telefono_solicitante',
+        );
+        $campos = array(
+            'd.id','d.estado',"CONCAT(ur.nombre_completo,'<br><b>',pr.nombre,'<b>') as remitente", "CONCAT(ud.nombre_completo,'<br><b>',pd.nombre,'<b>') as destinatario",
+            "CONCAT(ua.nombre_completo,'<br><b>',pa.nombre,'<b>') as responsable",'d.instruccion',
+            "CASE WHEN d.fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite",
+            "to_char(d.created_at, 'DD/MM/YYYY HH24:MI') as fecha_derivacion", "to_char(d.fecha_recepcion, 'DD/MM/YYYY HH24:MI') as fecha_recepcion", "to_char(d.fecha_atencion, 'DD/MM/YYYY HH24:MI') as fecha_atencion",
+            "to_char(d.fecha_devolucion, 'DD/MM/YYYY HH24:MI') as fecha_devolucion", 'd.domicilio_legal', 'd.domicilio_procesal', 'd.telefono_solicitante',
+            'd.recurso_jerarquico', 'd.recurso_revocatoria', 'd.oposicion',
+            );
+        $where = array(
+            'd.fk_hoja_ruta' => $id_hoja_ruta,
+            'd.deleted_at' => NULL,
+        );
+        $query = $db->table('licencia_prospeccion_exploracion.derivacion as d')
+        ->select($campos)
+        ->join('estado_tramite as etp', 'd.fk_estado_tramite_padre = etp.id', 'left')
+        ->join('estado_tramite as eth', 'd.fk_estado_tramite_hijo = eth.id', 'left')
+        ->join('usuarios as ur', 'd.fk_usuario_remitente = ur.id', 'left')
+        ->join('perfiles as pr', 'ur.fk_perfil = pr.id', 'left')
+        ->join('usuarios as ud', 'd.fk_usuario_destinatario = ud.id', 'left')
+        ->join('perfiles as pd', 'ud.fk_perfil = pd.id', 'left')
+        ->join('usuarios as ua', 'd.fk_usuario_responsable = ua.id', 'left')
+        ->join('perfiles as pa', 'ua.fk_perfil = pa.id', 'left')
+        ->where($where)
+        ->orderBY('d.id', 'ASC');
+        $datos = $query->get()->getResultArray();
+        $contenido['datos'] = $datos;
+        $contenido['cabecera_listado'] = $cabecera_listado;
+        $contenido['campos_listado'] = $campos_listado;
+        $contenido['tabs'] = $this->obtenerCabeceraVer($back, $id_hoja_ruta, 'SEGUIMIENTO TRÁMITE');
+        return view($this->carpeta.'ver_seguimiento_tramite', $contenido);
     }
 
     public function ajaxHojaRutaMadre(){

@@ -17,51 +17,33 @@ $(document).ready(function () {
 
     // These are the constraints used to validate the form
     var constraints = {
-        fk_solicitud_licencia_contrato:{
+        fk_hoja_ruta: {
             presence: {
-                message: "^Debe seleccionar la Hoja de Ruta Madre."
+                message: "^Debe seleccionar el Correlativo de H.R. Madre"
             },
         },
-        domicilio_legal: {
+        cite: {
             presence: true,
         },
-        domicilio_procesal: {
+        fecha_cite: {
             presence: true,
         },
-        telefono_solicitante: {
-            presence: true,
-        },
-        fk_estado_tramite: {
+        fk_persona_externa: {
             presence: {
-                message: "^Debe seleccionar el Estado del Tramite."
+                message: "^Debe seleccionar el Remitente"
             },
         },
-        fk_estado_tramite_hijo:{
-            presence: function(){
-                if($('#fk_estado_tramite').children('option:selected').data('padre') == 't')
-                    return true;
-                else
-                    return false;
-            }
-        },
-        observaciones: {
+        referencia: {
             presence: true,
         },
-        fk_usuario_destinatario:{
-            presence: {
-                message: "^Debe seleccionar el Destinatario."
-            },
-        },
-        instruccion: {
+        fojas: {
             presence: true,
         },
-        otro:{
-            presence: function(){
-                if($('#instruccion').val() == 'OTRO')
-                    return true;
-                else
-                    return false;
-            }
+        adjuntos: {
+            presence: true,
+        },
+        doc_digital: {
+            presence: true,
         },
     };
 
@@ -183,4 +165,22 @@ $(document).ready(function () {
             }
         });
     }
+
+    function errorDocumento(){
+        var anexar_documentos = $('#anexar_documentos').val();
+        var fk_estado_tramite_padre = $('#fk_estado_tramite').val();
+        var ultimo_fk_estado_tramite_padre = $('#ultimo_fk_estado_tramite_padre').val();
+        var fk_estado_tramite_hijo = $('#fk_estado_tramite_hijo').val();
+        var ultimo_fk_estado_tramite_hijo = $('#ultimo_fk_estado_tramite_hijo').val();
+        if(ultimo_fk_estado_tramite_padre == fk_estado_tramite_padre && ultimo_fk_estado_tramite_hijo == fk_estado_tramite_hijo){
+            return false;
+        }else if(ultimo_fk_estado_tramite_padre == fk_estado_tramite_padre){
+            return false;
+        }else if (anexar_documentos == 'NO'){
+            return false;
+        }
+
+        return true;
+    }
+
 });
