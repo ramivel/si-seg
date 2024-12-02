@@ -229,6 +229,8 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
 
         $routes->add('mis_ingresos_lpe', 'CorrespondenciaExterna::misIngresosLPE');
         $routes->add('agregar_lpe', 'CorrespondenciaExterna::agregarLPE');
+        $routes->add('editar_lpe/(:num)', 'CorrespondenciaExterna::editarLPE/$1');
+        $routes->post('guardar_editar_lpe', 'CorrespondenciaExterna::guardarEditarLPE');
 
     });
 
@@ -379,6 +381,7 @@ $routes->group('', ['filter'=>'AutenticacionCheck'], function($routes){
         $routes->post('guardar_atender', 'Lpe::guardarAtender');
         $routes->add('editar/(:num)', 'Lpe::editar/$1');
         $routes->post('guardar_editar', 'Lpe::guardarEditar');
+        $routes->add('correspondencia_externa/(:num)', 'Lpe::correspondenciaExterna/$1');
 
         $routes->add('ajax_hoja_ruta', 'Lpe::ajaxHojaRutaMadre');
         $routes->add('ajax_datos_hr', 'Lpe::ajaxDatosHR');

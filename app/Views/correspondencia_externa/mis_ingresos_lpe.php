@@ -57,10 +57,13 @@
                                                 $style = '';
                                                 switch($fila[$campos_reales[$i]]){
                                                     case 'RECIBIDO':
-                                                        $style = 'btn btn-sm btn-success btn-round';
+                                                        $style = RECIBIDO;
                                                         break;
                                                     case 'INGRESADO':
-                                                        $style = 'btn btn-sm btn-primary btn-round';
+                                                        $style = INGRESADO;
+                                                        break;
+                                                    case 'ATENDIDO':
+                                                        $style = ATENDIDO;
                                                         break;
                                                 }
                                                 echo '<button class="'.$style.'">'.$fila[$campos_reales[$i]].'</button>';

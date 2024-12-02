@@ -862,11 +862,8 @@ class CorrespondenciaExterna extends BaseController
             $db = \Config\Database::connect();
             $personaExternaModel = new PersonaExternaModel();
             $tramitesModel = new TramitesModel();
-
             $cabera['titulo'] = $this->titulo;
-            $cabera['navegador'] = true;
             $cabera['subtitulo'] = 'Editar Registro';
-
             $campos = array('hr.id', "CONCAT(hr.correlativo,' (',dam.codigo_unico,' - ',dam.denominacion,')') as hr");
             $where = array(
                 'hr.deleted_at' => NULL,
@@ -877,7 +874,6 @@ class CorrespondenciaExterna extends BaseController
             ->join('licencia_prospeccion_exploracion.datos_area_minera as dam', 'hr.id = dam.fk_hoja_ruta', 'left')
             ->where($where);
             $contenido['hr_madre'] = $builder->get()->getRowArray();
-
             $contenido['hoja_ruta'] = $this->datosLPE($fila['fk_hoja_ruta']);
             $campos = array('id', "CONCAT(documento_identidad, ' ', expedido, ' - ', nombres, ' ', apellidos, ' (', institucion, ' - ',cargo,')') as nombre");
             $contenido['persona_externa'] = $personaExternaModel->select($campos)->find($fila['fk_persona_externa']);
@@ -886,13 +882,12 @@ class CorrespondenciaExterna extends BaseController
             $contenido['doc_digital_anterior'] = $fila['doc_digital'];
             $contenido['tramite'] = $tramitesModel->find($fila['fk_tramite']);
             $contenido['accion'] = $this->controlador.'guardar_editar_lpe';
-            $contenido['validation'] = $this->validator;
             $contenido['controlador'] = $this->controlador;
             $contenido['modal_remitente'] = view($this->carpeta.'nuevo_remitente', array('expedidos'=>$this->expedidos));
             $data['content'] = view($this->carpeta.'editar_lpe', $contenido);
             $data['menu_actual'] = $this->menuActual.'mis_ingresos';
             $data['tramites_menu'] = $this->tramitesMenu();
-            $data['validacion_js'] = 'correspondencia-externa-editar-validation.js';
+            $data['validacion_js'] = 'lpe/correspondencia-externa-editar.js';
             echo view('templates/template', $data);
         }else{
             session()->setFlashdata('fail', 'El registro no existe.');
@@ -903,13 +898,13 @@ class CorrespondenciaExterna extends BaseController
         if ($this->request->getPost()) {
             $id = $this->request->getPost('id');
             $correspondenciaExternaModel = new CorrespondenciaExternaModel();
-            $actoAdministrativoModel = new ActoAdministrativoModel();
+            $hojaRutaModel = new HojaRutaLPEModel();
             $personaExternaModel = new PersonaExternaModel();
             $validation = $this->validate([
                 'id' => [
                     'rules' => 'required',
                 ],
-                'fk_acto_administrativo' => [
+                'fk_hoja_ruta' => [
                     'rules' => 'required',
                 ],
                 'cite' => [
@@ -937,37 +932,37 @@ class CorrespondenciaExterna extends BaseController
             ]);
             if(!$validation){
                 $db = \Config\Database::connect();
-                $campos = array('id', "CONCAT(correlativo,' (',codigo_unico,' - ',denominacion,')') as hr");
+                $campos = array('hr.id', "CONCAT(hr.correlativo,' (',dam.codigo_unico,' - ',dam.denominacion,')') as hr");
                 $where = array(
-                    'ac.deleted_at' => NULL,
-                    'ac.id' => $this->request->getPost('fk_acto_administrativo'),
+                    'hr.deleted_at' => NULL,
+                    'hr.id' => $this->request->getPost('fk_hoja_ruta'),
                 );
-                $builder = $db->table('public.acto_administrativo as ac')
+                $builder = $db->table('licencia_prospeccion_exploracion.hoja_ruta as hr')
                 ->select($campos)
-                ->join('public.datos_area_minera as dam', 'ac.id = dam.fk_acto_administrativo', 'left')
+                ->join('licencia_prospeccion_exploracion.datos_area_minera as dam', 'hr.id = dam.fk_hoja_ruta', 'left')
                 ->where($where);
-                $contenido['hr_madre'] = $builder->get()->getRowArray();
+                $hr_madre = $builder->get()->getRowArray();
+                $contenido['hr_madre'] = $hr_madre;
                 $cabera['titulo'] = $this->titulo;
-                $cabera['navegador'] = true;
                 $cabera['subtitulo'] = 'Editar Registro';
                 $campos = array('id', "CONCAT(documento_identidad, ' ', expedido, ' - ', nombres, ' ', apellidos, ' (', institucion, ' - ',cargo,')') as nombre");
                 $contenido['persona_externa'] = $personaExternaModel->select($campos)->find($this->request->getPost('fk_persona_externa'));
                 $contenido['doc_digital_anterior'] = $this->request->getPost('doc_digital_anterior');
                 $contenido['title'] = view('templates/title',$cabera);
-                $contenido['accion'] = $this->controlador.'guardar_editar';
+                $contenido['accion'] = $this->controlador.'guardar_editar_lpe';
                 $contenido['validation'] = $this->validator;
                 $contenido['controlador'] = $this->controlador;
                 $contenido['modal_remitente'] = view($this->carpeta.'nuevo_remitente', array('expedidos'=>$this->expedidos));
-                $data['content'] = view($this->carpeta.'editar', $contenido);
+                $data['content'] = view($this->carpeta.'editar_lpe', $contenido);
                 $data['menu_actual'] = $this->menuActual.'mis_ingresos';
                 $data['tramites_menu'] = $this->tramitesMenu();
-                $data['validacion_js'] = 'correspondencia-externa-editar-validation.js';
+                $data['validacion_js'] = 'lpe/correspondencia-externa-editar.js';
                 echo view('templates/template', $data);
             }else{
-                $acto_administrativo = $actoAdministrativoModel->find($this->request->getPost('fk_acto_administrativo'));
+                $hoja_ruta = $hojaRutaModel->find($this->request->getPost('fk_hoja_ruta'));
                 $data = array(
                     'id' => $id,
-                    'fk_acto_administrativo' => $this->request->getPost('fk_acto_administrativo'),
+                    'fk_hoja_ruta' => $this->request->getPost('fk_hoja_ruta'),
                     'fk_persona_externa' => $this->request->getPost('fk_persona_externa'),
                     'cite' => mb_strtoupper($this->request->getPost('cite')),
                     'fecha_cite' => $this->request->getPost('fecha_cite'),
@@ -980,8 +975,7 @@ class CorrespondenciaExterna extends BaseController
                 if(!empty($docDigital) && $docDigital->getSize()>0){
                     if(file_exists($this->request->getPost('doc_digital_anterior')))
                         @unlink($this->request->getPost('doc_digital_anterior'));
-
-                    $path = 'archivos/cam/'.$acto_administrativo['fk_area_minera'].'/externo/';
+                    $path = 'archivos/lpe/'.$hoja_ruta['fk_area_minera'].'/';
                     $nombreAdjunto = $docDigital->getRandomName();
                     $docDigital->move($path,$nombreAdjunto);
                     $data['doc_digital'] = $path.$nombreAdjunto;
@@ -990,7 +984,7 @@ class CorrespondenciaExterna extends BaseController
                     session()->setFlashdata('fail', $correspondenciaExternaModel->errors());
                 else
                     session()->setFlashdata('success', 'Se Actualizo Correctamente la Información.');
-                return redirect()->to($this->controlador.'mis_ingresos');
+                return redirect()->to($this->controlador.'mis_ingresos_lpe');
             }
         }
     }
@@ -1075,9 +1069,9 @@ class CorrespondenciaExterna extends BaseController
         ->join('licencia_prospeccion_exploracion.datos_area_minera as dam', 'hr.id = dam.fk_hoja_ruta', 'left')
         ->join('usuarios as ur', 'hr.ultimo_fk_usuario_remitente = ur.id', 'left')
         ->join('perfiles as pr', 'ur.fk_perfil=pr.id', 'left')
-        ->join('usuarios as ud', 'ac.fk_usuario_actual = ud.id', 'left')
+        ->join('usuarios as ud', 'hr.fk_usuario_actual = ud.id', 'left')
         ->join('perfiles as pd', 'ud.fk_perfil=pd.id', 'left')
-        ->join('usuarios as ua', 'ac.fk_usuario_actual = ua.id', 'left')
+        ->join('usuarios as ua', 'hr.fk_usuario_actual = ua.id', 'left')
         ->join('perfiles as pa', 'ua.fk_perfil = pa.id', 'left')
         ->where($where);
         return $builder->get()->getRowArray();

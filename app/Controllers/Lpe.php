@@ -10,6 +10,7 @@ use App\Models\EstadoTramiteModel;
 use App\Models\HojaRutaLPEModel;
 use App\Models\OficinasModel;
 use App\Models\SolicitudLicenciaContratoModel;
+use App\Models\TipoDocumentoExternoModel;
 
 class Lpe extends BaseController
 {
@@ -207,9 +208,6 @@ class Lpe extends BaseController
                         'required' => 'Debe seleccionar el Estado del Tramite.'
                     ]
                 ],
-                'observaciones' => [
-                    'rules' => 'required',
-                ],
                 'fk_usuario_destinatario' => [
                     'rules' => 'required',
                     'errors' => [
@@ -249,7 +247,7 @@ class Lpe extends BaseController
                         'ultimo_fk_estado_tramite_padre' => $this->request->getPost('fk_estado_tramite'),
                         'ultimo_fk_estado_tramite_hijo' => ((!empty($this->request->getPost('fk_estado_tramite_hijo'))) ? $this->request->getPost('fk_estado_tramite_hijo') : NULL),
                         'ultimo_fecha_actualizacion_estado' => date('Y-m-d H:i:s'),
-                        'ultimo_instruccion' => ($this->request->getPost('instruccion')=='OTRO')?mb_strtoupper($this->request->getPost('otro')):$this->request->getPost('instruccion'),
+                        'ultimo_instruccion' => ($this->request->getPost('instruccion')=='OTRO')?mb_strtoupper($this->request->getPost('otro')):$this->acciones[$this->request->getPost('instruccion')],
                         'ultimo_fk_usuario_remitente' => session()->get('registroUser'),
                         'ultimo_fk_usuario_destinatario' => $this->request->getPost('fk_usuario_destinatario'),
                         'ultimo_fk_usuario_responsable' => $this->request->getPost('fk_usuario_destinatario'),
@@ -292,7 +290,7 @@ class Lpe extends BaseController
                             'domicilio_procesal' => mb_strtoupper($this->request->getPost('domicilio_procesal')),
                             'telefono_solicitante' => mb_strtoupper($this->request->getPost('telefono_solicitante')),
                             'observaciones' => mb_strtoupper($this->request->getPost('observaciones')),
-                            'instruccion' => ($this->request->getPost('instruccion')=='OTRO')?mb_strtoupper($this->request->getPost('otro')):$this->request->getPost('instruccion'),
+                            'instruccion' => ($this->request->getPost('instruccion')=='OTRO')?mb_strtoupper($this->request->getPost('otro')):$this->acciones[$this->request->getPost('instruccion')],
                             'fecha_actualizacion_estado' => date('Y-m-d H:i:s'),
                             'recurso_jerarquico' => ($this->request->getPost('recurso_jerarquico') ? 'true' : 'false'),
                             'recurso_revocatoria' => ($this->request->getPost('recurso_revocatoria') ? 'true' : 'false'),
@@ -448,20 +446,14 @@ class Lpe extends BaseController
             $contenido['informacion_tramite'] = $this->obtenerInformacionTramiteFormulario($fila['id']);
             $contenido['fila'] = $fila;
             $contenido['ultima_derivacion'] = $ultima_derivacion;
-            $contenido['area_minera'] = $this->informacionAreaMinera($fila['fk_solicitud_licencia_contrato']);;
-            $contenido['estadosTramites'] = $this->obtenerEstadosTramites($this->idTramite);
-            $contenido['id_estado_padre'] = $ultima_derivacion['fk_estado_tramite_padre'];
-            if($ultima_derivacion['fk_estado_tramite_hijo']){
-                $contenido['estadosTramitesHijo'] = $this->obtenerEstadosTramitesHijo($ultima_derivacion['fk_estado_tramite_padre']);
-                $contenido['id_estado_hijo'] = $ultima_derivacion['fk_estado_tramite_hijo'];
-            }
+            $contenido['area_minera'] = $this->informacionAreaMinera($fila['fk_solicitud_licencia_contrato']);
             $contenido['documentos'] = $this->obtenerDocumentos($id_hoja_ruta);
             if(in_array(10, session()->get('registroPermisos')))
                 $contenido['documentos_cargar'] = $this->obtenerDocumentosCargar($id_hoja_ruta);
-            //$contenido['correspondencia_externa'] = $this->informacionHRExterna($fila['id']);
+            $contenido['correspondencia_externa'] = $this->informacionHRExterna($fila['id']);
+            $contenido['instrucciones'] = array(''=>'SELECCIONE UNA OPCIÓN')+$this->acciones+array('OTRO'=>'OTRO');
             $contenido['accion'] = $this->controlador.'guardar_atender';
             $contenido['controlador'] = $this->controlador;
-            $contenido['id_tramite'] = $this->idTramite;
             $data['content'] = view($this->carpeta.'atender', $contenido);
             $data['menu_actual'] = $this->menuActual.'mis_tramites';
             $data['tramites_menu'] = $this->tramitesMenu();
@@ -479,7 +471,7 @@ class Lpe extends BaseController
             $documentos = $this->obtenerDocumentos($id);
             if(in_array(10, session()->get('registroPermisos')))
                 $documentos_cargar = $this->obtenerDocumentosCargar($id);
-            //$correspondencia_externa = $this->informacionHRExterna($id);
+            $correspondencia_externa = $this->informacionHRExterna($id);
             $validation = $this->validate([
                 'id_hoja_ruta' => [
                     'rules' => 'required',
@@ -502,12 +494,6 @@ class Lpe extends BaseController
                 'telefono_solicitante' => [
                     'rules' => 'required',
                 ],
-                'fk_estado_tramite' => [
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => 'Debe seleccionar un Estado de Tramite.'
-                    ]
-                ],
                 'fk_usuario_destinatario' => [
                     'rules' => 'required',
                     'errors' => [
@@ -519,29 +505,24 @@ class Lpe extends BaseController
                 ],
             ]);
             if(!$validation){
-                /*if($correspondencia_externa && count($correspondencia_externa) > 0){
+                if($correspondencia_externa && count($correspondencia_externa) > 0){
                     $contenido['atendido'] = $this->request->getPost('atendido');
                     $contenido['observaciones_ce'] = $this->request->getPost('observaciones_ce');
-                }*/
-
+                }
                 $cabera['titulo'] = $this->titulo;
                 $cabera['subtitulo'] = 'Atender Hoja de Ruta';
                 $contenido['title'] = view('templates/title',$cabera);
-                $contenido['informacion_tramite'] = $this->obtenerInformacionTramiteFormulario($id);
                 $contenido['correlativo'] = $this->request->getPost('correlativo');
-                $contenido['estadosTramites'] = $this->obtenerEstadosTramites($this->idTramite);
-                $contenido['estadosTramitesHijo'] = $this->obtenerEstadosTramitesHijo($this->request->getPost('fk_estado_tramite'));
-                $contenido['id_estado_padre'] = $this->request->getPost('fk_estado_tramite');
-                $contenido['id_estado_hijo'] = $this->request->getPost('fk_estado_tramite_hijo');
+                $contenido['informacion_tramite'] = $this->obtenerInformacionTramiteFormulario($id);
                 $contenido['documentos'] = $documentos;
                 if(isset($documentos_cargar) && in_array(10, session()->get('registroPermisos')))
                     $contenido['documentos_cargar'] = $documentos_cargar;
                 $contenido['usu_destinatario'] = $this->obtenerUsuario($this->request->getPost('fk_usuario_destinatario'));
-                //$contenido['correspondencia_externa'] = $correspondencia_externa;
+                $contenido['correspondencia_externa'] = $correspondencia_externa;
+                $contenido['instrucciones'] = array(''=>'SELECCIONE UNA OPCIÓN')+$this->acciones+array('OTRO'=>'OTRO');
                 $contenido['accion'] = $this->controlador.'guardar_atender';
                 $contenido['validation'] = $this->validator;
                 $contenido['controlador'] = $this->controlador;
-                $contenido['id_tramite'] = $this->idTramite;
                 $data['content'] = view($this->carpeta.'atender', $contenido);
                 $data['menu_actual'] = $this->menuActual.'mis_tramites';
                 $data['tramites_menu'] = $this->tramitesMenu();
@@ -554,15 +535,21 @@ class Lpe extends BaseController
                 $datosAreaMineraModel = new DatosAreaMineraLPEModel();
                 $derivacionModel = new DerivacionLPEModel();
                 $documentosModel = new DocumentosModel();
-                //$correspondenciaExternaModel = new CorrespondenciaExternaModel();
+                $correspondenciaExternaModel = new CorrespondenciaExternaModel();
+                if(count($documentos)>0){
+                    foreach($documentos as $row){
+                        if($row['estado_tramite']){
+                            $fk_estado_tramite_padre = $row['fk_estado_tramite_padre_actualizar'];
+                            $fk_estado_tramite_hijo = $row['fk_estado_tramite_hijo_actualizar'];
+                            break;
+                        }
+                    }
+                }
                 $dataHojaRuta = array(
                     'id' => $id,
                     'ultimo_estado' => $estado,
-                    'ultimo_fk_estado_tramite_padre' => $this->request->getPost('fk_estado_tramite'),
-                    'ultimo_fk_estado_tramite_hijo' => ((!empty($this->request->getPost('fk_estado_tramite_hijo'))) ? $this->request->getPost('fk_estado_tramite_hijo') : NULL),
-                    'ultimo_fecha_actualizacion_estado' => ($this->request->getPost('fk_estado_tramite') != $this->request->getPost('ultimo_fk_estado_tramite_padre') ||  $this->request->getPost('fk_estado_tramite_hijo') != $this->request->getPost('ultimo_fk_estado_tramite_hijo'))? date('Y-m-d H:i:s'):$this->request->getPost('ultimo_fecha_actualizacion_estado'),
                     'ultimo_fecha_derivacion' => date('Y-m-d H:i:s'),
-                    'ultimo_instruccion' => mb_strtoupper($this->request->getPost('instruccion')),
+                    'ultimo_instruccion' => ($this->request->getPost('instruccion')=='OTRO')?mb_strtoupper($this->request->getPost('otro')):$this->acciones[$this->request->getPost('instruccion')],
                     'ultimo_fk_usuario_remitente' => session()->get('registroUser'),
                     'ultimo_fk_usuario_destinatario' => $this->request->getPost('fk_usuario_destinatario'),
                     'ultimo_fk_usuario_responsable'=>($this->request->getPost('responsable') ? $this->request->getPost('fk_usuario_destinatario') : $this->request->getPost('ultimo_fk_usuario_responsable')),
@@ -571,6 +558,11 @@ class Lpe extends BaseController
                     'ultimo_oposicion' => ($this->request->getPost('oposicion') ? 'true' : 'false'),
                     'editar' => 'true',
                 );
+                if(isset($fk_estado_tramite_padre) && $fk_estado_tramite_padre>0){
+                    $dataHojaRuta['ultimo_fk_estado_tramite_padre'] = $fk_estado_tramite_padre;
+                    $dataHojaRuta['ultimo_fk_estado_tramite_hijo'] = ($fk_estado_tramite_hijo>0 ? $fk_estado_tramite_hijo:NULL);
+                    $dataHojaRuta['ultimo_fecha_actualizacion_estado'] = ($fk_estado_tramite_padre != $this->request->getPost('ultimo_fk_estado_tramite_padre') ||  $fk_estado_tramite_hijo != $this->request->getPost('ultimo_fk_estado_tramite_hijo'))? date('Y-m-d H:i:s'):$this->request->getPost('ultimo_fecha_actualizacion_estado');
+                }
                 if(count($documentos)>0){
                     $ultimo_fk_documentos = '';
                     foreach($documentos as $row)
@@ -578,7 +570,7 @@ class Lpe extends BaseController
                     $dataHojaRuta['ultimo_fk_documentos'] = substr($ultimo_fk_documentos, 0, -1);
                 }
                 if(in_array(10, session()->get('registroPermisos'))){
-                    $dataHojaRuta['estado_tramite_apm'] = $this->obtenerEstadoTramiteAPM($this->request->getPost('fk_estado_tramite'), $this->request->getPost('fk_estado_tramite_hijo'));
+                    $dataHojaRuta['estado_tramite_apm'] = $this->obtenerEstadoTramiteAPM($this->request->getPost('ultimo_fk_estado_tramite_padre'), $this->request->getPost('ultimo_fk_estado_tramite_hijo'));
                     if(count($documentos)>0 || (isset($documentos_cargar) && count($documentos_cargar)>0)){
                         $resultado = '<ul class="list-group list-group-flush">';
                         if(count($documentos)>0)
@@ -611,7 +603,7 @@ class Lpe extends BaseController
                     );
                     if($datosAreaMineraModel->save($dataDatosAreaMinera) === false)
                         session()->setFlashdata('fail', $datosAreaMineraModel->errors());
-                    /*if($correspondencia_externa && count($correspondencia_externa)>0){
+                    if($correspondencia_externa && count($correspondencia_externa)>0){
                         $atendido = $this->request->getPost('atendido');
                         $observaciones_ce = $this->request->getPost('observaciones_ce');
                         foreach($correspondencia_externa as $n=>$correspondencia){
@@ -627,7 +619,7 @@ class Lpe extends BaseController
                                     session()->setFlashdata('fail', $correspondenciaExternaModel->errors());
                             }
                         }
-                    }*/
+                    }
                     $dataDerivacion = array(
                         'fk_hoja_ruta' => $id,
                         'domicilio_legal' => mb_strtoupper($this->request->getPost('domicilio_legal')),
@@ -640,13 +632,21 @@ class Lpe extends BaseController
                         'fk_usuario_remitente' => session()->get('registroUser'),
                         'fk_usuario_destinatario' => $this->request->getPost('fk_usuario_destinatario'),
                         'fk_usuario_responsable'=>($this->request->getPost('responsable') ? $this->request->getPost('fk_usuario_destinatario') : $this->request->getPost('ultimo_fk_usuario_responsable')),
-                        'instruccion' => mb_strtoupper($this->request->getPost('instruccion')),
+                        'instruccion' => ($this->request->getPost('instruccion')=='OTRO')?mb_strtoupper($this->request->getPost('otro')):$this->acciones[$this->request->getPost('instruccion')],
                         'recurso_jerarquico' => ($this->request->getPost('recurso_jerarquico') ? 'true' : 'false'),
                         'recurso_revocatoria' => ($this->request->getPost('recurso_revocatoria') ? 'true' : 'false'),
                         'oposicion' => ($this->request->getPost('oposicion') ? 'true' : 'false'),
                         'estado' => $estado,
                         'fk_usuario_creador' => session()->get('registroUser'),
                     );
+                    if(isset($fk_estado_tramite_padre) && $fk_estado_tramite_padre>0){
+                        $dataDerivacion['fk_estado_tramite_padre'] = $fk_estado_tramite_padre;
+                        $dataDerivacion['fk_estado_tramite_hijo'] = ($fk_estado_tramite_hijo>0 ? $fk_estado_tramite_hijo:NULL);
+                        $dataDerivacion['fecha_actualizacion_estado'] = ($fk_estado_tramite_padre != $this->request->getPost('ultimo_fk_estado_tramite_padre') ||  $fk_estado_tramite_hijo != $this->request->getPost('ultimo_fk_estado_tramite_hijo'))? date('Y-m-d H:i:s'):$this->request->getPost('ultimo_fecha_actualizacion_estado');
+                    }else{
+                        $dataDerivacion['fk_estado_tramite_padre'] = $this->request->getPost('ultimo_fk_estado_tramite_padre');
+                        $dataDerivacion['fk_estado_tramite_hijo'] = ((!empty($this->request->getPost('ultimo_fk_estado_tramite_hijo'))) ? $this->request->getPost('ultimo_fk_estado_tramite_hijo') : NULL);
+                    }
                     if($derivacionModel->insert($dataDerivacion) === false){
                         session()->setFlashdata('fail', $derivacionModel->errors());
                     }else{
@@ -661,6 +661,8 @@ class Lpe extends BaseController
                                     'fecha_notificacion'=> !empty($fecha_notificacion_anexar[$i]) ? $fecha_notificacion_anexar[$i] : NULL,
                                 );
                                 if(in_array(10, session()->get('registroPermisos'))){
+                                    if(file_exists($documento['doc_digital']))
+                                        @unlink($documento['doc_digital']);
                                     $docDigital = $this->request->getFile('documentos_anexar.'.$i);
                                     $nombreDocDigital = $docDigital->getRandomName();
                                     $path = $this->rutaArchivos.$this->request->getPost('fk_area_minera').'/';
@@ -686,6 +688,7 @@ class Lpe extends BaseController
                                     'id' => $documento['id'],
                                     'doc_digital' => $path.$nombreDocDigital,
                                     'fk_usuario_doc_digital' => session()->get('registroUser'),
+                                    'fecha_notificacion'=> isset($fecha_notificacion_anexar[0]) ? $fecha_notificacion_anexar[0] : NULL,
                                 );
                                 if($documentosModel->save($dataDocumento) === false)
                                     session()->setFlashdata('fail', $documentosModel->errors());
@@ -736,21 +739,24 @@ class Lpe extends BaseController
             $contenido['informacion_tramite'] = $this->obtenerInformacionTramiteFormulario($fila['id']);
             $contenido['fila'] = $fila;
             $contenido['derivacion'] = $derivacion;
-            $contenido['area_minera'] = $this->informacionAreaMinera($fila['fk_solicitud_licencia_contrato']);;
-            $contenido['estadosTramites'] = $this->obtenerEstadosTramites($this->idTramite);
-            $contenido['id_estado_padre'] = $derivacion['fk_estado_tramite_padre'];
-            if($derivacion['fk_estado_tramite_hijo']){
-                $contenido['estadosTramitesHijo'] = $this->obtenerEstadosTramitesHijo($derivacion['fk_estado_tramite_padre']);
-                $contenido['id_estado_hijo'] = $derivacion['fk_estado_tramite_hijo'];
+            $contenido['area_minera'] = $this->informacionAreaMinera($fila['fk_solicitud_licencia_contrato']);
+            if($derivacion['estado']=="MIGRADO"){
+                $contenido['estadosTramites'] = $this->obtenerEstadosTramites($this->idTramite);
+                $contenido['id_estado_padre'] = $derivacion['fk_estado_tramite_padre'];
+                if($derivacion['fk_estado_tramite_hijo']){
+                    $contenido['estadosTramitesHijo'] = $this->obtenerEstadosTramitesHijo($derivacion['fk_estado_tramite_padre']);
+                    $contenido['id_estado_hijo'] = $derivacion['fk_estado_tramite_hijo'];
+                }
             }
             $contenido['documentos'] = $this->obtenerDocumentos($id_hoja_ruta, $derivacion['id']);
             if(in_array(10, session()->get('registroPermisos')))
                 $contenido['documentos_cargar'] = $this->obtenerDocumentosCargar($id_hoja_ruta, $fila['fecha_actualizacion']);
+            $contenido['correspondencia_externa'] = $this->informacionHRExterna($fila['id']);
             $contenido['usu_destinatario'] = $this->obtenerUsuario($derivacion['fk_usuario_destinatario']);
-            //$contenido['correspondencia_externa'] = $this->informacionHRExterna($fila['id']);
+            $contenido['instrucciones'] = array(''=>'SELECCIONE UNA OPCIÓN')+$this->acciones+array('OTRO'=>'OTRO');
+            $contenido['instruccion'] = in_array($derivacion['instruccion'], $this->acciones) ? array_search($derivacion['instruccion'], $this->acciones) : 'OTRO';
             $contenido['accion'] = $this->controlador.'guardar_editar';
             $contenido['controlador'] = $this->controlador;
-            $contenido['id_tramite'] = $this->idTramite;
             $data['content'] = view($this->carpeta.'editar', $contenido);
             $data['menu_actual'] = $this->menuActual.'mis_tramites';
             $data['tramites_menu'] = $this->tramitesMenu();
@@ -769,7 +775,7 @@ class Lpe extends BaseController
             $documentos = $this->obtenerDocumentos($id, $id_derivacion);
             if(in_array(10, session()->get('registroPermisos')))
                 $documentos_cargar = $this->obtenerDocumentosCargar($id, $this->request->getPost('fecha_actualizacion'));
-            //$correspondencia_externa = $this->informacionHRExterna($id);
+            $correspondencia_externa = $this->informacionHRExterna($id);
             $validation = $this->validate([
                 'id_hoja_ruta' => [
                     'rules' => 'required',
@@ -792,48 +798,35 @@ class Lpe extends BaseController
                 'telefono_solicitante' => [
                     'rules' => 'required',
                 ],
-                'fk_estado_tramite' => [
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => 'Debe seleccionar un Estado de Tramite.'
-                    ]
-                ],
-                'fk_usuario_destinatario' => [
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => 'Debe seleccionar el Destinatario.'
-                    ]
-                ],
                 'instruccion' => [
                     'rules' => 'required',
                 ],
             ]);
             if(!$validation){
-                /*if($correspondencia_externa && count($correspondencia_externa) > 0){
+                if($correspondencia_externa && count($correspondencia_externa) > 0){
                     $contenido['atendido'] = $this->request->getPost('atendido');
                     $contenido['observaciones_ce'] = $this->request->getPost('observaciones_ce');
-                }*/
-
+                }
                 $cabera['titulo'] = $this->titulo;
                 $cabera['subtitulo'] = 'Editar Derivación';
                 $contenido['title'] = view('templates/title',$cabera);
                 $contenido['informacion_tramite'] = $this->obtenerInformacionTramiteFormulario($id);
                 $contenido['correlativo'] = $this->request->getPost('correlativo');
-                $contenido['estadosTramites'] = $this->obtenerEstadosTramites($this->idTramite);
-                $contenido['estadosTramitesHijo'] = $this->obtenerEstadosTramitesHijo($this->request->getPost('fk_estado_tramite'));
-                $contenido['id_estado_padre'] = $this->request->getPost('fk_estado_tramite');
-                $contenido['id_estado_hijo'] = $this->request->getPost('fk_estado_tramite_hijo');
+                if($this->request->getPost('fk_estado_tramite') && $this->request->getPost('fk_estado_tramite') > 0){
+                    $contenido['estadosTramites'] = $this->obtenerEstadosTramites($this->idTramite);
+                    $contenido['estadosTramitesHijo'] = $this->obtenerEstadosTramitesHijo($this->request->getPost('fk_estado_tramite'));
+                    $contenido['id_estado_padre'] = $this->request->getPost('fk_estado_tramite');
+                    $contenido['id_estado_hijo'] = $this->request->getPost('fk_estado_tramite_hijo');
+                }
                 $contenido['documentos'] = $documentos;
                 if(isset($documentos_cargar) && in_array(10, session()->get('registroPermisos')))
                     $contenido['documentos_cargar'] = $documentos_cargar;
                 $contenido['usu_destinatario'] = $this->obtenerUsuario($this->request->getPost('fk_usuario_destinatario'));
-                //$contenido['correspondencia_externa'] = $correspondencia_externa;
-                /*if(isset($documentos_cargar) && in_array(10, session()->get('registroPermisos')))
-                    $contenido['documentos_cargar'] = $documentos_cargar;*/
+                $contenido['instrucciones'] = array(''=>'SELECCIONE UNA OPCIÓN')+$this->acciones+array('OTRO'=>'OTRO');
+                $contenido['correspondencia_externa'] = $correspondencia_externa;
                 $contenido['accion'] = $this->controlador.'guardar_editar';
                 $contenido['validation'] = $this->validator;
                 $contenido['controlador'] = $this->controlador;
-                $contenido['id_tramite'] = $this->idTramite;
                 $data['content'] = view($this->carpeta.'editar', $contenido);
                 $data['menu_actual'] = $this->menuActual.'mis_tramites';
                 $data['tramites_menu'] = $this->tramitesMenu();
@@ -845,15 +838,23 @@ class Lpe extends BaseController
                 $datosAreaMineraModel = new DatosAreaMineraLPEModel();
                 $derivacionModel = new DerivacionLPEModel();
                 $documentosModel = new DocumentosModel();
-                //$correspondenciaExternaModel = new CorrespondenciaExternaModel();
-
+                $correspondenciaExternaModel = new CorrespondenciaExternaModel();
+                if(count($documentos)>0){
+                    foreach($documentos as $row){
+                        if($row['estado_tramite']){
+                            $fk_estado_tramite_padre = $row['fk_estado_tramite_padre_actualizar'];
+                            $fk_estado_tramite_hijo = $row['fk_estado_tramite_hijo_actualizar'];
+                            break;
+                        }
+                    }
+                }elseif($this->request->getPost('fk_estado_tramite') && $this->request->getPost('fk_estado_tramite') > 0){
+                    $fk_estado_tramite_padre = $this->request->getPost('fk_estado_tramite');
+                    $fk_estado_tramite_hijo = ((!empty($this->request->getPost('fk_estado_tramite_hijo'))) ? $this->request->getPost('fk_estado_tramite_hijo') : NULL);
+                }
                 $dataHojaRuta = array(
                     'id' => $id,
-                    'ultimo_fk_estado_tramite_padre' => $this->request->getPost('fk_estado_tramite'),
-                    'ultimo_fk_estado_tramite_hijo' => ((!empty($this->request->getPost('fk_estado_tramite_hijo'))) ? $this->request->getPost('fk_estado_tramite_hijo') : NULL),
-                    'ultimo_fecha_actualizacion_estado' => ($this->request->getPost('fk_estado_tramite') != $this->request->getPost('ultimo_fk_estado_tramite_padre') ||  $this->request->getPost('fk_estado_tramite_hijo') != $this->request->getPost('ultimo_fk_estado_tramite_hijo'))? date('Y-m-d H:i:s'):$this->request->getPost('ultimo_fecha_actualizacion_estado'),
                     'ultimo_fecha_derivacion' => date('Y-m-d H:i:s'),
-                    'ultimo_instruccion' => mb_strtoupper($this->request->getPost('instruccion')),
+                    'ultimo_instruccion' => ($this->request->getPost('instruccion')=='OTRO')?mb_strtoupper($this->request->getPost('otro')):$this->acciones[$this->request->getPost('instruccion')],
                     'ultimo_fk_usuario_destinatario' => $this->request->getPost('fk_usuario_destinatario'),
                     'ultimo_fk_usuario_responsable'=>($this->request->getPost('responsable') ? $this->request->getPost('fk_usuario_destinatario') : $this->request->getPost('ultimo_fk_usuario_responsable')),
                     'ultimo_recurso_jerarquico' => ($this->request->getPost('recurso_jerarquico') ? 'true' : 'false'),
@@ -861,6 +862,11 @@ class Lpe extends BaseController
                     'ultimo_oposicion' => ($this->request->getPost('oposicion') ? 'true' : 'false'),
                     'editar' => 'false',
                 );
+                if(isset($fk_estado_tramite_padre) && $fk_estado_tramite_padre > 0){
+                    $dataHojaRuta['ultimo_fk_estado_tramite_padre'] = $fk_estado_tramite_padre;
+                    $dataHojaRuta['ultimo_fk_estado_tramite_hijo'] = $fk_estado_tramite_hijo;
+                    $dataHojaRuta['ultimo_fecha_actualizacion_estado'] = ($fk_estado_tramite_padre == $this->request->getPost('ultimo_fk_estado_tramite_padre') && $fk_estado_tramite_hijo == $this->request->getPost('fk_estado_tramite_hijo'))? $this->request->getPost('ultimo_fecha_actualizacion_estado'):date('Y-m-d H:i:s');
+                }
                 if(count($documentos)>0){
                     $ultimo_fk_documentos = '';
                     foreach($documentos as $row)
@@ -868,7 +874,7 @@ class Lpe extends BaseController
                     $dataHojaRuta['ultimo_fk_documentos'] = substr($ultimo_fk_documentos, 0, -1);
                 }
                 if(in_array(10, session()->get('registroPermisos'))){
-                    $dataHojaRuta['estado_tramite_apm'] = $this->obtenerEstadoTramiteAPM($this->request->getPost('fk_estado_tramite'), $this->request->getPost('fk_estado_tramite_hijo'));
+                    $dataHojaRuta['estado_tramite_apm'] = $this->obtenerEstadoTramiteAPM($this->request->getPost('ultimo_fk_estado_tramite_padre'), $this->request->getPost('ultimo_fk_estado_tramite_hijo'));
                     if(count($documentos)>0 || (isset($documentos_cargar) && count($documentos_cargar)>0)){
                         $resultado = '<ul class="list-group list-group-flush">';
                         if(count($documentos)>0)
@@ -901,8 +907,7 @@ class Lpe extends BaseController
                     );
                     if($datosAreaMineraModel->save($dataDatosAreaMinera) === false)
                         session()->setFlashdata('fail', $datosAreaMineraModel->errors());
-
-                    /*if($correspondencia_externa && count($correspondencia_externa)>0){
+                    if($correspondencia_externa && count($correspondencia_externa)>0){
                         $atendido = $this->request->getPost('atendido');
                         $observaciones_ce = $this->request->getPost('observaciones_ce');
                         foreach($correspondencia_externa as $n=>$correspondencia){
@@ -918,23 +923,25 @@ class Lpe extends BaseController
                                     session()->setFlashdata('fail', $correspondenciaExternaModel->errors());
                             }
                         }
-                    }*/
+                    }
                     $dataDerivacion = array(
                         'id' => $id_derivacion,
                         'domicilio_legal' => mb_strtoupper($this->request->getPost('domicilio_legal')),
                         'domicilio_procesal' => mb_strtoupper($this->request->getPost('domicilio_procesal')),
                         'telefono_solicitante' => mb_strtoupper($this->request->getPost('telefono_solicitante')),
-                        'fk_estado_tramite_padre' => $this->request->getPost('fk_estado_tramite'),
-                        'fk_estado_tramite_hijo' => ((!empty($this->request->getPost('fk_estado_tramite_hijo'))) ? $this->request->getPost('fk_estado_tramite_hijo') : NULL),
-                        'fecha_actualizacion_estado' => ($this->request->getPost('fk_estado_tramite') != $this->request->getPost('ultimo_fk_estado_tramite_padre') ||  $this->request->getPost('fk_estado_tramite_hijo') != $this->request->getPost('ultimo_fk_estado_tramite_hijo'))? date('Y-m-d H:i:s'):NULL,
                         'observaciones' => mb_strtoupper($this->request->getPost('observaciones')),
                         'fk_usuario_destinatario' => $this->request->getPost('fk_usuario_destinatario'),
                         'fk_usuario_responsable'=>($this->request->getPost('responsable') ? $this->request->getPost('fk_usuario_destinatario') : $this->request->getPost('ultimo_fk_usuario_responsable')),
-                        'instruccion' => mb_strtoupper($this->request->getPost('instruccion')),
+                        'instruccion' => ($this->request->getPost('instruccion')=='OTRO')?mb_strtoupper($this->request->getPost('otro')):$this->acciones[$this->request->getPost('instruccion')],
                         'recurso_jerarquico' => ($this->request->getPost('recurso_jerarquico') ? 'true' : 'false'),
                         'recurso_revocatoria' => ($this->request->getPost('recurso_revocatoria') ? 'true' : 'false'),
                         'oposicion' => ($this->request->getPost('oposicion') ? 'true' : 'false'),
                     );
+                    if(isset($fk_estado_tramite_padre) && $fk_estado_tramite_padre > 0){
+                        $dataDerivacion['fk_estado_tramite_padre'] = $fk_estado_tramite_padre;
+                        $dataDerivacion['fk_estado_tramite_hijo'] = $fk_estado_tramite_hijo;
+                        $dataDerivacion['fecha_actualizacion_estado'] = ($fk_estado_tramite_padre == $this->request->getPost('ultimo_fk_estado_tramite_padre') && $fk_estado_tramite_hijo == $this->request->getPost('fk_estado_tramite_hijo'))? NULL:date('Y-m-d H:i:s');
+                    }
                     if($derivacionModel->save($dataDerivacion) === false){
                         session()->setFlashdata('fail', $derivacionModel->errors());
                     }else{
@@ -983,6 +990,59 @@ class Lpe extends BaseController
                     return redirect()->to($this->controlador.'mis_tramites');
                 }
             }
+        }
+    }
+    public function correspondenciaExterna($id_hoja_ruta){
+        $db = \Config\Database::connect();
+        $where = array(
+            'hr.deleted_at' => NULL,
+            'hr.fk_usuario_actual' => session()->get('registroUser'),
+            'hr.id' => $id_hoja_ruta
+        );
+        $builder = $db->table('licencia_prospeccion_exploracion.hoja_ruta as hr')
+        ->join('licencia_prospeccion_exploracion.datos_area_minera as dam', 'hr.id = dam.fk_hoja_ruta', 'left')
+        ->where($where);
+        if($fila = $builder->get()->getRowArray()){
+            $db = \Config\Database::connect();
+            $campos = array('ce.id', "to_char(ce.created_at, 'DD/MM/YYYY HH24:MI') as fecha_ingreso", "CONCAT(u.nombre_completo,'<br><b>',p.nombre,'</b>') as ingresado_por",
+            "CONCAT('CITE: ',ce.cite,'<br>Fecha: ',to_char(ce.fecha_cite, 'DD/MM/YYYY'),'<br>Remitente: ',CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')'),'<br>Referencia: ',ce.referencia) as documento_externo",
+            'ce.doc_digital');
+            $where = array(
+                'ce.fk_tramite' => $this->idTramite,
+                'ce.estado' => 'INGRESADO',
+                'ce.fk_hoja_ruta' => $fila['id'],
+            );
+            $builder = $db->table('public.correspondencia_externa AS ce')
+            ->join('public.persona_externa AS pe', 'ce.fk_persona_externa = pe.id', 'left')
+            ->join('public.usuarios AS u', 'ce.fk_usuario_creador = u.id', 'left')
+            ->join('public.perfiles AS p', 'u.fk_perfil = p.id', 'left')
+            ->select($campos)
+            ->where($where)
+            ->orderBy('ce.id', 'DESC');
+            $datos = $builder->get()->getResultArray();
+            $campos_listar=array('Fecha Ingreso','Ingresado Por', 'Documento Externo', 'Doc. Digital');
+            $campos_reales=array('fecha_ingreso','ingresado_por', 'documento_externo', 'doc_digital');
+            $menuActual = $this->menuActual.'mis_tramites';
+            $cabera['titulo'] = $this->titulo;
+            $cabera['subtitulo'] = 'Recibir Correspondencia Externa';
+            $contenido['title'] = view('templates/title',$cabera);
+            $contenido['informacion_tramite'] = $this->obtenerInformacionTramiteFormulario($id_hoja_ruta);
+            $contenido['fila'] = $fila;
+            $contenido['campos_listar'] = $campos_listar;
+            $contenido['campos_reales'] = $campos_reales;
+            $contenido['datos'] = $datos;
+            $contenido['controlador'] = $this->controlador;
+            $contenido['url_atras'] = base_url($this->controlador.'mis_tramites');
+            $contenido['tipos_documentos_externos'] = $this->obtenerTiposDocumentosExternos();
+            $contenido['accion'] = 'correspondencia_externa/recibir';
+            $data['content'] = view($this->carpeta.'correspondencia_externa', $contenido);
+            $data['menu_actual'] = $menuActual;
+            $data['tramites_menu'] = $this->tramitesMenu();
+            $data['alertas'] = $this->alertasTramites();
+            echo view('templates/template', $data);
+        }else{
+            session()->setFlashdata('fail', 'El registro no existe.');
+            return redirect()->to($this->controlador.'buscador');
         }
     }
 
@@ -1179,7 +1239,11 @@ class Lpe extends BaseController
     }
     private function obtenerDocumentos($id_hoja_ruta, $id_derivacion=''){
         $db = \Config\Database::connect();
-        $campos = array('doc.id','doc.correlativo',"TO_CHAR(doc.fecha, 'DD/MM/YYYY') as fecha",'td.nombre as tipo_documento','td.notificacion','doc.doc_digital','doc.fecha_notificacion');
+        $campos = array(
+            'doc.id','doc.correlativo',"TO_CHAR(doc.fecha, 'DD/MM/YYYY') as fecha",'td.nombre as tipo_documento','td.notificacion','doc.doc_digital','doc.fecha_notificacion',
+            "CASE WHEN doc.fk_estado_tramite_hijo_actualizar > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,'<br>',etp.orden,'.',eth.orden,'. ',eth.nombre) WHEN doc.fk_estado_tramite_padre_actualizar > 0 THEN CONCAT(etp.orden,'. ',etp.nombre) ELSE '' END as estado_tramite",
+            "doc.fk_estado_tramite_hijo_actualizar","doc.fk_estado_tramite_padre_actualizar",
+        );
         if($id_derivacion)
             $where = array(
                 'doc.fk_usuario_creador' => session()->get('registroUser'),
@@ -1198,6 +1262,8 @@ class Lpe extends BaseController
         $builder = $db->table('public.documentos AS doc')
         ->select($campos)
         ->join('public.tipo_documento AS td', 'doc.fk_tipo_documento = td.id', 'left')
+        ->join('estado_tramite as etp', 'doc.fk_estado_tramite_padre_actualizar = etp.id', 'left')
+        ->join('estado_tramite as eth', 'doc.fk_estado_tramite_hijo_actualizar = eth.id', 'left')
         ->where($where)
         ->orderBY('doc.id', 'ASC');
         return $builder->get()->getResultArray();
@@ -1345,6 +1411,47 @@ class Lpe extends BaseController
         $contenido['campos_listado'] = $campos_listado;
         $contenido['tabs'] = $this->obtenerCabeceraVer($back, $id_hoja_ruta, 'SEGUIMIENTO TRÁMITE');
         return view($this->carpeta.'ver_seguimiento_tramite', $contenido);
+    }
+    private function obtenerTiposDocumentosExternos(){
+        $tipoDocumentoExternoModel = new TipoDocumentoExternoModel();
+        $resultado = $tipoDocumentoExternoModel->findAll();
+        $temporal = array(''=>'SELECCIONE UNA OPCIÓN');
+        foreach($resultado as $row)
+            $temporal[$row['id']] = $row['nombre'];
+        return $temporal;
+    }
+    private function informacionHRExterna($id_hoja_ruta){
+        if(isset($id_hoja_ruta) && $id_hoja_ruta > 0){
+            $db = \Config\Database::connect();
+            $campos = array(
+                'ce.id',"to_char(ce.created_at, 'DD/MM/YYYY') as fecha_ingreso","CASE WHEN ce.fecha_atencion IS NULL THEN (CURRENT_DATE - ce.created_at::date)::text ELSE '' END as dias_pasados",
+                "CONCAT(ui.nombre_completo,'<br><b>',pi.nombre,'<b>') as ingreso","to_char(ce.fecha_recepcion, 'DD/MM/YYYY') as fecha_recepcion","CONCAT(ur.nombre_completo,'<br><b>',pr.nombre,'<b>') as recepcion",
+                "CONCAT('Tipo Documento: ',tde.nombre,'<br>CITE: ',ce.cite,'<br>Fecha: ',to_char(ce.fecha_cite, 'DD/MM/YYYY'),'<br>Remitente: ',CONCAT(pe.nombres, ' ', pe.apellidos, ' (', pe.institucion, ' - ',pe.cargo,')'),'<br>Referencia: ',ce.referencia) as documento_externo",
+                'ce.doc_digital','ce.observacion_recepcion','ce.observacion_atencion','tde.notificar','tde.dias_intermedio', 'tde.dias_limite',
+            );
+            $where = array(
+                'ce.fk_tramite' => $this->idTramite,
+                'ce.fk_hoja_ruta' => $id_hoja_ruta,
+                'ce.deleted_at' => NULL,
+                'ce.estado' => 'RECIBIDO',
+            );
+            $builder = $db->table('public.correspondencia_externa AS ce')
+            ->join('public.persona_externa AS pe', 'ce.fk_persona_externa = pe.id', 'left')
+            ->join('public.tipo_documento_externo AS tde', 'ce.fk_tipo_documento_externo = tde.id', 'left')
+            ->join('public.usuarios AS ui', 'ce.fk_usuario_creador = ui.id', 'left')
+            ->join('public.perfiles AS pi', 'ui.fk_perfil = pi.id', 'left')
+            ->join('public.usuarios AS ur', 'ce.fk_usuario_recepcion = ur.id', 'left')
+            ->join('public.perfiles AS pr', 'ur.fk_perfil = pr.id', 'left')
+            ->select($campos)
+            ->where($where)
+            ->orderBy('ce.created_at ASC');
+            if($datos = $builder->get()->getResultArray())
+                return $datos;
+            else
+                return false;
+        }else{
+            return false;
+        }
     }
 
     public function ajaxHojaRutaMadre(){

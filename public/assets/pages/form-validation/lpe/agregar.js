@@ -44,9 +44,6 @@ $(document).ready(function () {
                     return false;
             }
         },
-        observaciones: {
-            presence: true,
-        },
         fk_usuario_destinatario:{
             presence: {
                 message: "^Debe seleccionar el Destinatario."

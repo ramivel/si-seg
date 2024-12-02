@@ -335,7 +335,7 @@ class Documentos extends BaseController
         $db = \Config\Database::connect();
         $resultado = array();
         $campos = array(
-            "td.id", "td.nombre", "td.perfiles", "tdte.cambia_estado",
+            "td.id", "td.nombre", "td.perfiles", "tdte.cambia_estado", "tdte.fk_estado_tramite_padre", "tdte.fk_estado_tramite_hijo",
             "CASE WHEN tdte.justificacion THEN 'SI' ELSE 'NO' END as justificacion",
             "CASE WHEN tdte.fk_estado_tramite_hijo > 0 THEN CONCAT(etp.orden,'. ',etp.nombre,' - ',etp.orden,'.',eth.orden,'. ',eth.nombre) ELSE CONCAT(etp.orden,'. ',etp.nombre) END as estado_tramite"
         );
@@ -355,7 +355,7 @@ class Documentos extends BaseController
             foreach($tiposDocumentos as $i=>$row){
                 $perfiles = explode(',', $row['perfiles']);
                 if(in_array($idPerfil, $perfiles) )
-                    $resultado[] = $row;
+                    $resultado[$row['id']] = $row;
             }
         }
         return $resultado;
@@ -611,6 +611,7 @@ class Documentos extends BaseController
             }
             $db = \Config\Database::connect();
             $datosUsuario = $this->obtenerDatosUsuario(session()->get('registroUser'));
+            $tiposDocumentos = $this->obtenerTipoDocumentosActualizado($id_tramite, $datosUsuario['fk_perfil']);
             switch($tramite['controlador']){
                 case 'cam/':
                     var_dump('pendiente'); exit();
@@ -695,7 +696,8 @@ class Documentos extends BaseController
                         $documentosModel = new DocumentosModel();
                         $fk_tipo_documento = $this->request->getPost('fk_tipo_documento');
                         $correlativo = $this->generarCorrelativo($fk_tipo_documento, $datosUsuario, $id_tramite);
-                        $data = array(
+                        $tipo_documento = $tiposDocumentos[$fk_tipo_documento];
+                        $dataDocumento = array(
                             'fk_tramite' => $id_tramite,
                             'correlativo' => $correlativo,
                             'ciudad' => ucwords(strtolower($datosUsuario['departamento'])),
@@ -703,19 +705,30 @@ class Documentos extends BaseController
                             'fk_tipo_documento' => $fk_tipo_documento,
                             'referencia' => $this->request->getPost('referencia'),
                             'fk_usuario_creador' => session()->get('registroUser'),
+                            'justificacion' => mb_strtoupper($this->request->getPost('justificacion')),
                         );
+                        switch($tipo_documento['cambia_estado']){
+                            case "SI":
+                                $dataDocumento['fk_estado_tramite_padre_actualizar'] = $tipo_documento['fk_estado_tramite_padre'];
+                                $dataDocumento['fk_estado_tramite_hijo_actualizar'] = $tipo_documento['fk_estado_tramite_hijo'];
+                                break;
+                            case "EL USUARIO SELECCIONA":
+                                $dataDocumento['fk_estado_tramite_padre_actualizar'] = $this->request->getPost('fk_estado_tramite');
+                                $dataDocumento['fk_estado_tramite_hijo_actualizar'] = ((!empty($this->request->getPost('fk_estado_tramite_hijo'))) ? $this->request->getPost('fk_estado_tramite_hijo') : NULL);
+                                break;
+                        }
                         switch($tramite['controlador']){
                             case 'cam/':
-                                $data['fk_acto_administrativo'] = $id;
+                                $dataDocumento['fk_acto_administrativo'] = $id;
                                 break;
                             case 'mineria_ilegal/':
                             case 'derecho_preferente/':
                             case 'lpe/':
                             case 'licencia_comercializacion/':
-                                $data['fk_hoja_ruta'] = $id;
+                                $dataDocumento['fk_hoja_ruta'] = $id;
                                 break;
                         }
-                        if($documentosModel->insert($data) === false){
+                        if($documentosModel->insert($dataDocumento) === false){
                             session()->setFlashdata('fail', $documentosModel->errors());
                         }else{
                             $idDocumento = $documentosModel->getInsertID();
@@ -732,7 +745,7 @@ class Documentos extends BaseController
                 $contenido['datosUsuario'] = $datosUsuario;
                 $contenido['tipo_tramite'] = $tramite['controlador'];
                 $contenido['fila'] = $fila;
-                $contenido['tiposDocumentos'] = $this->obtenerTipoDocumentosActualizado($id_tramite, $datosUsuario['fk_perfil']);
+                $contenido['tiposDocumentos'] = $tiposDocumentos;
                 $contenido['estadosTramites'] = $this->obtenerEstadosTramites($id_tramite);
                 $contenido['accion'] = $accion;
                 $contenido['atender'] = $atender;

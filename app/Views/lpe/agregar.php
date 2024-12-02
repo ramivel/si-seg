@@ -359,25 +359,6 @@
                                         <?php }?>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Observaciones*:</label>
-                                    <div class="col-sm-10">
-                                        <?php
-                                            $campo = 'observaciones';
-                                            echo form_textarea(array(
-                                                'name' => $campo,
-                                                'id' => $campo,
-                                                'rows' => '3',
-                                                'class' => 'form-control form-control-uppercase',
-                                                'value' => set_value($campo,'SIN OBSERVACIONES',false)
-                                            ));
-                                        ?>
-                                        <span class="messages"></span>
-                                        <?php if(isset($validation) && $validation->hasError($campo)){?>
-                                            <span class="form-bar text-danger"><?= $validation->getError($campo);?></span>
-                                        <?php }?>
-                                    </div>
-                                </div>
                                 <h4 class="sub-title mb-2">DERIVACIÓN DEL TRÁMITE</h4>
                                 <div class="form-group row">
                                     <label class="col-sm-2 col-form-label">Responsable del Trámite*:</label>

@@ -714,6 +714,9 @@ $(document).ready(function () {
        break;
       case "NO":
         $("#estado_actualizar").hide();
+        $("#estado_tramite_padre").hide();
+        $("#estado_tramite_hijo").hide();
+        $("#estado_actualizarse").val('');
         break;
     }
     var justificacion = $(this).children("option:selected").data("justificacion");

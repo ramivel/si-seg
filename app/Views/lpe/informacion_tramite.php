@@ -1,21 +1,12 @@
-<table class="table table-bordered mb-0">
-    <tbody>
-        <tr>
-        <th class="text-nowrap text-right" width="200px" scope="row">Código Único:</th>
-            <td><?= $fila['codigo_unico'];?></td>
-            <th class="text-nowrap text-right" width="200px" scope="row">Denominación:</th>
-            <td><?= $fila['denominacion'];?></td>
-            <th class="text-nowrap text-right" width="200px" scope="row">Fecha Mecanizada:</th>
-            <td><?= $fila['fecha_mecanizada'];?></td>
-        </tr>
-    </tbody>
-</table>
+<h4 class="sub-title mb-2">DATOS DE LA HOJA DE RUTA MADRE</h4>
 <table class="table table-bordered">
     <tbody>
         <tr>
-        <th class="text-nowrap text-right" width="200px" scope="row">Responsable del Trámite:</th>
+            <th class="text-nowrap text-right" width="200px" scope="row">Fecha Mecanizada:</th>
+            <td><?= $fila['fecha_mecanizada'];?></td>
+            <th class="text-nowrap text-right" width="200px" scope="row">Responsable Actual:</th>
             <td><?= $fila['responsable'];?></td>
-            <th class="text-nowrap text-right" width="200px" scope="row">Estado actual del Trámite:</th>
+            <th class="text-nowrap text-right" width="200px" scope="row">Estado Actual:</th>
             <td><?= $fila['estado_tramite'];?></td>
         </tr>
     </tbody>
